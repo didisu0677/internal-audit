@@ -1,0 +1,22 @@
+{
+    "field": {
+        "id": "primary_key",
+        "nip": "varchar",
+        "email": "varchar",
+        "nama": "varchar",
+        "id_department": "int",
+        "is_active": "boolean"
+    },
+    "label": {
+        "id": "Id",
+        "nip": "Nip",
+        "email": "Email",
+        "nama": "Nama",
+        "id_department": "Id Department",
+        "is_active": "Aktif"
+    },
+    "validation": {
+        "email": "email"
+    },
+    "alias": []
+}

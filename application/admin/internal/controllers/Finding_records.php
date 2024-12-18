@@ -1,0 +1,411 @@
+<?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+
+class Finding_records extends BE_Controller {
+	function __construct() {
+		parent::__construct();
+	}
+
+	function index() {
+		$data['auditor'] = get_data('tbl_m_auditor','is_active',1)->result_array();
+		$data['auditee'] = get_data('tbl_auditee','is_active',1)->result_array();
+
+		if(user('id_group') != AUDITEE){
+			$data['department'] = get_data('tbl_m_department','is_active',1)->result_array();
+		}else{
+			$dept = get_data('tbl_auditee a',[
+				'select' => 'a.nip,a.id_department',
+				'join' => 'tbl_user b on a.nip = b.username',
+				'where' => [
+					'a.nip' => user('username') 
+				]
+			])->row();
+
+			$data['department'] = get_data('tbl_m_department',[
+				'where' => [
+					'is_active' => 1,
+					'id' => $dept->id_department
+				],
+				])->result_array();
+		}
+
+
+		if(user('id_group') != AUDITEE){
+
+			$data['user']	= get_data('tbl_user',[
+				'where'	=> [
+					'is_active'	=> 1,
+				]
+			])->result_array();
+		}else{
+
+			$dept = get_data('tbl_auditee a',[
+				'select' => 'a.nip,a.id_department',
+				'join' => 'tbl_user b on a.nip = b.username',
+				'where' => [
+					'a.nip' => user('username') 
+				]
+			])->row();
+
+			$data['user']	= get_data('tbl_user a',[
+				'select' => 'a.*',
+				'join' => 'tbl_auditee b on a.username = b.nip',
+				'where'	=> [
+					'a.is_active'	=> 1,
+					'b.id_department' => $dept->id_department
+				]
+			])->result_array();
+
+		}
+
+		render($data);
+	}
+
+	function data($department="") {
+
+		$config	= [];		
+
+
+		if(user('id_group') == AUDITEE) {
+			 $config = [
+				'access_edit'	=> false,
+				'access_delete'	=> false,
+	   		 ];
+		}else{
+			$config = [
+				'access_edit'	=> true,
+				'access_delete'	=> true,
+				'access_view'	=> true,
+	   		 ];
+		}
+		$config['button'][]	= button_serverside('btn-default','btn-capa',['far fa-copy',lang('capa'),true],'act-dokumen');
+
+
+		if($department && $department != 'ALL') {
+	    	$config['where']['id_department_auditee']	= $department;	
+	    }
+
+		$data = data_serverside($config);
+		render($data,'json');
+	}
+
+	function get_data() {
+		// debug(post('id'));die;
+		$x = get_data('tbl_finding_records a',[
+			'select' => 'a.*,b.department',
+			'join'   =>  'tbl_m_department b on a.id_department_auditee = b.id',
+			'where' => [
+				'a.id' => post('id')
+			],
+			])->row_array();
+
+			$data = get_data('tbl_m_finding a',[
+				'select' => 'a.*,b.department',
+				'join'   =>  'tbl_m_department b on a.id_department_auditee = b.id',
+				'where' => [
+					'a.id' => $x['id_m_finding']
+				],
+				])->row_array();
+			
+			$data['auditor'] = $data['id_auditor'];
+
+		
+		$data['detail'] = get_data('tbl_finding_records',[
+			'where' => [
+				'id_m_finding' => $x['id_m_finding']
+			]
+		])->result();
+		
+
+		$cb_schedule  = get_data('tbl_schedule_audit a',[
+			'select' => 'a.*,b.nama_institusi',
+			'join'  => 'tbl_institusi_audit b on a.id_institusi_audit = b.id type LEFT',
+	        'where'	=> [
+	            'a.is_active'	=> 1,
+				'a.nomor' => $data['periode_audit']
+	        ],
+		])->result();
+
+	    $data['nomor_schedule']    = '';
+	    foreach($cb_schedule as $d) {
+	        $data['nomor_schedule'] .= '<option value="'.$d->nomor.'"
+            data-deskripsi="'.$d->deskripsi.'"
+			data-nama_institusi="'.$d->nama_institusi.'"
+            data-tanggal_mulai ="'.c_date($d->tanggal_mulai).'"
+            data-tanggal_akhir="'.c_date($d->tanggal_akhir).'"
+			data-tgl_closing_meeting ="'.c_date($d->tgl_closing_meeting).'"
+            >'.$d->nomor.'  |  '.$d->deskripsi.'</option>';
+	    }
+
+		render($data,'json');
+	}
+
+	function get_combo(){
+	    $cb_schedule  = get_data('tbl_schedule_audit a',[
+			'select' => 'a.*,b.nama_institusi',
+			'join'  => 'tbl_institusi_audit b on a.id_institusi_audit = b.id',
+	        'where'	=> [
+	            'a.is_active'	=> 1,
+	        ],
+		])->result();
+	    $data['nomor_schedule']    = '<option value=""></option>';
+	    foreach($cb_schedule as $d) {
+	        $data['nomor_schedule'] .= '<option value="'.$d->nomor.'"
+            data-deskripsi="'.$d->deskripsi.'"
+			data-nama_institusi="'.$d->nama_institusi.'"
+            data-tanggal_mulai ="'.c_date($d->tanggal_mulai).'"
+            data-tanggal_akhir="'.c_date($d->tanggal_akhir).'"
+			data-tgl_closing_meeting ="'.c_date($d->tgl_closing_meeting).'"
+            >'.$d->nomor.'  |  '.$d->deskripsi.'</option>';
+	    }
+
+	    render($data,'json');
+	}
+
+	function get_department_auditee(){
+		$id = post('id');
+		debug($id);die;
+	    $cb_department  = get_data('tbl_auditee a',[
+			'select' => 'a.id_department as id, b.kode, b.department',
+			'join' => 'tbl_m_department b on a.id_department = b.id',
+	        'where'	=> [
+	            'a.is_active'	=> 1,
+				'a.id' => $id
+	        ],
+		])->result();
+
+	    $data['department']    = '';
+	    foreach($cb_department as $d) {
+	        $data['department'] .= '<option value="'.$d->id.'"
+            data-kode="'.$d->kode.'"
+            >'.$d->department.'</option>';
+	    }
+	    render($data,'json');
+	}
+
+	function get_auditee(){
+		$id = post('id');
+		$data = get_data('tbl_schedule_audit','nomor',$id)->row_array();
+
+		$department = [''];
+		if($data && $data['department_auditee'] != null ) $department = json_decode($data['department_auditee'],true);
+		$cb_auditee = get_data('tbl_auditee',[
+			'select' => '*',
+			'where' => [
+				'is_active' => 1,
+				'id_department' => $department
+			]
+		])->result();
+
+		$data['auditee']    = '';
+	    foreach($cb_auditee as $d) {
+	        $data['auditee'] .= '<option value="'.$d->id.'"
+             >'.$d->nama.'</option>';
+	    }
+	    render($data,'json');
+	}
+
+	function add_capa() {
+		$data = get_data('tbl_finding_records a',[
+			'select' => 'a.*,b.department, c.nama as nama_auditee',
+			'join'   =>  ['tbl_m_department b on a.id_department_auditee = b.id',
+						  'tbl_auditee c on a.auditee = c.id',
+						 ],
+			'where' => [
+				'a.id' => post('id')
+			],
+			])->row_array();
+
+			$pic	= get_data('tbl_user a',[
+				'select'	=> 'a.*',
+				'join' => 'tbl_auditee b on a.username = b.nip type LEFT',
+				'where'		=> [
+					'a.is_active' => 1,
+					'b.id_department' => $data['id_department_auditee'],
+				], 
+				'sort_by'	=> 'id'
+			])->result();
+
+			$data['pic_capa']    = '<option value=""></option>';
+			foreach($pic as $d) {
+				$data['pic_capa'] .= '<option value="'.$d->id.'"
+				data-nama="'.$d->nama.'"
+				>'.$d->nama.'</option>';
+			}
+
+			$data['detail']	= get_data('tbl_capa',[
+				'select'	=> '*',
+				'where' 	=> [
+					'id_finding'   => post('id')
+				],
+				'sort_by'  => 'nomor',
+			])->result_array();
+
+
+			$data['user']	= get_data('tbl_user a',[
+				'join' => 'tbl_auditee b on a.username = b.nip type LEFT',
+				'where'	=> [
+					'a.is_active'	=> 1,
+					'b.id_department' => $data['id_department_auditee']
+				]
+			])->result_array();
+
+		render($data,'json');
+	}
+
+	function save() {
+		$data = post();
+		$data['nomor']  = '';
+		$schedule  = get_data('tbl_schedule_audit', 'nomor', $data['periode_audit'])->row();
+		$auditor   = get_data('tbl_m_auditor','id',$data['auditor'])->row();
+		if($auditor) $data['nama_auditor'] = $auditor->nama;
+		if($schedule) {
+			$data['id_institusi_audit'] = $schedule->id_institusi_audit;
+		}
+
+		$data['id_auditor'] = $data['auditor'];
+		$response 	= save_data('tbl_m_finding',$data,post(':validation'));
+
+		if($response['status'] = 'success') {
+
+			$isi_finding 	= post('isi_finding','html');
+			$id_finding_records = post('id_finding_records');
+			$isi_finding = post('isi_finding');
+			$bobot_finding = post('bobot_finding');
+
+			foreach($isi_finding as $k => $v) {
+				$last_file 		= [];
+				if($id_finding_records[$k]) {
+					$dt 		= get_data('tbl_finding_records','id',$id_finding_records[$k])->row();
+					if(isset($dt->id)) {
+						$last_file = $dt->file;
+					}
+				}		
+				$file 				= post('file_finding');
+				$filename 			= [];
+				$dir 				= '';
+
+				if(isset($file[$k]) && !empty($file[$k]) && $file[$k] != '') {
+					if(!is_dir(FCPATH . "assets/uploads/finding_records/")){
+						$oldmask = umask(0);
+						mkdir(FCPATH . "assets/uploads/finding_records/",0777);
+						umask($oldmask);
+					}
+					$copy = 0 ;
+					if($file[$k]) {						
+						if(@copy($file[$k], FCPATH . 'assets/uploads/finding_records/'.basename($file[$k]))) {
+							$filename[$k]	= basename($file[$k]);
+							if(!$dir) $dir = str_replace(basename($file[$k]),'',$file[$k]);
+							$copy = 1 ;
+						}
+					}
+				}
+
+				$data['bobot_finding'] = $bobot_finding[$k];
+				$data['id_m_finding'] = post('id');
+				$data['id'] = $id_finding_records[$k];
+				$data['finding'] = $isi_finding[$k];
+				$response = save_data('tbl_finding_records',$data,post(':validation'));
+			}
+		}
+
+		render($response,'json');
+	}
+
+	function save_capa() {
+		$data = post();
+
+		$nomor = post('nomor') ;
+		$isi_capa = post('isi_capa') ;
+		$dateline_capa = post('due_date') ;
+		$pic_capa = post('pic_capa') ;
+		$id_capa = post('id_capa');
+
+
+		// $schedule  = get_data('tbl_schedule_audit', 'nomor', $data['periode_audit'])->row();
+		// $auditor   = get_data('tbl_m_auditor','id',$data['auditor'])->row();
+		// if($auditor) $data['nama_auditor'] = $auditor->nama;
+		// if($schedule) {
+		// 	$data['id_institusi_audit'] = $schedule->id_institusi_audit;
+		// }
+
+
+		foreach($isi_capa as $i => $v) {
+			$data['id'] = $id_capa[$i];
+			$data['isi_capa'] = $v ;
+			$data['dateline_capa'] = $dateline_capa[$i];
+			$data['pic_capa'] = $pic_capa[$i];
+
+
+	
+			$data['id_status_capa'] = 1;
+
+			$response = save_data('tbl_capa',$data,post(':validation'));
+
+			if($id_capa[$i] != 0)
+			delete_data('tbl_capa',['nomor not' =>$nomor, 'id_finding' =>$data['id_finding'], 'nomor !=' => '']);
+		}
+
+		render($response,'json');
+	}
+
+	function delete() {
+		$response = destroy_data('tbl_finding_records','id',post('id'));
+		if($response['status'] == 'success') {
+			$m_finding = get_data('tbl_finding_records','id',post('id'))->row();
+			if($m_finding) destroy_data('tbl_m_finding','id',$m_finding->id_m_finding);
+		}
+		render($response,'json');
+	}
+
+	function template() {
+		ini_set('memory_limit', '-1');
+		$arr = ['institusi_audit' => 'institusi_audit','auditor' => 'auditor','nama_auditor' => 'nama_auditor','tgl_mulai_audit' => 'tgl_mulai_audit','tgl_akhir_audit' => 'tgl_akhir_audit','tgl_closing_meeting' => 'tgl_closing_meeting','site_auditee' => 'site_auditee','department_auditee' => 'department_auditee','audit_area' => 'audit_area','finding' => 'finding','bobot_finding' => 'bobot_finding','status_finding' => 'status_finding','capa' => 'capa','status_capa' => 'status_capa','follow_up' => 'follow_up','capa_score' => 'capa_score','achivement' => 'achivement','is_active' => 'is_active'];
+		$config[] = [
+			'title' => 'template_import_finding_records',
+			'header' => $arr,
+		];
+		$this->load->library('simpleexcel',$config);
+		$this->simpleexcel->export();
+	}
+
+	function import() {
+		ini_set('memory_limit', '-1');
+		$file = post('fileimport');
+		$col = ['institusi_audit','auditor','nama_auditor','tgl_mulai_audit','tgl_akhir_audit','tgl_closing_meeting','site_auditee','department_auditee','audit_area','finding','bobot_finding','status_finding','capa','status_capa','follow_up','capa_score','achivement','is_active'];
+		$this->load->library('simpleexcel');
+		$this->simpleexcel->define_column($col);
+		$jml = $this->simpleexcel->read($file);
+		$c = 0;
+		foreach($jml as $i => $k) {
+			if($i==0) {
+				for($j = 2; $j <= $k; $j++) {
+					$data = $this->simpleexcel->parsing($i,$j);
+					$data['create_at'] = date('Y-m-d H:i:s');
+					$data['create_by'] = user('nama');
+					$save = insert_data('tbl_finding_records',$data);
+					if($save) $c++;
+				}
+			}
+		}
+		$response = [
+			'status' => 'success',
+			'message' => $c.' '.lang('data_berhasil_disimpan').'.'
+		];
+		@unlink($file);
+		render($response,'json');
+	}
+
+	function export() {
+		ini_set('memory_limit', '-1');
+		$arr = ['institusi_audit' => 'Institusi Audit','auditor' => 'Auditor','nama_auditor' => 'Nama Auditor','tgl_mulai_audit' => '-dTgl Mulai Audit','tgl_akhir_audit' => '-dTgl Akhir Audit','tgl_closing_meeting' => '-dTgl Closing Meeting','site_auditee' => 'Site Auditee','department_auditee' => 'Department Auditee','audit_area' => 'Audit Area','finding' => 'Finding','bobot_finding' => 'Bobot Finding','status_finding' => 'Status Finding','capa' => 'Capa','status_capa' => 'Status Capa','follow_up' => 'Follow Up','capa_score' => 'Capa Score','achivement' => 'Achivement','is_active' => 'Aktif'];
+		$data = get_data('tbl_finding_records')->result_array();
+		$config = [
+			'title' => 'data_finding_records',
+			'data' => $data,
+			'header' => $arr,
+		];
+		$this->load->library('simpleexcel',$config);
+		$this->simpleexcel->export();
+	}
+
+}

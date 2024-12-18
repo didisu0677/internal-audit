@@ -1,0 +1,16 @@
+{
+    "field": {
+        "id": "primary_key",
+        "description": "varchar",
+        "score": "int",
+        "is_active": "boolean"
+    },
+    "label": {
+        "id": "Id",
+        "description": "Description",
+        "score": "Score",
+        "is_active": "Aktif"
+    },
+    "validation": [],
+    "alias": []
+}

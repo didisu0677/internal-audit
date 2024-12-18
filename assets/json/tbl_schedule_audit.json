@@ -1,0 +1,26 @@
+{
+    "field": {
+        "id": "primary_key",
+        "nomor": "varchar",
+        "institusi_audit": "int",
+        "tanggal_mulai": "date",
+        "tanggal_akhir": "date",
+        "tgl_closing_meeting": "date",
+        "audit_area": "int",
+        "departement_auditee": "varchar",
+        "is_active": "boolean"
+    },
+    "label": {
+        "id": "Id",
+        "nomor": "Nomor",
+        "institusi_audit": "Institusi Audit",
+        "tanggal_mulai": "Tanggal Mulai",
+        "tanggal_akhir": "Tanggal Akhir",
+        "tgl_closing_meeting": "Tgl Closing Meeting",
+        "audit_area": "Audit Area",
+        "departement_auditee": "Departement Auditee",
+        "is_active": "Aktif"
+    },
+    "validation": [],
+    "alias": []
+}

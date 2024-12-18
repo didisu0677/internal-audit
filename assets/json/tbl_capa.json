@@ -1,0 +1,42 @@
+{
+    "field": {
+        "id": "primary_key",
+        "id_finding": "int",
+        "nomor": "varchar",
+        "description": "text",
+        "deadline_capa": "date",
+        "pic_capa": "varchar",
+        "status_capa": "int",
+        "followup": "int",
+        "followup_date": "date",
+        "followup_email": "varchar",
+        "followup_meeting": "varchar",
+        "keterangan_progress": "varchar",
+        "capa_score": "int",
+        "achievement": "int",
+        "evidence": "text",
+        "is_active": "boolean"
+    },
+    "label": {
+        "id": "Id",
+        "id_finding": "Id Finding",
+        "nomor": "Nomor",
+        "description": "Description",
+        "deadline_capa": "Deadline Capa",
+        "pic_capa": "Pic Capa",
+        "status_capa": "Status Capa",
+        "followup": "Followup",
+        "followup_date": "Followup Date",
+        "followup_email": "Followup Email",
+        "followup_meeting": "Followup Meeting",
+        "keterangan_progress": "Keterangan Progress",
+        "capa_score": "Capa Score",
+        "achievement": "Achievement",
+        "evidence": "Evidence",
+        "is_active": "Aktif"
+    },
+    "validation": {
+        "followup_email": "email"
+    },
+    "alias": []
+}

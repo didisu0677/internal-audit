@@ -1,0 +1,18 @@
+{
+    "field": {
+        "id": "primary_key",
+        "nama": "varchar",
+        "jabatan": "varchar",
+        "institusi": "varchar",
+        "is_active": "boolean"
+    },
+    "label": {
+        "id": "Id",
+        "nama": "Nama",
+        "jabatan": "Jabatan",
+        "institusi": "Institusi",
+        "is_active": "Aktif"
+    },
+    "validation": [],
+    "alias": []
+}
