@@ -805,8 +805,8 @@ function addFinding(id_finding_records,bobot_finding,file,lampiran, isi_finding)
 
 
 	if(_id_finding_records) $('#id_finding_records' + idy).val(_id_finding_records);
-	select_value2 = $('#bobot_finding').html();
-	if(_bobot_finding) $('#bobot_finding' + idy).val(_bobot_finding).trigger('change');
+	// select_value2 = $('#bobot_finding').html();
+	// if(_bobot_finding) $('#bobot_finding' + idy).val(_bobot_finding).trigger('change');
 
 	if(_isi_finding) $('#isi_finding' + idy).val(_isi_finding);
 	if(_lampiran) $('#lampiran' + idy).val(_lampiran);
