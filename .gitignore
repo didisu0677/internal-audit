@@ -7,4 +7,3 @@
 # Ignore system files
 db.*
 database.php
-assets/cache/
