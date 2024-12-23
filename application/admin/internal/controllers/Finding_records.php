@@ -18,7 +18,7 @@ class Finding_records extends BE_Controller {
 				'where' => [
 					'a.nip' => user('username') 
 				]
-			])->row();
+			])->row(); 
 
 			$data['department'] = get_data('tbl_m_department',[
 				'where' => [
