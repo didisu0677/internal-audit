@@ -486,5 +486,6 @@
     "tanggal_akhir": "Tanggal Akhir",
     "tgl_closing_meeting": "Tgl Closing Meeting",
     "audit_area": "Audit Area",
-    "department_auditee": "Department Auditee"
+    "department_auditee": "Department Auditee",
+    "section": "Section"
 }

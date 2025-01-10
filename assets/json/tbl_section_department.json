@@ -1,0 +1,16 @@
+{
+    "field": {
+        "id": "primary_key",
+        "section": "varchar",
+        "id_department": "int",
+        "is_active": "boolean"
+    },
+    "label": {
+        "id": "Id",
+        "section": "Section",
+        "id_department": "Id Department",
+        "is_active": "Aktif"
+    },
+    "validation": [],
+    "alias": []
+}

@@ -134,6 +134,7 @@ modal_open('modal-form','','modal-lg','data-openCallback="formOpen1"');
 						<option value="Major">Major</option>
 						<option value="Moderate">Moderate</option>
 						<option value="Minor">Minor</option>
+						<option value="Improvement">Improvement</option>
 					</select>		
 			</div>
 			</div>	
