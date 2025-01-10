@@ -81,7 +81,7 @@ $(document).on('click','.btn-remove-finding',function(){
 function initUploadFile() {
 
 $('.input-file[type="text"]').each(function(i,j){
-	var _token = "xbFpayLVg";
+	var _token = "dyFzN4yoL";
 
 	var idx 	= 'upl-file-' + i;
 	var konten 	= '<form action="'+base_url+'upload/file/datetime'+'" class="hidden">';
@@ -280,7 +280,7 @@ function addPasal(nomor,id_capa,isi_capa,tanggal_berlaku,file,lampiran, pic) {
 	var _isi_capa 	= typeof isi_capa == undefined ? '' : isi_capa;
 	var _lampiran 	= typeof lampiran == undefined ? '' : lampiran;
 	var _file 	= typeof file == undefined ? '' : file;
-	var _token = "xbFpayLVg";
+	var _token = "dyFzN4yoL";
 
 	
 	var today = new Date();
@@ -399,7 +399,7 @@ function addFinding(id_finding_records,bobot_finding,file,lampiran, isi_finding)
 	var _isi_finding 	= typeof isi_finding == undefined ? '' : isi_finding;
 	var _lampiran 	= typeof lampiran == undefined ? '' : lampiran;
 	var _file 	= typeof file == undefined ? '' : file;
-	var _token = "xbFpayLVg";
+	var _token = "dyFzN4yoL";
 
 	
 	var today = new Date();
@@ -431,7 +431,7 @@ function addFinding(id_finding_records,bobot_finding,file,lampiran, isi_finding)
 			+ '<label class="col-form-label col-sm-3" for="lampiran'+idy+'">'+$('#btn-add').attr('data-lampiran')+'</label>'
 			+ '<div class="col-sm-6">'
 				+ '<input type ="text" name="file_finding[]" id="file_finding'+idy+'" data-validation="" data-action ="'+base_url+'upload/file/datetime'+'" data-token ="'+_token+'" autocomplete="off" class="form-control input-file" value="" placeholder="maksimal 5MB">'
-				// + '<input type="text" name="file_finding'+'['+(_lampiran != undefined ? _lampiran : idy)+']" id="file_finding'+idy+'" data-validation="required" data-action="http://localhost/internal-audit/upload/file/datetime" data-token="xbFpayLVg" autocomplete="off" class="form-control input-file" placeholder="maksimal 51MB" value="'+(_file != undefined ? _file : '')+'">'
+				// + '<input type="text" name="file_finding'+'['+(_lampiran != undefined ? _lampiran : idy)+']" id="file_finding'+idy+'" data-validation="required" data-action="http://localhost/internal-audit/upload/file/datetime" data-token="dyFzN4yoL" autocomplete="off" class="form-control input-file" placeholder="maksimal 51MB" value="'+(_file != undefined ? _file : '')+'">'
 				+ '</div>'
 
 			+ '<div class="input-group-append">'
@@ -486,7 +486,7 @@ function addFinding(id_finding_records,bobot_finding,file,lampiran, isi_finding)
 
 	if(_id_finding_records) $('#id_finding_records' + idy).val(_id_finding_records);
 	// select_value2 = $('#bobot_finding').html();
-	// if(_bobot_finding) $('#bobot_finding' + idy).val(_bobot_finding).trigger('change');
+	if(_bobot_finding) $('#bobot_finding' + idy).val(_bobot_finding).trigger('change');
 
 	if(_isi_finding) $('#isi_finding' + idy).val(_isi_finding);
 	if(_lampiran) $('#lampiran' + idy).val(_lampiran);

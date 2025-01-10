@@ -89,8 +89,7 @@ class Finding_records extends BE_Controller {
 	}
 
 	function get_data() {
-		// debug(post('id'));die;
-		$x = get_data('tbl_finding_records a',[
+		$data = get_data('tbl_finding_records a',[
 			'select' => 'a.*,b.department',
 			'join'   =>  'tbl_m_department b on a.id_department_auditee = b.id',
 			'where' => [
@@ -98,20 +97,25 @@ class Finding_records extends BE_Controller {
 			],
 			])->row_array();
 
-			$data = get_data('tbl_m_finding a',[
-				'select' => 'a.*,b.department',
-				'join'   =>  'tbl_m_department b on a.id_department_auditee = b.id',
-				'where' => [
-					'a.id' => $x['id_m_finding']
-				],
-				])->row_array();
+			// $data = get_data('tbl_m_finding a',[
+			// 	'select' => 'a.*,b.department',
+			// 	'join'   =>  'tbl_m_department b on a.id_department_auditee = b.id',
+			// 	'where' => [
+			// 		'a.id' => $x['id_m_finding']
+			// 	],
+			// 	])->row_array();
 			
-			$data['auditor'] = $data['id_auditor'];
+			// $data['auditor'] = $data['id_auditor'];
 
 		
 		$data['detail'] = get_data('tbl_finding_records',[
 			'where' => [
-				'id_m_finding' => $x['id_m_finding']
+				// 'id_m_finding' => $x['id_m_finding']
+				'id_department_auditee' => $data['id_department_auditee'],
+				'auditee' => $data['auditee'],
+				'auditor' => $data['auditor'],
+				'periode_audit' => $data['periode_audit']
+
 			]
 		])->result();
 		
