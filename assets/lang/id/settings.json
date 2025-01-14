@@ -487,5 +487,6 @@
     "tgl_closing_meeting": "Tgl Closing Meeting",
     "audit_area": "Audit Area",
     "department_auditee": "Department Auditee",
-    "section": "Section"
+    "section": "Section",
+    "surat_tugas" : "Surat tugas"
 }

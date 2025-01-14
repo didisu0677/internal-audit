@@ -17,6 +17,7 @@
 			tr();
 				th('checkbox','text-center','width="30" data-content="id"');
 				th(lang('nomor'),'','data-content="nomor"');
+				th(lang('surat_tugas'),'','data-content="surat_tugas"');
 				th(lang('deskripsi'),'','data-content="deskripsi"');
 				th(lang('institusi_audit'),'','data-content="nama_institusi", data-table="tbl_institusi_audit"');
 				th(lang('tanggal_mulai'),'','data-content="tanggal_mulai" data-type="daterange"');
@@ -35,6 +36,7 @@ modal_open('modal-form','','modal-lg','data-openCallback="openForm"');
 			col_init(3,9);
 			input('hidden','id','id');
 			input('text',lang('nomor'),'nomor');
+			input('surat_tugas',lang('surat_tugas'),'surat_tugas');
 			input('deskripsi',lang('deskripsi'),'deskripsi');
 			select2(lang('institusi_audit'),'id_institusi_audit','required',$institusi,'id','nama_institusi');
 			input('date',lang('tanggal_mulai'),'tanggal_mulai');

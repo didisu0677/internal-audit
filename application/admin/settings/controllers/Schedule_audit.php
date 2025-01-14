@@ -60,7 +60,7 @@ class Schedule_audit extends BE_Controller {
 
 	function template() {
 		ini_set('memory_limit', '-1');
-		$arr = ['nomor' => 'nomor','id_institusi_audit' => 'id_institusi_audit','tanggal_mulai' => 'tanggal_mulai','tanggal_akhir' => 'tanggal_akhir','tgl_closing_meeting' => 'tgl_closing_meeting','audit_area' => 'audit_area','departement_auditee' => 'departement_auditee','is_active' => 'is_active'];
+		$arr = ['nomor' => 'nomor', 'surat_tugas' => 'surat_tugas' , 'id_institusi_audit' => 'id_institusi_audit','tanggal_mulai' => 'tanggal_mulai','tanggal_akhir' => 'tanggal_akhir','tgl_closing_meeting' => 'tgl_closing_meeting','audit_area' => 'audit_area','departement_auditee' => 'departement_auditee','is_active' => 'is_active'];
 		$config[] = [
 			'title' => 'template_import_schedule_audit',
 			'header' => $arr,
@@ -72,7 +72,7 @@ class Schedule_audit extends BE_Controller {
 	function import() {
 		ini_set('memory_limit', '-1');
 		$file = post('fileimport');
-		$col = ['nomor','id_institusi_audit','tanggal_mulai','tanggal_akhir','tgl_closing_meeting','audit_area','departement_auditee','is_active'];
+		$col = ['nomor','surat_tugas','id_institusi_audit','tanggal_mulai','tanggal_akhir','tgl_closing_meeting','audit_area','departement_auditee','is_active'];
 		$this->load->library('simpleexcel');
 		$this->simpleexcel->define_column($col);
 		$jml = $this->simpleexcel->read($file);
