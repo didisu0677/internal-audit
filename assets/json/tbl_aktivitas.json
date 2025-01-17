@@ -1,0 +1,28 @@
+{
+    "field": {
+        "id": "primary_key",
+        "company": "varchar",
+        "site_auditee": "varchar",
+        "id_divisi_auditee": "int",
+        "id_department_auditee": "int",
+        "id_section_auditee": "int",
+        "aktivitas": "varchar",
+        "audit_area": "varchar",
+        "id_type_aktivitas": "int",
+        "is_active": "boolean"
+    },
+    "label": {
+        "id": "Id",
+        "company": "Company",
+        "site_auditee": "Site Auditee",
+        "id_divisi_auditee": "Id Divisi Auditee",
+        "id_department_auditee": "Id Department Auditee",
+        "id_section_auditee": "Id Section Auditee",
+        "aktivitas": "Aktivitas",
+        "audit_area": "Audit Area",
+        "id_type_aktivitas": "Id Type Aktivitas",
+        "is_active": "Aktif"
+    },
+    "validation": [],
+    "alias": []
+}

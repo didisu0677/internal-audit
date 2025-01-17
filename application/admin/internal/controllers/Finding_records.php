@@ -10,20 +10,26 @@ class Finding_records extends BE_Controller {
 		$data['auditee'] = get_data('tbl_auditee','is_active',1)->result_array();
 
 		if(user('id_group') != AUDITEE){
-			$data['department'] = get_data('tbl_m_department','is_active',1)->result_array();
+			$data['department'] = get_data('tbl_m_department',[
+				'where' => [
+					'is_active' => 1,
+					'__m' => 'id in (select id_department_auditee from tbl_finding_records)'
+				],
+				])->result_array();
 		}else{
 			$dept = get_data('tbl_auditee a',[
 				'select' => 'a.nip,a.id_department',
 				'join' => 'tbl_user b on a.nip = b.username',
 				'where' => [
 					'a.nip' => user('username') 
-				]
+				],
 			])->row(); 
 
 			$data['department'] = get_data('tbl_m_department',[
 				'where' => [
 					'is_active' => 1,
-					'id' => $dept->id_department
+					'id' => $dept->id_department,
+					'__m' => 'id in (select id_department_auditee from tbl_finding_records)'
 				],
 				])->result_array();
 		}

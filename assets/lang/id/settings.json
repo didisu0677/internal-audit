@@ -488,5 +488,12 @@
     "audit_area": "Audit Area",
     "department_auditee": "Department Auditee",
     "section": "Section",
-    "surat_tugas" : "Surat tugas"
+    "surat_tugas": "Surat tugas",
+    "company": "Company",
+    "site_auditee": "Site Auditee",
+    "id_divisi_auditee": "Id Divisi Auditee",
+    "id_department_auditee": "Id Department Auditee",
+    "id_section_auditee": "Id Section Auditee",
+    "aktivitas": "Aktivitas",
+    "id_type_aktivitas": "Id Type Aktivitas"
 }
