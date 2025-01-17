@@ -6,7 +6,7 @@
 		</div>
 		<div class="float-right">
 			<label class=""><?php echo lang('department'); ?> &nbsp</label>					
-			<select class = "select2 infinity custom-select" style="width: 180px;" id="department">
+			<select class = "select2 infinity custom-select" style="width: 300px;" id="department">
 				<?php if(user('id_group') != AUDITEE) { ?>
 				<option value="ALL">ALL Department</option>
 				<?php } ?>
