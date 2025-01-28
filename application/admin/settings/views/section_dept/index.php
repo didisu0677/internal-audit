@@ -18,7 +18,7 @@
 				th('checkbox','text-center','width="30" data-content="id"');
 				th(lang('kode'),'','data-content="kode"');
 				th(lang('company'),'','data-content="perusahaan" data-table="tbl_m_company"'); 
-				th(lang('location'),'','data-content="location" data-table="tbl_location"');
+				th(lang('location'),'','data-content="lokasi" data-table="tbl_location"');
 				th(lang('divisi'),'','data-content="divisi" data-table="tbl_m_divisi"');
 				th(lang('department'),'','data-content="department" data-table="tbl_m_department"');
 				th(lang('section'),'','data-content="section"');
@@ -70,7 +70,7 @@ modal_open('modal-form','','modal-lg','data-openCallback="formOpen"');
 				<div class="tab-pane fade" id="location" role="tabpanel" aria-labelledby="location-tab">
 				<br>
 					<?php
-					form_open(base_url('settings/section_dept/save'),'post','form');
+					form_open(base_url('settings/section_dept/save_location'),'post','form-1');
 						col_init(3,9);
 						input('hidden','id','id');
 						select2(lang('company'),'id_company','required',$company,'id','perusahaan');
@@ -85,11 +85,11 @@ modal_open('modal-form','','modal-lg','data-openCallback="formOpen"');
 				<div class="tab-pane fade" id="divisi" role="tabpanel" aria-labelledby="divisi-tab">
 				<br>
 					<?php
-					form_open(base_url('settings/section_dept/save'),'post','form');
+					form_open(base_url('settings/section_dept/save_divisi'),'post','form-2');
 						col_init(3,9);
 						input('hidden','id','id');
 						select2(lang('company'),'id_company','required',$company,'id','perusahaan');
-						select2(lang('location'),'id_lokasi','required',$location,'id','location');
+						select2(lang('location'),'divid_lokasi','required',$location,'id','lokasi');
 						input('text',lang('kode'),'kode_divisi');
 						input('text',lang('divisi'),'divisi');
 						toggle(lang('aktif').'?','is_active');
@@ -101,12 +101,12 @@ modal_open('modal-form','','modal-lg','data-openCallback="formOpen"');
 				<div class="tab-pane fade" id="dept" role="tabpanel" aria-labelledby="dept-tab">
 				<br>
 					<?php
-					form_open(base_url('settings/section_dept/save'),'post','form');
+					form_open(base_url('settings/section_dept/save_department'),'post','form-3');
 						col_init(3,9);
 						input('hidden','id','id');
 						select2(lang('company'),'id_company','required',$company,'id','perusahaan');
-						select2(lang('location'),'id_lokasi','required',$location,'id','location');
-						input('text',lang('department'),'department');
+						select2(lang('location'),'deptid_lokasi','required',$location,'id','lokasi');
+						select2(lang('location'),'deptid_divisi','required',$divisi,'id','divisi');
 						input('text',lang('kode'),'kode_department');
 						input('text',lang('department'),'department');
 						toggle(lang('aktif').'?','is_active');
@@ -118,12 +118,12 @@ modal_open('modal-form','','modal-lg','data-openCallback="formOpen"');
 				<div class="tab-pane fade" id="section" role="tabpanel" aria-labelledby="section-tab">
 				<br>
 					<?php
-					form_open(base_url('settings/section_dept/save'),'post','form');
+					form_open(base_url('settings/section_dept/save_section'),'post','form-4');
 						col_init(3,9);
 						input('hidden','id','id');
 						select2(lang('company'),'id_company','required',$company,'id','perusahaan');
-						select2(lang('location'),'id_lokasi','required',$location,'id','location');
-						select2(lang('divisi'),'id_divisi','required',$divisi,'id','divisi');
+						select2(lang('location'),'secid_lokasi','required',$location,'id','lokasi');
+						select2(lang('divisi'),'secid_divisi','required',$divisi,'id','divisi');
 						select2(lang('department'),'id_department','required',$department,'id','department');
 						input('text',lang('kode'),'kode_section');
 						input('text',lang('section'),'section_dept');
@@ -149,11 +149,26 @@ modal_close();
 ?>
 
 <script>
-function formOpen1() {	
+function formOpen() {	
 	var response = response_edit;
 	
 	if(typeof response.id != 'undefined') {
     	$('#kode_perusahaan').val(response.kode_perusahaan)
+		$('#divid_lokasi').val(response.id_location).trigger('change')
+		$('#deptid_lokasi').val(response.id_location).trigger('change')
+		$('#secid_lokasi').val(response.id_location).trigger('change')
+
+		$('#deptid_divisi').val(response.id_divisi).trigger('change')
+		$('#secid_divisi').val(response.id_divisi).trigger('change')
+
+		$('#kode_lokasi').val(response.kode_lokasi)
+		$('#lokasi').val(response.lokasi)
+		$('#kode_divisi').val(response.kode_divisi)
+		$('#divisi').val(response.divisi)
+
+		$('#kode_section').val(response.kode)
+		$('#section_dept').val(response.section)
+
 	}
 }
 
