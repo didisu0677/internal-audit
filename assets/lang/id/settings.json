@@ -495,5 +495,11 @@
     "id_department_auditee": "Id Department Auditee",
     "id_section_auditee": "Id Section Auditee",
     "aktivitas": "Aktivitas",
-    "id_type_aktivitas": "Id Type Aktivitas"
+    "id_type_aktivitas": "Id Type Aktivitas",
+    "input_otomatis": "Input Otomatis",
+    "location": "Location",
+    "lokasi": "Lokasi",
+    "id_company": "Id Company",
+    "id_location": "Id Location",
+    "id_divisi": "Id Divisi"
 }

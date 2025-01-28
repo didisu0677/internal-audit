@@ -15,7 +15,7 @@
 </div>
 <div class="content-body">
 	<?php
-	table_open('',true,base_url('settings/hari_libur/data'),'bas_m_hari_libur');
+	table_open('',true,base_url('settings/kalender_kerja/data'),'tbl_m_hari_libur');
 		thead();
 			tr();
 				th('checkbox','text-center','width="30" data-content="id"');
@@ -29,7 +29,7 @@
 <?php 
 modal_open('modal-form');
 	modal_body();
-		form_open(base_url('settings/hari_libur/save'),'post','form');
+		form_open(base_url('settings/kalender_kerja/save'),'post','form');
 			col_init(3,9);
 			input('hidden','id','id');
 			input('text',lang('keterangan'),'keterangan','required');
@@ -44,7 +44,7 @@ modal_open('modal-otomatis');
 		?>
 		<div class="alert alert-warning"><?php echo lang('data_libur_diambil_dari');?> <a href="https://www.liburnasional.com" class="fw-bold" target="_blank">https://www.liburnasional.com</a></div>
 		<?php
-		form_open(base_url('settings/hari_libur/otomatis'),'post','form-otomatis');
+		form_open(base_url('settings/kalender_kerja/otomatis'),'post','form-otomatis');
 			col_init(3,9);
 			select2(lang('tahun'),'tahun','required',$tahun,'_key');
 			form_button(lang('input_otomatis'),false);

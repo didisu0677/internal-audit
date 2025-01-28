@@ -1,12 +1,14 @@
 {
     "field": {
         "id": "primary_key",
+        "id_divisi": "int",
         "kode": "varchar",
         "department": "varchar",
         "is_active": "boolean"
     },
     "label": {
         "id": "Id",
+        "id_divisi": "Id Divisi",
         "kode": "Kode",
         "department": "Department",
         "is_active": "Aktif"

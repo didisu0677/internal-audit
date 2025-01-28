@@ -8,7 +8,13 @@ class Schedule_audit extends BE_Controller {
 
 	function index() {
 		$data['institusi'] = get_data('tbl_institusi_audit','is_active',1)->result_array();
-		$data['department'] = get_data('tbl_m_department','is_active',1)->result_array();
+		$data['department'] = get_data('tbl_m_department a',[
+			'select' => 'a.id, CONCAT(b.divisi,"-",a.department) as department',
+			'join'   => 'tbl_m_divisi b on a.id_divisi = b.id type LEFT',
+			'where' => [
+					'a.is_active' => 1
+				],
+			])->result_array();
 		render($data);
 	}
 

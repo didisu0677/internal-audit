@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Hari_libur extends BE_Controller {
+class Kalender_kerja extends BE_Controller {
 
 	function __construct() {
 		parent::__construct();
@@ -21,7 +21,7 @@ class Hari_libur extends BE_Controller {
 	}
 
 	function get_data() {
-		$data = get_data('bas_m_hari_libur','id',post('id'))->row_array();
+		$data = get_data('tbl_m_hari_libur','id',post('id'))->row_array();
 		render($data,'json');
 	}
 
@@ -34,12 +34,12 @@ class Hari_libur extends BE_Controller {
 				$data['tanggal_selesai'] = $data['tanggal_mulai'];
 			}
 		}
-		$response = save_data('bas_m_hari_libur',$data,post(':validation'));
+		$response = save_data('tbl_m_hari_libur',$data,post(':validation'));
 		render($response,'json');
 	}
 
 	function delete() {
-		$response = destroy_data('bas_m_hari_libur','id',post('id'));
+		$response = destroy_data('tbl_m_hari_libur','id',post('id'));
 		render($response,'json');
 	}
 
@@ -50,11 +50,11 @@ class Hari_libur extends BE_Controller {
 		$n = 0;
 		foreach($x as $l) {
 			$data = $l;
-			$cek = get_data('bas_m_hari_libur',[
+			$cek = get_data('tbl_m_hari_libur',[
 				'where'	=> $data
 			])->row();
 			if(!isset($cek->id)) {
-				insert_data('bas_m_hari_libur',$data);
+				insert_data('tbl_m_hari_libur',$data);
 				$n++;
 			}
 		}

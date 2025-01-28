@@ -2,8 +2,8 @@
     "institusi_audit": "Institusi Audit",
     "auditor": "Auditor",
     "nama_auditor": "Nama Auditor",
-    "tgl_mulai_audit": "Tgl Mulai Audit",
-    "tgl_akhir_audit": "Tgl Akhir Audit",
+    "tgl_mulai_audit": "T. Mulai Audit",
+    "tgl_akhir_audit": "T. Akhir Audit",
     "tgl_closing_meeting": "Tgl Closing Meeting",
     "site_auditee": "Site Auditee",
     "department_auditee": "Department Auditee",
@@ -60,5 +60,6 @@
     "cancle" : "Cancel",
     "deadline_exceeded" : "Deadline Exceeded",
     "isi_finding" : "Isi Finding",
-    "add_finding" : "Add Finding"
+    "add_finding" : "Add Finding",
+    "section" : "Section"
 }

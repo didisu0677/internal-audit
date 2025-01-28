@@ -7,7 +7,13 @@ class Auditee extends BE_Controller {
 	}
 
 	function index() {
-		$data['department'] = get_data('tbl_m_department','is_active',1)->result_array();
+		$data['department'] = get_data('tbl_m_department a',[
+			'select' => 'a.id, CONCAT(b.divisi,"-",a.department) as department',
+			'join'   => 'tbl_m_divisi b on a.id_divisi = b.id type LEFT',
+			'where' => [
+					'a.is_active' => 1
+				],
+			])->result_array();
 		render($data);
 	}
 
@@ -18,11 +24,26 @@ class Auditee extends BE_Controller {
 
 	function get_data() {
 		$data = get_data('tbl_auditee','id',post('id'))->row_array();
+		$data['id_department']		= json_decode($data['id_department'],true);
 		render($data,'json');
 	}
 
 	function save() {
-		$response = save_data('tbl_auditee',post(),post(':validation'));
+		$data = post();
+		$data['id_department'] = json_encode(post('id_department'));
+		$id_department = post('id_department');
+		$response = save_data('tbl_auditee',$data,post(':validation'));
+
+		if($response['status'] == 'success') {
+			delete_data('tbl_detail_auditee','nip',$data['nip']);
+			foreach($id_department as $v => $k){
+				insert_data('tbl_detail_auditee',[
+					'nip' => $data['nip'],
+					'id_department' => $k,
+					'is_active' => 1
+				]);
+			}
+		}
 		render($response,'json');
 	}
 

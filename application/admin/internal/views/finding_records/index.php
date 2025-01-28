@@ -35,7 +35,7 @@
 				// th(lang('tgl_akhir_audit'),'','data-content="tgl_akhir_audit" data-type="daterange"');
 				// th(lang('tgl_closing_meeting'),'','data-content="tgl_closing_meeting" data-type="daterange"');
 				th(lang('site_auditee'),'','data-content="site_auditee"');
-				th(lang('department'),'','data-content="department" data-table="tbl_m_department tbl_department_auditee"');
+				th(lang('section'),'','data-content="section" data-table="tbl_section_department"');
 				th(lang('audit_area'),'','data-content="audit_area"');
 				th(lang('finding_description') . ' description','','data-content="finding"');
 				th(lang('bobot'),'','data-content="bobot_finding"');
@@ -118,7 +118,7 @@ modal_open('modal-form','','modal-lg','data-openCallback="formOpen1"');
 			card_open(lang('auditee'),'mb-2');
 				select2(lang('auditee'),'auditee','required');
 				select2(lang('site_auditee'),'site_auditee','required|infinity',['Head Office (HO)','Factory']);
-				select2(lang('department_auditee'),'id_department_auditee','required',$department,'id','department');
+				select2(lang('department_auditee'),'id_section_department','required',$department,'id','department');
 				input('text',lang('audit_area'),'audit_area');
 			card_close();
 
@@ -529,7 +529,8 @@ function formOpen() {
 	is_edit = false;	
 }
 
-function formOpen1() {	var response = response_edit;
+function formOpen1() {	
+	var response = response_edit;
 	$('#additional-file').html('');
 	$('#additional-finding').html('');
 
@@ -831,7 +832,7 @@ function get_department() {
 		data : {id : $('#auditee').val()},
 		type : 'POST',
 		success	: function(response) {
-			$('#id_department_auditee').html(response.department);
+			$('#id_section_department').html(response.department);
 			readonly_ajax = true;
 		}
 	});
@@ -844,7 +845,7 @@ function get_auditee() {
 		data : {id : $('#periode_audit').val()},
 		type : 'POST',
 		success	: function(response) {
-			$('#auditee').html(response.auditee);
+			$('#auditee').html(response.auditee).trigger('change');
 			readonly_ajax = true;
 		}
 	});

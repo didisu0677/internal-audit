@@ -12,14 +12,16 @@
 </div>
 <div class="content-body">
 	<?php
-	table_open('',true,base_url('settings/auditee/data'),'tbl_auditee');
+	table_open('',true,base_url('settings/section_deptXX/data'),'tbl_section_department');
 		thead();
 			tr();
 				th('checkbox','text-center','width="30" data-content="id"');
-				th(lang('nip'),'','data-content="nip"');
-				th(lang('email'),'','data-content="email"');
-				th(lang('nama'),'','data-content="nama"');
-				th(lang('department'),'','data-content="id_department"');
+				th(lang('id_company'),'','data-content="id_company"');
+				th(lang('id_location'),'','data-content="id_location"');
+				th(lang('id_divisi'),'','data-content="id_divisi"');
+				th(lang('id_department'),'','data-content="id_department"');
+				th(lang('kode'),'','data-content="kode"');
+				th(lang('section'),'','data-content="section"');
 				th(lang('aktif').'?','text-center','data-content="is_active" data-type="boolean"');
 				th('&nbsp;','','width="30" data-content="action_button"');
 	table_close();
@@ -28,14 +30,15 @@
 <?php 
 modal_open('modal-form');
 	modal_body();
-		form_open(base_url('settings/auditee/save'),'post','form');
+		form_open(base_url('settings/section_deptXX/save'),'post','form');
 			col_init(3,9);
 			input('hidden','id','id');
-			input('text',lang('nip'),'nip');
-			input('text',lang('email'),'email','email');
-			input('text',lang('nama'),'nama');
-			select2(lang('department'),'id_department[]','required',$department,'id','department','','multiple');
-
+			input('text',lang('id_company'),'id_company');
+			input('text',lang('id_location'),'id_location');
+			input('text',lang('id_divisi'),'id_divisi');
+			input('text',lang('id_department'),'id_department');
+			input('text',lang('kode'),'kode');
+			input('text',lang('section'),'section');
 			toggle(lang('aktif').'?','is_active');
 			form_button(lang('simpan'),lang('batal'));
 		form_close();
@@ -43,7 +46,7 @@ modal_open('modal-form');
 modal_close();
 modal_open('modal-import',lang('impor'));
 	modal_body();
-		form_open(base_url('settings/auditee/import'),'post','form-import');
+		form_open(base_url('settings/section_deptXX/import'),'post','form-import');
 			col_init(3,9);
 			fileupload('File Excel','fileimport','required','data-accept="xls|xlsx"');
 			form_button(lang('impor'),lang('batal'));

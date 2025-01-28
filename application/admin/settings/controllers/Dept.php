@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Department extends BE_Controller {
+class Dept extends BE_Controller {
 
 	function __construct() {
 		parent::__construct();
@@ -32,9 +32,9 @@ class Department extends BE_Controller {
 
 	function template() {
 		ini_set('memory_limit', '-1');
-		$arr = ['kode' => 'kode','department' => 'department','is_active' => 'is_active'];
+		$arr = ['id_divisi' => 'id_divisi','kode' => 'kode','department' => 'department','is_active' => 'is_active'];
 		$config[] = [
-			'title' => 'template_import_department',
+			'title' => 'template_import_dept',
 			'header' => $arr,
 		];
 		$this->load->library('simpleexcel',$config);
@@ -44,7 +44,7 @@ class Department extends BE_Controller {
 	function import() {
 		ini_set('memory_limit', '-1');
 		$file = post('fileimport');
-		$col = ['kode','department','is_active'];
+		$col = ['id_divisi','kode','department','is_active'];
 		$this->load->library('simpleexcel');
 		$this->simpleexcel->define_column($col);
 		$jml = $this->simpleexcel->read($file);
@@ -70,10 +70,10 @@ class Department extends BE_Controller {
 
 	function export() {
 		ini_set('memory_limit', '-1');
-		$arr = ['kode' => 'Kode','department' => 'Department','is_active' => 'Aktif'];
+		$arr = ['id_divisi' => 'Id Divisi','kode' => 'Kode','department' => 'Department','is_active' => 'Aktif'];
 		$data = get_data('tbl_m_department')->result_array();
 		$config = [
-			'title' => 'data_department',
+			'title' => 'data_dept',
 			'data' => $data,
 			'header' => $arr,
 		];

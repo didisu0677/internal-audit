@@ -1,14 +1,22 @@
 {
     "field": {
         "id": "primary_key",
-        "section": "varchar",
+        "id_company": "int",
+        "id_location": "int",
+        "id_divisi": "int",
         "id_department": "int",
+        "kode": "varchar",
+        "section": "varchar",
         "is_active": "boolean"
     },
     "label": {
         "id": "Id",
-        "section": "Section",
+        "id_company": "Id Company",
+        "id_location": "Id Location",
+        "id_divisi": "Id Divisi",
         "id_department": "Id Department",
+        "kode": "Kode",
+        "section": "Section",
         "is_active": "Aktif"
     },
     "validation": [],
