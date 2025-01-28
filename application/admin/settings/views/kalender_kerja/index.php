@@ -5,6 +5,14 @@
 			<?php echo breadcrumb(); ?>
 		</div>
 		<div class="float-right">
+			<label class=""><?php echo lang('tahun'); ?>  &nbsp</label>
+			<select class="select2 infinity custom-select" style="width: 100px;" id="filter_tahun">
+				<?php for($i = date('Y'); $i >= date('Y')-1; $i--){ ?>
+                <option value="<?php echo $i; ?>"<?php if($i == date('Y')) echo ' selected'; ?>><?php echo $i; ?></option>
+                <?php } ?>
+			</select>
+
+
 			<?php echo access_button('delete'); ?>
 			<div class="d-inline">
 				<button type="button" class="btn btn-info btn-sm" id="input-otomatis"><?php echo lang('input_otomatis'); ?></button>
@@ -53,6 +61,22 @@ modal_open('modal-otomatis');
 modal_close();
 ?>
 <script>
+
+	$(document).ready(function() {
+		var url = base_url + 'settings/kalender_kerja/data/';
+			url 	+= '/'+$('#filter_tahun').val(),
+		$('[data-serverside]').attr('data-serverside',url);
+		refreshData();
+		DataAwal();
+	});	
+
+	$('#filter_tahun').change(function(){
+		var url = base_url + 'settings/kalender_kerja/data/';
+			url 	+= '/'+$('#filter_tahun').val(),
+		$('[data-serverside]').attr('data-serverside',url);
+		refreshData();
+	});
+
 	$('#input-otomatis').click(function(e){
 		e.preventDefault();
 		$('#modal-otomatis').modal();

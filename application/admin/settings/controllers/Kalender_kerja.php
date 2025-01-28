@@ -15,8 +15,10 @@ class Kalender_kerja extends BE_Controller {
 		render($data);
 	}
 
-	function data() {
-		$data = data_serverside();
+	function data($tahun="") {
+		$config = [];
+		if($tahun) $config['where']['year(tanggal_mulai)'] = $tahun; 
+		$data = data_serverside($config);
 		render($data,'json');
 	}
 
