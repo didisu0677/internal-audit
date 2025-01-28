@@ -27,8 +27,8 @@ foreach($finding as $v) {
         <td></td>
         <td></td>
         <td class="button">
-            <button type="button" class="btn btn-warning btn-input" data-key="edit" data-id="<?php echo $v->id; ?>" title="<?php echo lang('update_capa'); ?>"><i class="fa-edit"></i></button>
-            <button type="button" class="btn btn-danger btn-send-reminder" data-key="send" data-id="<?php echo $v->id; ?>" title="<?php echo lang('send_reminder'); ?>"><i class="fa-envelope"></i></button>
+            <button type="button" class="btn btn-warning btn-input" data-key="edit" data-id="<?php echo $u->id; ?>" title="<?php echo lang('update_capa'); ?>"><i class="fa-edit"></i></button>
+            <button type="button" class="btn btn-danger btn-send-reminder" data-key="send" data-id="<?php echo $u->id; ?>" title="<?php echo lang('send_reminder'); ?>"><i class="fa-envelope"></i></button>
 		</td>    
     </tr>
     <?php } ?>
