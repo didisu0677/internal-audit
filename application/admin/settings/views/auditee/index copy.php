@@ -73,16 +73,15 @@ modal_close();
 					konten += '<option value="'+v.id+'">'+v.kode + ' | ' +v.section+'</option>';
 				});
 				$('#id_section').html(konten);
-
-				apply_value_section()
 			}
 		});
 	}
 
-	function apply_value_section(){
+	function formOpen() {
 		is_edit = true;
 		var response = response_edit;
 		if (typeof response.id !== 'undefined') {
+			$('#id_department1').val(response.id_department).trigger('change');
 			if(response.id_section != null && response.id_section.length > 0) {
 				$.each(response.id_section, function(k,v){
 					$('#id_section').find('[value="'+v+'"]').prop('selected',true);
@@ -91,10 +90,5 @@ modal_close();
 			};
 		}
 		is_edit = false;
-	}
-
-	function formOpen() {
-		var response = response_edit;
-		$('#id_department1').val(response.id_department).trigger('change');
 	}
 </script>
