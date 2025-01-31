@@ -35,7 +35,7 @@ modal_open('modal-form','','model-lg','data-openCallback="formOpen"');
 			input('text',lang('email'),'email','email');
 			input('text',lang('nama'),'nama');
 			select2(lang('department'),'id_department1','required',$department,'id','department');
-			select2(lang('section'),'id_section1[]','required',$section,'id','section','','multiple');
+			select2(lang('section'),'id_section[]','required',$section,'id','section','','multiple');
 	
 			toggle(lang('aktif').'?','is_active');
 			form_button(lang('simpan'),lang('batal'));
@@ -79,24 +79,9 @@ modal_close();
 	function formOpen() {
 		is_edit = true;
 		var response = response_edit;
-		getSection();
 		if (typeof response.id !== 'undefined') {
 			$('#id_department1').val(response.id_department).trigger('change');
-			if (response.id_section != null && response.id_section.length > 0) {
-				// Loop untuk mengatur setiap value di id_section
-				$.each(response.id_section, function(k, v) {
-					// Pastikan option dengan value yang sesuai ada
-					var option = $('#id_section1').find('option[value="'+v+'"]');
-					if (option.length) {
-						option.prop('selected', true);
-					} else {
-						console.log('Option with value', v, 'not found');
-					}
-				});
-
-				// Trigger perubahan setelah pemilihan
-				$('#id_section1').trigger('change');
-			}
+			$('#id_section').val(response.id_section).trigger('change');
 		}
 		is_edit = false;
 	}

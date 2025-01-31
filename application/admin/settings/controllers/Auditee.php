@@ -37,7 +37,6 @@ class Auditee extends BE_Controller {
 		$data = post();
 		$data['id_department'] = $data['id_department1'];
 		$data['id_section'] = json_encode(post('id_section'));
-		$id_section = post('id_section');
 		$response = save_data('tbl_auditee',$data,post(':validation'));
 
 		if($response['status'] == 'success') {
