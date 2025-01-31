@@ -54,14 +54,13 @@ class Auditee extends BE_Controller {
 
 
 				$sect = get_data('tbl_section_department','id',$k)->row();
-				if($section =''){
+				if($section ==''){
 					$section = $sect->section;
 				}else{
-					$section = $section .', ' . $sect->section;
+					$section = $section . ', ' . $sect->section;
 				}
-
-				update_data('tbl_auditee',['section' => $section],['id' => $response['id']]);
 			}
+			update_data('tbl_auditee',['section' => $section],['id' => $response['id']]);
 		}
 		render($response,'json');
 	}
