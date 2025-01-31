@@ -55,14 +55,14 @@ modal_close();
 
 <script>
 
-	$('#id_department1').change(function(){
-		getSection();
+	$('#id_department1').change(async function(){
+		await getSection();
 	});
 
 
-	function getSection() {
-		$('#id_section1').html('');
-		$.ajax({
+	async function getSection() {
+		$('#id_section').html('');
+		await $.ajax({
 			url : base_url + 'settings/auditee/get_section',
 			data : {dept : $('#id_department1').val()},
 			type : 'post',
@@ -72,7 +72,7 @@ modal_close();
 				$.each(response,function(k,v){
 					konten += '<option value="'+v.id+'">'+v.kode + ' | ' +v.section+'</option>';
 				});
-				$('#id_section1').html(konten);
+				$('#id_section').html(konten);
 			}
 		});
 	}
