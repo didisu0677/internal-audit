@@ -35,6 +35,7 @@ class Auditee extends BE_Controller {
 
 	function save() {
 		$data = post();
+		$data['id_department'] = $data['id_department1'];
 		$data['id_section'] = json_encode(post('id_section'));
 		$id_section = post('id_section');
 		$response = save_data('tbl_auditee',$data,post(':validation'));
@@ -46,7 +47,7 @@ class Auditee extends BE_Controller {
 			foreach($id_section as $v => $k){
 				insert_data('tbl_detail_auditee',[
 					'nip' => $data['nip'],
-					'id_department' => $data['id_department'],
+					'id_department' => $data['id_department1'],
 					'id_section' => $k,
 					'is_active' => 1
 				]);
