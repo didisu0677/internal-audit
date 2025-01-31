@@ -27,7 +27,7 @@
 	?>
 </div>
 <?php 
-modal_open('modal-form','','model-lg','data-openCallback="formOpen"');
+modal_open('modal-form','','modal-lg','data-openCallback="formOpen"');
 	modal_body();
 		form_open(base_url('settings/auditee/save'),'post','form');
 			col_init(3,9);
