@@ -61,7 +61,7 @@ modal_close();
 
 
 	function getSection() {
-		$('#id_section').html('');
+		$('#id_section1').html('');
 		$.ajax({
 			url : base_url + 'settings/auditee/get_section',
 			data : {dept : $('#id_department1').val()},
@@ -72,7 +72,7 @@ modal_close();
 				$.each(response,function(k,v){
 					konten += '<option value="'+v.id+'">'+v.kode + ' | ' +v.section+'</option>';
 				});
-				$('#id_section').html(konten);
+				$('#id_section1').html(konten);
 			}
 		});
 	}
@@ -82,7 +82,12 @@ modal_close();
 		var response = response_edit;
 		if (typeof response.id !== 'undefined') {
 			$('#id_department1').val(response.id_department).trigger('change');
-			$('#id_section').val(response.id_section).trigger('change');
+			if(response.id_section != null && response.id_section.length > 0) {
+				$.each(response.id_section, function(k,v){
+					$('#id_section').find('[value="'+v+'"]').prop('selected',true);
+				});
+				$('#id_section').trigger('change');
+			};
 		}
 		is_edit = false;
 	}
