@@ -20,6 +20,7 @@
 				th(lang('email'),'','data-content="email"');
 				th(lang('nama'),'','data-content="nama"');
 				th(lang('department'),'','data-content="department" data-table="tbl_m_department"');
+				th(lang('section'),'','data-content="section"');
 				th(lang('aktif').'?','text-center','data-content="is_active" data-type="boolean"');
 				th('&nbsp;','','width="30" data-content="action_button"');
 	table_close();
