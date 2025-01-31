@@ -14,6 +14,19 @@ class Capa_monitoring extends BE_Controller {
 					'__m' => 'id in (select id_department_auditee from tbl_finding_records)'
 				],
 				])->result_array();
+
+				$dept =[];
+				foreach($data['department'] as $d => $v) {
+					$dept[] = $v['id'];
+				}
+
+				$data['tahun'] = get_data('tbl_finding_records',[
+					'select' => 'distinct year(tgl_mulai_audit) as tahun',
+					'where' => [
+						'id_department_auditee' => $dept
+					]
+				])->result();
+
 		}else{
 			$dept = get_data('tbl_auditee a',[
 				'select' => 'a.nip,a.id_department',
@@ -30,6 +43,18 @@ class Capa_monitoring extends BE_Controller {
 					'__m' => 'id in (select id_department_auditee from tbl_finding_records)'
 				],
 				])->result_array();
+
+				$dept =[];
+				foreach($data['department'] as $d => $v) {
+					$dept[] = $v['id'];
+				}
+
+				$data['tahun'] = get_data('tbl_finding_records',[
+					'select' => 'distinct year(tgl_mulai_audit) as tahun',
+					'where' => [
+						'id_department_auditee' => $dept
+					]
+				])->result();
 		}
 		render($data);
 	}

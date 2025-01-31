@@ -21,8 +21,8 @@
 					<div class="col-sm-12">
 						<div class="input-group">
 						<select class="select2 filter custom-select" id="filter-tahun">
-							<?php for($i=date('Y');$i >= date('Y')-2;$i--) {
-								echo '<option value="'.$i.'">'.$i.'</option>';
+							<?php foreach($tahun as $t) {
+								echo '<option value="'.$t->tahun.'">'.$t->tahun.'</option>';
 							} ?>
 						</select>
 						</div>
