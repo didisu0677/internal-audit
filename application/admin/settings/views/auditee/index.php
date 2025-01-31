@@ -55,14 +55,14 @@ modal_close();
 
 <script>
 
-	$('#id_department1').change(async function(){
-		await getSection();
+	$('#id_department1').change(function(){
+		getSection();
 	});
 
 
-	async function getSection() {
+	function getSection() {
 		$('#id_section').html('');
-		await $.ajax({
+		$.ajax({
 			url : base_url + 'settings/auditee/get_section',
 			data : {dept : $('#id_department1').val()},
 			type : 'post',
