@@ -19,14 +19,14 @@
 				th(lang('nip'),'','data-content="nip"');
 				th(lang('email'),'','data-content="email"');
 				th(lang('nama'),'','data-content="nama"');
-				th(lang('department'),'','data-content="id_department"');
+				th(lang('department'),'','data-content="department" data-table="tbl_m_department"');
 				th(lang('aktif').'?','text-center','data-content="is_active" data-type="boolean"');
 				th('&nbsp;','','width="30" data-content="action_button"');
 	table_close();
 	?>
 </div>
 <?php 
-modal_open('modal-form');
+modal_open('modal-form','','model-lg','data-openCallback="formOpen"');
 	modal_body();
 		form_open(base_url('settings/auditee/save'),'post','form');
 			col_init(3,9);
@@ -34,8 +34,9 @@ modal_open('modal-form');
 			input('text',lang('nip'),'nip');
 			input('text',lang('email'),'email','email');
 			input('text',lang('nama'),'nama');
-			select2(lang('department'),'id_department[]','required',$department,'id','department','','multiple');
-
+			select2(lang('department'),'id_department1','required',$department,'id','department');
+			select2(lang('section'),'id_section1[]','required',$section,'id','section','','multiple');
+	
 			toggle(lang('aktif').'?','is_active');
 			form_button(lang('simpan'),lang('batal'));
 		form_close();
@@ -50,3 +51,53 @@ modal_open('modal-import',lang('impor'));
 		form_close();
 modal_close();
 ?>
+
+<script>
+
+	$('#id_department1').change(function(){
+		getSection();
+	});
+
+
+	function getSection() {
+		$('#id_section').html('');
+		$.ajax({
+			url : base_url + 'settings/auditee/get_section',
+			data : {dept : $('#id_department1').val()},
+			type : 'post',
+			dataType : 'json',
+			success : function(response) {
+				var konten = '';
+				$.each(response,function(k,v){
+					konten += '<option value="'+v.id+'">'+v.kode + ' | ' +v.section+'</option>';
+				});
+				$('#id_section').html(konten);
+			}
+		});
+	}
+
+	function formOpen() {
+		is_edit = true;
+		var response = response_edit;
+		getSection();
+		if (typeof response.id !== 'undefined') {
+			$('#id_department1').val(response.id_department).trigger('change');
+			if (response.id_section != null && response.id_section.length > 0) {
+				// Loop untuk mengatur setiap value di id_section
+				$.each(response.id_section, function(k, v) {
+					// Pastikan option dengan value yang sesuai ada
+					var option = $('#id_section1').find('option[value="'+v+'"]');
+					if (option.length) {
+						option.prop('selected', true);
+					} else {
+						console.log('Option with value', v, 'not found');
+					}
+				});
+
+				// Trigger perubahan setelah pemilihan
+				$('#id_section1').trigger('change');
+			}
+		}
+		is_edit = false;
+	}
+</script>

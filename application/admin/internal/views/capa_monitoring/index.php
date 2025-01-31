@@ -21,13 +21,33 @@
 					<div class="col-sm-12">
 						<div class="input-group">
 						<select class="select2 filter custom-select" id="filter-tahun">
-							<?php for($i=date('Y');$i>=2020;$i--) {
+							<?php for($i=date('Y');$i >= date('Y')-2;$i--) {
 								echo '<option value="'.$i.'">'.$i.'</option>';
 							} ?>
 						</select>
 						</div>
 					</div>
 				</div>
+
+				
+
+				<div class="form-group row">
+					<div class="col-sm-12">
+						<div class="input-group">
+			
+							<select class = "select2 infinity custom-select" style="width: 300px;" id="department">
+								<?php if(user('id_group') != AUDITEE) { ?>
+								<option value="ALL">ALL Department</option>
+								<?php } ?>
+								<?php foreach($department as $d){ ?>
+								<option value="<?php echo $d['id']; ?>"><?php echo $d['department']; ?></option>
+								<?php } ?>
+							</select>
+						</div>
+					</div>
+				</div
+				
+				?>
 
 				<a class="btn btn-sm btn-info" id="btn-show"><?php echo 'View Report'; ?></a>   
             <?php 
@@ -116,6 +136,10 @@ $(document).ready(function(){
 	getData();
 });
 
+$('#form-filter select').change(function() {
+    getData();
+});
+
 
 var xhr = null;
 function getData() {
@@ -129,6 +153,7 @@ function getData() {
 		url 	: base_url + 'internal/capa_monitoring/data',
 		data 	: {
 			tahun : $('#filter-tahun').val(),
+			dept : $('#department').val(),
 		},
 		type	: 'post',
 		success	: function(response) {

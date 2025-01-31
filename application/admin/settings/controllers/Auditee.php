@@ -14,6 +14,10 @@ class Auditee extends BE_Controller {
 					'a.is_active' => 1
 				],
 			])->result_array();
+		
+
+		$data['section'] = get_data('tbl_section_department','is_active',1)->result_array();
+	
 		render($data);
 	}
 
@@ -24,24 +28,38 @@ class Auditee extends BE_Controller {
 
 	function get_data() {
 		$data = get_data('tbl_auditee','id',post('id'))->row_array();
-		$data['id_department']		= json_decode($data['id_department'],true);
+		$data['id_section']		= json_decode($data['id_section'],true);
+
 		render($data,'json');
 	}
 
 	function save() {
 		$data = post();
-		$data['id_department'] = json_encode(post('id_department'));
-		$id_department = post('id_department');
+		$data['id_section'] = json_encode(post('id_section'));
+		$id_section = post('id_section');
 		$response = save_data('tbl_auditee',$data,post(':validation'));
 
 		if($response['status'] == 'success') {
 			delete_data('tbl_detail_auditee','nip',$data['nip']);
-			foreach($id_department as $v => $k){
+
+			$section = '';
+			foreach($id_section as $v => $k){
 				insert_data('tbl_detail_auditee',[
 					'nip' => $data['nip'],
-					'id_department' => $k,
+					'id_department' => $data['id_department'],
+					'id_section' => $k,
 					'is_active' => 1
 				]);
+
+
+				$sect = get_data('tbl_section_department','id',$k)->row();
+				if($section =''){
+					$section = $sect->section;
+				}else{
+					$section = $section .', ' . $sec->section;
+				}
+
+				update_data('tbl_auditee',['section' => $section],['id' => $response['id']]);
 			}
 		}
 		render($response,'json');
@@ -51,6 +69,20 @@ class Auditee extends BE_Controller {
 		$response = destroy_data('tbl_auditee','id',post('id'));
 		render($response,'json');
 	}
+
+	function get_section(){
+		$dept = post('dept');
+		$res['section'] = get_data('tbl_section_department', [
+			'select' => '*',
+			'where' => [
+				'id_department' => $dept,
+				'is_active' => 1
+			]
+		])->result_array();
+
+		render($res['section'], 'json');
+	
+		}
 
 	function template() {
 		ini_set('memory_limit', '-1');

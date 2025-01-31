@@ -16,6 +16,10 @@ class Finding_records extends BE_Controller {
 					'__m' => 'id in (select id_department_auditee from tbl_finding_records)'
 				],
 				])->result_array();
+
+				$data['tahun'] = get_data('tbl_finding_records',[
+					'select' => 'distinct year(tgl_mulai_audit)',
+				])->result();
 		}else{
 			$dept = get_data('tbl_auditee a',[
 				'select' => 'a.nip,a.id_department',
@@ -25,15 +29,25 @@ class Finding_records extends BE_Controller {
 				],
 			])->row(); 
 
+			$dept1 = [''];
+
+			if(!empty($dept->id_department) && isset($dept->id_department)) $dept1 = json_decode($dept->id_department,true);
+
 			$data['department'] = get_data('tbl_m_department',[
 				'where' => [
 					'is_active' => 1,
-					'id' => $dept->id_department,
+					'id' => $dept1,
 					'__m' => 'id in (select id_department_auditee from tbl_finding_records)'
 				],
 				])->result_array();
-		}
 
+			$data['tahun'] = get_data('tbl_finding_records',[
+				'select' => 'distinct year(tgl_mulai_audit)',
+				'where' => [
+					'id_department_auditee' => $dept1
+				]
+			])->result();
+		}
 
 		if(user('id_group') != AUDITEE){
 
@@ -180,7 +194,7 @@ class Finding_records extends BE_Controller {
 				'id' => $id
 			],
 		])->row_array();
-		if(isset($dept)) $arr_dept = json_decode($dept['id_department'],true);
+		if(isset($dept)) $arr_dept = json_decode($dept['id_section'],true);
 
 	    // $cb_department  = get_data('tbl_auditee a',[
 		// 	'select' => 'a.id_department as id, b.kode, b.department1',
@@ -198,7 +212,7 @@ class Finding_records extends BE_Controller {
 			'select' => 'a.*',
 			'where'	=> [
 				'a.is_active'	=> 1,
-				'a.id_department' => $arr_dept 
+				'a.id' => $arr_dept 
 			],
 		])->result();
 

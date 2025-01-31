@@ -7,7 +7,31 @@ class Capa_monitoring extends BE_Controller {
 	}
 
 	function index() {
-		render();
+		if(user('id_group') != AUDITEE){
+			$data['department'] = get_data('tbl_m_department',[
+				'where' => [
+					'is_active' => 1,
+					'__m' => 'id in (select id_department_auditee from tbl_finding_records)'
+				],
+				])->result_array();
+		}else{
+			$dept = get_data('tbl_auditee a',[
+				'select' => 'a.nip,a.id_department',
+				'join' => 'tbl_user b on a.nip = b.username',
+				'where' => [
+					'a.nip' => user('username') 
+				],
+			])->row(); 
+
+			$data['department'] = get_data('tbl_m_department',[
+				'where' => [
+					'is_active' => 1,
+					'id' => $dept->id_department,
+					'__m' => 'id in (select id_department_auditee from tbl_finding_records)'
+				],
+				])->result_array();
+		}
+		render($data);
 	}
 
 	// function data() {
@@ -30,19 +54,27 @@ class Capa_monitoring extends BE_Controller {
 					],
 		];
 
+
 		$data['capa'] = get_data('tbl_capa a',$arr)->result();
 
-
-
-
-		$data['finding'] = get_data('tbl_finding_records a',[
+		$arr1 = [
 			'select' => 'a.*,b.department',
-			'join' => 'tbl_m_department b on a.id_department_auditee = b.id type LEFT',
-			'where' => [
-				  'a.is_active' => 0
-			],
-			'sort_by' => 'a.periode_audit'
-			])->result();
+				'join' => 'tbl_m_department b on a.id_department_auditee = b.id type LEFT',
+				'where' => [
+					'a.is_active' => 0
+				],
+				'sort_by' => 'a.periode_audit'
+		];
+
+		if(post('tahun')) {
+			$arr1['where']['year(a.tgl_mulai_audit)'] = post('tahun');
+		}
+
+		if(post('dept') && post('dept') != 'ALL') {
+			$arr1['where']['a.id_department_auditee'] = post('dept');
+		}
+
+		$data['finding'] = get_data('tbl_finding_records a',$arr1)->result();
 
 
 		render($data,'layout:false');
