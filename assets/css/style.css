@@ -519,7 +519,7 @@ body .navbar .nav-item a:focus {
 .header-navbar .navbar-header .navbar-brand .brand-logo-min {
 	vertical-align: sub;
 	height: 2.125rem;
-	filter: brightness(0) invert(1);
+	/* filter: brightness(0) invert(1); */
 	opacity: .9;
 	display: none;
 	margin-top: .25rem;
