@@ -1,0 +1,26 @@
+{
+    "field": {
+        "id": "primary_key",
+        "parent_id": "int",
+        "section_code": "varchar",
+        "section_name": "varchar",
+        "description": "varchar",
+        "group_section": "varchar",
+        "id_group_section": "int",
+        "urutan": "int",
+        "is_active": "boolean"
+    },
+    "label": {
+        "id": "Id",
+        "parent_id": "Parent Id",
+        "section_code": "Section Code",
+        "section_name": "Section Name",
+        "description": "Description",
+        "group_section": "Group Section",
+        "id_group_section": "Id Group Section",
+        "urutan": "Urutan",
+        "is_active": "Aktif"
+    },
+    "validation": [],
+    "alias": []
+}

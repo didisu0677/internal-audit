@@ -11,7 +11,7 @@
 				<option value="ALL">ALL Department</option>
 				<?php } ?>
 				<?php foreach($department as $d){ ?>
-				<option value="<?php echo $d['id']; ?>"><?php echo $d['department']; ?></option>
+				<option value="<?php echo $d['id']; ?>"><?php echo $d['section_name']; ?></option>
 				<?php } ?>
 			</select>
 
@@ -28,14 +28,14 @@
 		thead();
 			tr();
 				th('checkbox','text-center','width="30" data-content="id"');
-				th(lang('periode_audit'),'','data-content="periode_audit"');
+				// th(lang('periode_audit'),'','data-content="periode_audit"');
 				// th(lang('institusi_audit'),'','data-content="nama_institusi" data-table="tbl_institusi_audit"');
 				th(lang('auditor'),'','data-content="nama_auditor"');
 				th(lang('tgl_mulai_audit'),'','data-content="tgl_mulai_audit" data-type="daterange"');
 				// th(lang('tgl_akhir_audit'),'','data-content="tgl_akhir_audit" data-type="daterange"');
-				// th(lang('tgl_closing_meeting'),'','data-content="tgl_closing_meeting" data-type="daterange"');
+				th(lang('auditee'),'','data-content="nama" data-table="tbl_auditee"');
 				th(lang('site_auditee'),'','data-content="site_auditee"');
-				th(lang('section'),'','data-content="section" data-table="tbl_section_department"');
+				th(lang('section'),'','data-content="section_name" data-table="tbl_m_audit_section tbl_section_department"');
 				th(lang('audit_area'),'','data-content="audit_area"');
 				th(lang('finding_description') . ' description','','data-content="finding"');
 				th(lang('bobot'),'','data-content="bobot_finding"');
@@ -118,7 +118,7 @@ modal_open('modal-form','','modal-lg','data-openCallback="formOpen1"');
 			card_open(lang('auditee'),'mb-2');
 				select2(lang('auditee'),'auditee','required');
 				select2(lang('site_auditee'),'site_auditee','required|infinity',['Head Office (HO)','Factory']);
-				select2(lang('department_auditee'),'id_section_department','required',$department,'id','department');
+				select2(lang('department_auditee'),'id_section_department','required',$department,'id','section_name');
 				input('text',lang('audit_area'),'audit_area');
 			card_close();
 
@@ -255,7 +255,7 @@ modal_open('modal-capa','','modal-xl','data-openCallback="formOpen"');
 							<label class="col-form-label col-sm-2" for="pic<?php echo $i; ?>"><?php echo lang('pic'); ?></label>
 							<div class="col-sm-10">
 								<input type="hidden" name="nama_pic[]" class="nama_pic">
-								<select id="username" class="form-control username select2" name="pic_capa[]" data-validation="required" aria-label="<?php echo lang('pic_capa'); ?>" placeholder="<?php echo lang('nama_panitia'); ?>">
+								<select id="username" class="form-control username select2" name="pic_capa[]" data-validation="required" aria-label="<?php echo lang('pic_capa'); ?>" placeholder="<?php echo lang('nama_pic'); ?>">
 								</select>
 							</div>
 

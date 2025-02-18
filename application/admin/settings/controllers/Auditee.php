@@ -7,13 +7,22 @@ class Auditee extends BE_Controller {
 	}
 
 	function index() {
-		$data['department'] = get_data('tbl_m_department a',[
-			'select' => 'a.id, CONCAT(b.divisi,"-",a.department) as department',
-			'join'   => 'tbl_m_divisi b on a.id_divisi = b.id type LEFT',
+		// $data['department'] = get_data('tbl_m_department a',[
+		// 	'select' => 'a.id, CONCAT(b.divisi,"-",a.department) as department',
+		// 	'join'   => 'tbl_m_divisi b on a.id_divisi = b.id type LEFT',
+		// 	'where' => [
+		// 			'a.is_active' => 1
+		// 		],
+		// 	])->result_array();
+
+		$data['department'] = get_data('tbl_m_audit_section a',[
+			'select' => 'a.section_code, CONCAT(a.description,"-",a.section_name) as department',
 			'where' => [
-					'a.is_active' => 1
+					'a.is_active' => 1,
+					'a.id_group_section' => 3
 				],
 			])->result_array();
+
 		
 
 		$data['section'] = get_data('tbl_section_department','is_active',1)->result_array();
@@ -27,7 +36,14 @@ class Auditee extends BE_Controller {
 	}
 
 	function get_data() {
-		$data = get_data('tbl_auditee','id',post('id'))->row_array();
+		$data = get_data('tbl_auditee a',[
+			'select' => 'a.*,b.section_code',
+			'join'   => 'tbl_m_audit_section b on a.id_department = b.id type LEFT',
+			'where' => [
+				'a.id' => post('id'),
+			],
+		])->row_array();
+
 		$data['id_section']		= json_decode($data['id_section'],true);
 
 		render($data,'json');
@@ -35,9 +51,12 @@ class Auditee extends BE_Controller {
 
 	function save() {
 		$data = post();
-		$data['id_department'] = $data['id_department1'];
 		$data['id_section'] = json_encode(post('id_section'));
 		$id_section = post('id_section');
+
+		$dept = get_data('tbl_m_audit_section','section_code',$data['id_department1'])->row();
+		if(isset($dept->id)) $data['id_department'] = $dept->id;
+
 		$response = save_data('tbl_auditee',$data,post(':validation'));
 
 		if($response['status'] == 'success') {
@@ -53,11 +72,11 @@ class Auditee extends BE_Controller {
 				]);
 
 
-				$sect = get_data('tbl_section_department','id',$k)->row();
+				$sect = get_data('tbl_m_audit_section','id',$k)->row();
 				if($section ==''){
-					$section = $sect->section;
+					$section = $sect->section_name;
 				}else{
-					$section = $section . ', ' . $sect->section;
+					$section = $section . ', ' . $sect->section_name;
 				}
 			}
 			update_data('tbl_auditee',['section' => $section],['id' => $response['id']]);
@@ -72,10 +91,10 @@ class Auditee extends BE_Controller {
 
 	function get_section(){
 		$dept = post('dept');
-		$res['section'] = get_data('tbl_section_department', [
+		$res['section'] = get_data('tbl_m_audit_section', [
 			'select' => '*',
 			'where' => [
-				'id_department' => $dept,
+				'SUBSTRING(section_code,3,2)' => $dept,
 				'is_active' => 1
 			]
 		])->result_array();

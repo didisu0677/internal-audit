@@ -501,5 +501,9 @@
     "lokasi": "Lokasi",
     "id_company": "Id Company",
     "id_location": "Id Location",
-    "id_divisi": "Id Divisi"
+    "id_divisi": "Id Divisi",
+    "section_code": "Section Code",
+    "section_name": "Section Name",
+    "group_section": "Group Section",
+    "id_group_section": "Id Group Section"
 }

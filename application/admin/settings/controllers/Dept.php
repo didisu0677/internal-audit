@@ -16,23 +16,23 @@ class Dept extends BE_Controller {
 	}
 
 	function get_data() {
-		$data = get_data('tbl_m_department','id',post('id'))->row_array();
+		$data = get_data('tbl_m_audit_section','id',post('id'))->row_array();
 		render($data,'json');
 	}
 
 	function save() {
-		$response = save_data('tbl_m_department',post(),post(':validation'));
+		$response = save_data('tbl_m_audit_section',post(),post(':validation'));
 		render($response,'json');
 	}
 
 	function delete() {
-		$response = destroy_data('tbl_m_department','id',post('id'));
+		$response = destroy_data('tbl_m_audit_section','id',post('id'));
 		render($response,'json');
 	}
 
 	function template() {
 		ini_set('memory_limit', '-1');
-		$arr = ['id_divisi' => 'id_divisi','kode' => 'kode','department' => 'department','is_active' => 'is_active'];
+		$arr = ['parent_id' => 'parent_id','section_code' => 'section_code','section_name' => 'section_name','description' => 'description','group_section' => 'group_section','id_group_section' => 'id_group_section','urutan' => 'urutan','is_active' => 'is_active'];
 		$config[] = [
 			'title' => 'template_import_dept',
 			'header' => $arr,
@@ -44,7 +44,7 @@ class Dept extends BE_Controller {
 	function import() {
 		ini_set('memory_limit', '-1');
 		$file = post('fileimport');
-		$col = ['id_divisi','kode','department','is_active'];
+		$col = ['parent_id','section_code','section_name','description','group_section','id_group_section','urutan','is_active'];
 		$this->load->library('simpleexcel');
 		$this->simpleexcel->define_column($col);
 		$jml = $this->simpleexcel->read($file);
@@ -55,7 +55,7 @@ class Dept extends BE_Controller {
 					$data = $this->simpleexcel->parsing($i,$j);
 					$data['create_at'] = date('Y-m-d H:i:s');
 					$data['create_by'] = user('nama');
-					$save = insert_data('tbl_m_department',$data);
+					$save = insert_data('tbl_m_audit_section',$data);
 					if($save) $c++;
 				}
 			}
@@ -70,8 +70,8 @@ class Dept extends BE_Controller {
 
 	function export() {
 		ini_set('memory_limit', '-1');
-		$arr = ['id_divisi' => 'Id Divisi','kode' => 'Kode','department' => 'Department','is_active' => 'Aktif'];
-		$data = get_data('tbl_m_department')->result_array();
+		$arr = ['parent_id' => 'Parent Id','section_code' => 'Section Code','section_name' => 'Section Name','description' => 'Description','group_section' => 'Group Section','id_group_section' => 'Id Group Section','urutan' => 'Urutan','is_active' => 'Aktif'];
+		$data = get_data('tbl_m_audit_section')->result_array();
 		$config = [
 			'title' => 'data_dept',
 			'data' => $data,

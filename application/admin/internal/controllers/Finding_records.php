@@ -10,7 +10,7 @@ class Finding_records extends BE_Controller {
 		// $data['auditee'] = get_data('tbl_auditee','is_active',1)->result_array();
 
 		if(user('id_group') != AUDITEE){
-			$data['department'] = get_data('tbl_m_department',[
+			$data['department'] = get_data('tbl_m_audit_section',[
 				'where' => [
 					'is_active' => 1,
 					'__m' => 'id in (select id_department_auditee from tbl_finding_records)'
@@ -33,7 +33,7 @@ class Finding_records extends BE_Controller {
 
 			if(!empty($dept->id_department) && isset($dept->id_department)) $dept1 = json_decode($dept->id_department,true);
 
-			$data['department'] = get_data('tbl_m_department',[
+			$data['department'] = get_data('tbl_m_audit_section',[
 				'where' => [
 					'is_active' => 1,
 					'id' => $dept1,
@@ -97,6 +97,7 @@ class Finding_records extends BE_Controller {
 				'access_view'	=> true,
 	   		 ];
 		}
+		$config['join'][] = 'tbl_auditee ON tbl_auditee.id = tbl_finding_records.auditee TYPE LEFT';
 		$config['button'][]	= button_serverside('btn-default','btn-capa',['far fa-copy',lang('capa'),true],'act-dokumen');
 
 
@@ -196,19 +197,7 @@ class Finding_records extends BE_Controller {
 		])->row_array();
 		if(isset($dept)) $arr_dept = json_decode($dept['id_section'],true);
 
-	    // $cb_department  = get_data('tbl_auditee a',[
-		// 	'select' => 'a.id_department as id, b.kode, b.department1',
-		// 	'join' => ['tbl_m_department b on a.id_department = b.id',
-		// 	           'tbl_detail_auditee c on a.nip = c.nip'
-		//               ],
-	    //     'where'	=> [
-	    //         'a.is_active'	=> 1,
-		// 		'a.id' => $id
-	    //     ],
-		// ])->result();
-
-
-		$cb_department = get_data('tbl_section_department a',[
+		$cb_department = get_data('tbl_m_audit_section a',[
 			'select' => 'a.*',
 			'where'	=> [
 				'a.is_active'	=> 1,
@@ -221,8 +210,8 @@ class Finding_records extends BE_Controller {
 	    $data['department']    = '';
 	    foreach($cb_department as $d) {
 	        $data['department'] .= '<option value="'.$d->id.'"
-            data-kode="'.$d->kode.'"
-            >'.$d->section.'</option>';
+            data-kode="'.$d->section_code.'"
+            >'.$d->section_name.'</option>';
 	    }
 	    render($data,'json');
 	}
@@ -234,13 +223,12 @@ class Finding_records extends BE_Controller {
 		$department = [''];
 		if($data && $data['department_auditee'] != null ) {
 			$department = json_decode($data['department_auditee'],true);
-			// debug($department);die;
 			$cb_auditee = get_data('tbl_detail_auditee a',[
 				'select' => 'distinct b.id,b.nama',
 				'join'  => 'tbl_auditee b on a.nip = b.nip type LEFT',
 				'where' => [
 					'a.is_active' => 1,
-					'a.id_department' => $department
+					'a.id_section' => $department
 				]
 			])->result();
 
@@ -255,8 +243,8 @@ class Finding_records extends BE_Controller {
 
 	function add_capa() {
 		$data = get_data('tbl_finding_records a',[
-			'select' => 'a.*,b.department, c.nama as nama_auditee',
-			'join'   =>  ['tbl_m_department b on a.id_department_auditee = b.id',
+			'select' => 'a.*,b.section_name as department, c.nama as nama_auditee',
+			'join'   =>  ['tbl_m_audit_section b on a.id_department_auditee = b.id',
 						  'tbl_auditee c on a.auditee = c.id',
 						 ],
 			'where' => [
@@ -264,15 +252,18 @@ class Finding_records extends BE_Controller {
 			],
 			])->row_array();
 
+			// debug($data);die;
+
 			$pic	= get_data('tbl_user a',[
 				'select'	=> 'a.*',
 				'join' => 'tbl_auditee b on a.username = b.nip type LEFT',
 				'where'		=> [
 					'a.is_active' => 1,
-					'b.id_department' => $data['id_section_department'],
+					'b.id_department' => $data['id_divisi'],
 				], 
 				'sort_by'	=> 'id'
 			])->result();
+
 
 			$data['pic_capa']    = '<option value=""></option>';
 			foreach($pic as $d) {
@@ -294,7 +285,7 @@ class Finding_records extends BE_Controller {
 				'join' => 'tbl_auditee b on a.username = b.nip type LEFT',
 				'where'	=> [
 					'a.is_active'	=> 1,
-					'b.id_department' => $data['id_section_department']
+					'b.id_department' => $data['id_divisi']
 				]
 			])->result_array();
 
@@ -311,13 +302,28 @@ class Finding_records extends BE_Controller {
 			$data['id_institusi_audit'] = $schedule->id_institusi_audit;
 		}
 
-		$dept = get_data('tbl_section_department','id',$data['id_section_department'])->row();
-		if(isset($dept->id_department)) {
-			$data['id_department_auditee'] = $dept->id_department;
-			$data['id_divisi'] = $dept->id_divisi;
+
+		$dept = get_data('tbl_m_audit_section','id',$data['id_section_department'])->row();
+
+		if(isset($dept->id)) {
+			$div = get_data('tbl_m_audit_section','section_code',substr($dept->section_code, 2, 2))->row();
+
+			if(isset($div->id)) $data['id_divisi'] = $div->id;
+
+
+			$d = get_data('tbl_m_audit_section',[
+					'where' => [
+						'section_code' => substr($dept->section_code, 4, 1),
+						'parent_id' => $div->id,
+					],
+				])->row();
+			
+			if(isset($d->id)) $data['id_department_auditee'] = $d->id;
+			
 		}
 
 		$data['id_auditor'] = $data['auditor'];
+
 		$response 	= save_data('tbl_m_finding',$data,post(':validation'));
 
 		if($response['status'] = 'success') {

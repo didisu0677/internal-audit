@@ -19,7 +19,7 @@
 				th(lang('nip'),'','data-content="nip"');
 				th(lang('email'),'','data-content="email"');
 				th(lang('nama'),'','data-content="nama"');
-				th(lang('department'),'','data-content="department" data-table="tbl_m_department"');
+				th(lang('department'),'','data-content="section_name" data-table="tbl_m_audit_section tbl_m_department"');
 				th(lang('section'),'','data-content="section"');
 				th(lang('aktif').'?','text-center','data-content="is_active" data-type="boolean"');
 				th('&nbsp;','','width="30" data-content="action_button"');
@@ -35,7 +35,7 @@ modal_open('modal-form','','modal-lg','data-openCallback="formOpen"');
 			input('text',lang('nip'),'nip');
 			input('text',lang('email'),'email','email');
 			input('text',lang('nama'),'nama');
-			select2(lang('department'),'id_department1','required',$department,'id','department');
+			select2(lang('divisi'),'id_department1','required',$department,'section_code','department');
 			select2(lang('section'),'id_section[]','required',$section,'id','section','','multiple');
 	
 			toggle(lang('aktif').'?','is_active');
@@ -70,7 +70,7 @@ modal_close();
 			success : function(response) {
 				var konten = '';
 				$.each(response,function(k,v){
-					konten += '<option value="'+v.id+'">'+v.kode + ' | ' +v.section+'</option>';
+					konten += '<option value="'+v.id+'">'+v.section_code + ' | ' +v.section_name+'</option>';
 				});
 				$('#id_section').html(konten);
 
@@ -95,6 +95,6 @@ modal_close();
 
 	function formOpen() {
 		var response = response_edit;
-		$('#id_department1').val(response.id_department).trigger('change');
+		$('#id_department1').val(response.section_code).trigger('change');
 	}
 </script>
