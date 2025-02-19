@@ -87,14 +87,14 @@
 				<div class="form-group row">
 					<label class="col-form-label col-sm-3" for="isi_capa"><?php echo (lang('capa_plan')); ?></label>	
 					<div class="col-sm-9">
-						<textarea name="isi_capa[]" id="isi_capa" class="form-control editor" data-validation="required" rows="2" data-editor="inline"></textarea>
+						<textarea name="isi_capa[]" id="isi_capa" class="form-control editor" data-validation="required" rows="1" data-editor="inline"></textarea>
 					</div>
 				</div>
 
 				<div class="form-group row">
 				<label class="col-form-label col-sm-3" for="keterangan_progress"><?php echo (lang('keterangan_progress')); ?></label>		
 				<div class="col-sm-9">
-					<textarea name="keterangan_progress" id="keterangan_progress" class="form-control editor" data-validation="required" rows="2" data-editor="inline"></textarea>
+					<textarea name="keterangan_progress" id="keterangan_progress" class="form-control editor" data-validation="required" rows="1" data-editor="inline"></textarea>
 				</div>
 			</div>
 
