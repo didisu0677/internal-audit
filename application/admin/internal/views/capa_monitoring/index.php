@@ -76,7 +76,7 @@
 </div>
     
 <?php 
-	modal_open('modal-form','','modal-lg','data-openCallback="formOpen"');
+	modal_open('modal-form','','modal-xl','data-openCallback="formOpen"');
 		modal_body();
 			form_open(base_url('internal/capa_monitoring/save'),'post','form');
 				col_init(3,9);
