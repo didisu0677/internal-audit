@@ -99,7 +99,7 @@ class Finding_records extends BE_Controller {
 	   		 ];
 		}
 		$config['join'][] = 'tbl_auditee ON tbl_auditee.id = tbl_finding_records.auditee TYPE LEFT';
-		$config['button'][]	= button_serverside('btn-default','btn-capa',['far fa-copy',lang('capa'),true],'act-dokumen');
+		$config['button'][]	= button_serverside('btn-default','btn-capa',['far fa-copy',lang('capa_plan'),true],'act-dokumen');
 
 
 		if($department && $department != 'ALL') {
