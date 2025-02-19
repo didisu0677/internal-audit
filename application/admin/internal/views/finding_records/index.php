@@ -60,7 +60,7 @@ modal_open('modal-form','','modal-lg','data-openCallback="formOpen1"');
 		form_open(base_url('internal/finding_records/save'),'post','form');
 			col_init(3,9);
 			for($i=0; $i < 1; $i++) { 
-			input('hidden','id','id');
+			input('','id','id');
 			card_open(lang('info_audit'),'mb-2');
 				select2(lang('periode_audit'),'periode_audit','required');
 				// input('text',lang('institusi_audit'),'institusi_audit');

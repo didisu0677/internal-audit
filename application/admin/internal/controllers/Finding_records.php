@@ -102,7 +102,7 @@ class Finding_records extends BE_Controller {
 
 
 		if($department && $department != 'ALL') {
-	    	$config['where']['id_department_auditee']	= $department;	
+	    	$config['where']['id_divisi']	= $department;	
 	    }
 
 		$data = data_serverside($config);

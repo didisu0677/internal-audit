@@ -80,6 +80,52 @@ class Auditee extends BE_Controller {
 				}
 			}
 			update_data('tbl_auditee',['section' => $section],['id' => $response['id']]);
+
+			$user = get_data('tbl_user',[
+				'where' => [
+						'username' => $data['nip'],
+					],
+				])->row();
+			if(!isset($user->id)){
+				$data_user = [
+					'id' => 0,
+					'kode' => $data['nip'],
+					'username' => $data['nip'],
+					'nama' => $data['nama'],
+					'id_group' => 38,
+					'email' => $data['email'],
+					'password' => 'P455w0rd!',
+					'is_active' => 1
+				];
+
+
+				$data_user['password']   = $data_user['password'] ? 
+				password_hash(md5($data_user['password']),PASSWORD_DEFAULT,array('cost'=>COST)) : 
+				password_hash(md5($data_user['kode']),PASSWORD_DEFAULT,array('cost'=>COST));
+
+				$response_user = save_data('tbl_user',$data_user);
+				if($response_user=='succes') {
+					update_data('tbl_user',[
+						'change_password_by'    => user('nama'),
+						'change_password_at'    => date('Y-m-d H:i:s')
+					],'id',$response_user['id']);
+					$check  = get_data('tbl_history_password',[
+						'where' => [
+							'id_user'   => $response['id'],
+							'password'  => md5(post('password'))
+						]
+					])->row();
+					if(isset($check->id)) {
+						update_data('tbl_history_password',['tanggal'=>date('Y-m-d H:i:s')],'id',$check->id);
+					} else {
+						insert_data('tbl_history_password',[
+							'id_user'   => $response['id'],
+							'password'  => md5(post('password')),
+							'tanggal'   => date('Y-m-d H:i:s')
+						]);
+					}
+				}
+			}
 		}
 		render($response,'json');
 	}
