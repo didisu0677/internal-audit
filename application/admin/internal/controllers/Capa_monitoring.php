@@ -96,7 +96,6 @@ class Capa_monitoring extends BE_Controller {
 	
 
 	function get_data() {
-		debug(post('id'));die;
 		$data = get_data('tbl_capa','id',post('id'))->row_array();
 		render($data,'json');
 	}
