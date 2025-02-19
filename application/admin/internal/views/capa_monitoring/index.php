@@ -76,14 +76,21 @@
 </div>
     
 <?php 
-	modal_open('modal-form','','modal-lg');
+	modal_open('modal-form','','modal-lg','data-openCallback="formOpen"');
 		modal_body();
 			form_open(base_url('internal/capa_monitoring/save'),'post','form');
 				col_init(3,9);
 				input('hidden','id','id');
-				select2(lang('follow_up'),'follow_up','',['[date] System','System and Personal e-mail', 'System & meeting']);
+				// select2(lang('follow_up'),'follow_up','',['[date] System','System and Personal e-mail', 'System & meeting']);
 				?>
 					
+				<div class="form-group row">
+					<label class="col-form-label col-sm-3" for="isi_capa"><?php echo (lang('isi_capa')); ?></label>	
+					<div class="col-sm-9">
+						<textarea name="isi_capa[]" id="isi_capa" class="form-control editor" data-validation="required" rows="2" data-editor="inline"></textarea>
+					</div>
+				</div>
+
 				<div class="form-group row">
 				<label class="col-form-label col-sm-3" for="keterangan_progress"><?php echo (lang('keterangan_progress')); ?></label>		
 				<div class="col-sm-9">
@@ -109,10 +116,6 @@
 					checkbox(lang('pending'),'akses_delete',1);
 					checkbox(lang('cancle'),'akses_additional',1);
 					checkbox(lang('deadline_exceeded'),'deadline_exceeded',1);
-
-
-					select2(lang('capa_score'),'capa_score','',['[date] System','System and Personal e-mail', 'System & meeting']);
-					input('text',lang('achievement'). ' %','achievement');
 
 				form_button(lang('simpan'),lang('batal'));
 			form_close();
@@ -167,6 +170,13 @@ function getData() {
 			}
 		}
 	});
+}
+
+function formOpen() {	
+	var response = response_edit;
+	if(typeof response.id != 'undefined') {
+		CKEDITOR.instances['isi_capa'].setData(decodeEntities(response.isi_capa));
+	} 
 }
 
 $(document).on('click','.btn-detail',function(){
