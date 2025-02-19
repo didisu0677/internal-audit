@@ -90,6 +90,7 @@ class Finding_records extends BE_Controller {
 			 $config = [
 				'access_edit'	=> false,
 				'access_delete'	=> false,
+				'access_view'	=> false,
 	   		 ];
 		}else{
 			$config = [
