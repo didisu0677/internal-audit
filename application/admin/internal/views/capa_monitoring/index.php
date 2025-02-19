@@ -78,7 +78,7 @@
 <?php 
 	modal_open('modal-form','','modal-lg');
 		modal_body();
-			form_open(base_url('settings/menu/save'),'post','form');
+			form_open(base_url('internal/capa_monitoring/save'),'post','form');
 				col_init(3,9);
 				input('hidden','id','id');
 				select2(lang('follow_up'),'follow_up','',['[date] System','System and Personal e-mail', 'System & meeting']);
