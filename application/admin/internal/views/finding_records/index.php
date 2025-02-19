@@ -118,7 +118,7 @@ modal_open('modal-form','','modal-lg','data-openCallback="formOpen1"');
 			card_open(lang('auditee'),'mb-2');
 				select2(lang('auditee'),'auditee','required');
 				select2(lang('site_auditee'),'site_auditee','required|infinity',['Head Office (HO)','Factory']);
-				select2(lang('department_auditee'),'id_section_department','required',$department,'id','section_name');
+				select2(lang('section'),'id_section_department','required',$department,'id','section_name');
 				input('text',lang('audit_area'),'audit_area');
 			card_close();
 
