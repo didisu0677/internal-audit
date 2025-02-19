@@ -8,23 +8,15 @@ class Capa_monitoring extends BE_Controller {
 
 	function index() {
 		if(user('id_group') != AUDITEE){
-			$data['department'] = get_data('tbl_m_department',[
+			$data['department'] = get_data('tbl_m_audit_section',[
 				'where' => [
 					'is_active' => 1,
 					'__m' => 'id in (select id_department_auditee from tbl_finding_records)'
 				],
 				])->result_array();
 
-				$dept =[];
-				foreach($data['department'] as $d => $v) {
-					$dept[] = $v['id'];
-				}
-
 				$data['tahun'] = get_data('tbl_finding_records',[
 					'select' => 'distinct year(tgl_mulai_audit) as tahun',
-					'where' => [
-						'id_department_auditee' => $dept
-					]
 				])->result();
 
 		}else{
@@ -36,25 +28,21 @@ class Capa_monitoring extends BE_Controller {
 				],
 			])->row(); 
 
-			$data['department'] = get_data('tbl_m_department',[
+			$data['department'] = get_data('tbl_m_audit_section',[
 				'where' => [
 					'is_active' => 1,
 					'id' => $dept->id_department,
-					'__m' => 'id in (select id_department_auditee from tbl_finding_records)'
+					'__m' => 'id in (select id_divisi from tbl_finding_records)'
 				],
 				])->result_array();
 
-				$dept =[];
-				foreach($data['department'] as $d => $v) {
-					$dept[] = $v['id'];
-				}
+			$data['tahun'] = get_data('tbl_finding_records',[
+				'select' => 'distinct year(tgl_mulai_audit) as tahun',
+				'where' => [
+					'id_divisi' => $dept->id_department
+				]
+			])->result();
 
-				$data['tahun'] = get_data('tbl_finding_records',[
-					'select' => 'distinct year(tgl_mulai_audit) as tahun',
-					'where' => [
-						'id_department_auditee' => $dept
-					]
-				])->result();
 		}
 		render($data);
 	}
@@ -96,7 +84,7 @@ class Capa_monitoring extends BE_Controller {
 		}
 
 		if(post('dept') && post('dept') != 'ALL') {
-			$arr1['where']['a.id_department_auditee'] = post('dept');
+			$arr1['where']['a.id_divisi'] = post('dept');
 		}
 
 		$data['finding'] = get_data('tbl_finding_records a',$arr1)->result();
