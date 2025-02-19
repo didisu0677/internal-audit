@@ -13,7 +13,7 @@ class Finding_records extends BE_Controller {
 			$data['department'] = get_data('tbl_m_audit_section',[
 				'where' => [
 					'is_active' => 1,
-					'__m' => 'id in (select id_department_auditee from tbl_finding_records)'
+					'__m' => 'id in (select id_divisi from tbl_finding_records)'
 				],
 				])->result_array();
 
