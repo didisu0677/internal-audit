@@ -20,29 +20,41 @@ class Capa_monitoring extends BE_Controller {
 				])->result();
 
 		}else{
-			$dept = get_data('tbl_auditee a',[
-				'select' => 'a.nip,a.id_department',
+			$dept = get_data('tbl_detail_auditee a',[
+				'select' => 'a.nip,a.id_department,a.id_section',
 				'join' => 'tbl_user b on a.nip = b.username',
 				'where' => [
 					'a.nip' => user('username') 
-				],
-			])->row(); 
-
-			$data['department'] = get_data('tbl_m_audit_section',[
-				'where' => [
-					'is_active' => 1,
-					'id' => $dept->id_department,
-					'__m' => 'id in (select id_divisi from tbl_finding_records)'
-				],
-				])->result_array();
-
-			$data['tahun'] = get_data('tbl_finding_records',[
-				'select' => 'distinct year(tgl_mulai_audit) as tahun',
-				'where' => [
-					'id_divisi' => $dept->id_department
 				]
 			])->result();
 
+			$arr_d = [];
+			foreach($dept as $d) {
+				$arr_d[] = $d->id_section;
+			}
+
+			// $dept1 = [''];
+
+			// if(!empty($dept->id_department) && isset($dept->id_department)) $dept1 = json_decode($dept->id_department,true);
+
+			$data['department'] = get_data('tbl_m_audit_section a',[
+				'select' => 'b.id as id, b.section_code, b.section_name, b.description',
+				'join' => 'tbl_m_audit_section b on a.parent_id = b.id type LEFT',
+				'where' => [
+					'a.is_active' => 1,
+					'a.id' => $arr_d,
+					'__m' => 'a.id in (select id_section_department from tbl_finding_records)'
+				],
+				])->result_array();
+
+			// debug($data['department']);die;
+
+			$data['tahun'] = get_data('tbl_finding_records',[
+				'select' => 'distinct year(tgl_mulai_audit)',
+				'where' => [
+					'id_section_department' => $arr_d
+				]
+			])->result();
 		}
 		render($data);
 	}
