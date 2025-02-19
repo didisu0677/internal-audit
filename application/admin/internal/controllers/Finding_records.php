@@ -29,22 +29,23 @@ class Finding_records extends BE_Controller {
 				],
 			])->row(); 
 
-			$dept1 = [''];
 
-			if(!empty($dept->id_department) && isset($dept->id_department)) $dept1 = json_decode($dept->id_department,true);
+			// $dept1 = [''];
+
+			// if(!empty($dept->id_department) && isset($dept->id_department)) $dept1 = json_decode($dept->id_department,true);
 
 			$data['department'] = get_data('tbl_m_audit_section',[
 				'where' => [
 					'is_active' => 1,
-					'id' => $dept1,
-					'__m' => 'id in (select id_department_auditee from tbl_finding_records)'
+					'id' => $dept->id_department,
+					'__m' => 'id in (select id_divisi from tbl_finding_records)'
 				],
 				])->result_array();
 
 			$data['tahun'] = get_data('tbl_finding_records',[
 				'select' => 'distinct year(tgl_mulai_audit)',
 				'where' => [
-					'id_department_auditee' => $dept1
+					'id_divisi' => $dept->id_department
 				]
 			])->result();
 		}
