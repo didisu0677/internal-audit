@@ -95,7 +95,7 @@ class Finding_records extends BE_Controller {
 			$config = [
 				'access_edit'	=> true,
 				'access_delete'	=> true,
-				'access_view'	=> true,
+				'access_view'	=> false,
 	   		 ];
 		}
 		$config['join'][] = 'tbl_auditee ON tbl_auditee.id = tbl_finding_records.auditee TYPE LEFT';
