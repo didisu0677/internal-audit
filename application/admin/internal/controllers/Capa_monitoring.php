@@ -84,7 +84,7 @@ class Capa_monitoring extends BE_Controller {
 		}
 
 		if(post('dept') && post('dept') != 'ALL') {
-			$arr1['where']['a.id_divisi'] = post('dept');
+			$arr1['where']['a.id_department_auditee'] = post('dept');
 		}
 
 		$data['finding'] = get_data('tbl_finding_records a',$arr1)->result();
