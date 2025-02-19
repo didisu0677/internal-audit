@@ -50,7 +50,7 @@ class Capa_monitoring extends BE_Controller {
 			// debug($data['department']);die;
 
 			$data['tahun'] = get_data('tbl_finding_records',[
-				'select' => 'distinct year(tgl_mulai_audit)',
+				'select' => 'distinct year(tgl_mulai_audit) as tahun',
 				'where' => [
 					'id_section_department' => $arr_d
 				]
