@@ -42,7 +42,7 @@ modal_open('modal-form','','modal-lg','data-openCallback="openForm"');
 			input('date',lang('tanggal_mulai'),'tanggal_mulai');
 			input('date',lang('tanggal_akhir'),'tanggal_akhir');
 			input('date',lang('tgl_closing_meeting'),'tgl_closing_meeting');
-			select2(lang('department'),'department_auditee[]','required',$department,'id','department','','multiple');
+			select2(lang('section'),'department_auditee[]','required',$department,'id','department','','multiple');
 			toggle(lang('aktif').'?','is_active');
 			form_button(lang('simpan'),lang('batal'));
 		form_close();
