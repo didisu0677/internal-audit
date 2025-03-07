@@ -80,8 +80,9 @@
 		modal_body();
 			form_open(base_url('internal/capa_monitoring/save'),'post','form');
 				col_init(3,9);
-				input('hidden','id','id');
-				// select2(lang('follow_up'),'follow_up','',['[date] System','System and Personal e-mail', 'System & meeting']);
+				input('','id','id');
+				input('','id_finding','id_finding');
+				input('','id_progress','id_progress');
 				?>
 					
 				<div class="form-group row">
@@ -92,30 +93,133 @@
 				</div>
 
 				<div class="form-group row">
-				<label class="col-form-label col-sm-3" for="keterangan_progress"><?php echo (lang('keterangan_progress')); ?></label>		
-				<div class="col-sm-9">
-					<textarea name="keterangan_progress" id="keterangan_progress" class="form-control editor" data-validation="required" rows="1" data-editor="inline"></textarea>
-				</div>
-			</div>
+					<label class="col-form-label col-sm-3" for="keterangan_progress"><?php echo (lang('keterangan_progress')) ; ?></label>		
+					<div class="col-sm-9">
+						<div class="card">
+							<div class="card-body">
+							<ul class="nav nav-tabs" id="myTab" role="tablist">
+								<li class="nav-item">
+									<a class="nav-link active" id="progress-1" data-toggle="tab" href="#progress_1" role="tab" aria-controls="general" aria-selected="true">Progress-1</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link" id="progress-2" data-toggle="tab" href="#progress_2" role="tab" aria-controls="email" aria-selected="true">Progress-2</a>
+								</li>
+								<li class="nav-item">
+									<a class="nav-link" id="progress-3" data-toggle="tab" href="#progress_3" role="tab" aria-controls="email" aria-selected="true">Progress-3</a>
+								</li>
+							</ul>
+								<div class="tab-content" id="myTabContent">
+								<div class="tab-pane fade show active" id="progress_1" role="tabpanel" aria-labelledby="general-tab">
+									<div class="card-header"><b>Keterangan Progress</b></div>
+									<?php 
+									input('','no_progress','1');
+									?>
+									<textarea name="keterangan_progress_1" id="keterangan_progress_1" class="form-control editor" data-validation="required" rows="1" data-editor="inline"></textarea>
+									<br>
+									<div class="form-group row">
+										<label class="col-form-label col-sm-3" for="evidence_base"><?php echo lang('evidence_base'); ?></label>		
+										<div class="col-sm-9">
+											<input type="text" name="evidence_base" id="evidence_base"  data-validation="" data-action="<?php echo base_url('upload/file/datetime'); ?>" data-token="<?php echo encode_id([user('id'),(time() + 900)]); ?>" autocomplete="off" class="form-control input-file" value="" placeholder="<?php echo lang('maksimal'); ?> 5MB">
+										</div>
+									</div>
+									<div class="card-header"><b>Comment Auditor</b></div>
+									<textarea name="comment_progress_1" id="comment_progress_1" class="form-control editor" rows="1" data-editor="inline"></textarea>
+									<?php if(user('id_group') != AUDITEE) { ?>
+									<br>
+									<div id = "status_progress" class="form-group row">
+										<label class="col-form-label col-sm-3" for="status_capa"><?php echo (lang('status_capa')); ?></label>		
+										<div class="col-sm-9">
+											<select class="select2 infinity custom-select" name="status_capa" id="status_capa">
+												<option value="1"><?php echo lang('done') . str_repeat('&nbsp;', 5); ?></option>
+												<option value="0"><?php echo lang('revise') ?></option>
+											</select>
+										</div>
+
+									<?php }; ?>
+									</br>
+
+									</div>
+								</div>
 
 
+									<!-- progress 2 !-->
+									<div class="tab-pane fade" id="progress_2" role="tabpanel" aria-labelledby="email-tab">
+										<div class="card-header"><b>Keterangan Progress</b></div>
+										<?php 
+											input('','no_progress','2');
+										?>
+										<textarea name="keterangan_progress_2" id="keterangan_progress_2" class="form-control editor" data-validation="required" rows="1" data-editor="inline"></textarea>
+									<br>
+									<div class="form-group row">
+										<label class="col-form-label col-sm-3" for="evidence_base"><?php echo lang('evidence_base'); ?></label>		
+										<div class="col-sm-9">
+											<input type="text" name="evidence_base" id="evidence_base"  data-validation="" data-action="<?php echo base_url('upload/file/datetime'); ?>" data-token="<?php echo encode_id([user('id'),(time() + 900)]); ?>" autocomplete="off" class="form-control input-file" value="" placeholder="<?php echo lang('maksimal'); ?> 5MB">
+										</div>
+									</div>
+									<div class="card-header"><b>Comment Auditor</b></div>
+									<textarea name="comment_progress_2" id="comment_progress_2" class="form-control editor" rows="1" data-editor="inline"></textarea>
+									<?php if(user('id_group') != AUDITEE) { ?>
+									<br>
+									<div id = "status_progress" class="form-group row">
+										<label class="col-form-label col-sm-3" for="status_capa"><?php echo (lang('status_capa')); ?></label>		
+										<div class="col-sm-9">
+											<select class="select2 infinity custom-select" name="status_capa" id="status_capa">
+												<option value="1"><?php echo lang('done') . str_repeat('&nbsp;', 5); ?></option>
+												<option value="0"><?php echo lang('revise') ?></option>
+											</select>
+										</div>
 
+									<?php }; ?>
+									</br>
+
+									</div>
+									</div>
+									<!-- !-->
+
+									<!-- progress 3 !-->
+									<div class="tab-pane fade" id="progress_3" role="tabpanel" aria-labelledby="email-tab">
+										<div class="card-header"><b>Keterangan Progress</b></div>
+										<?php 
+											input('','no_progress','3');
+										?>
+										<textarea name="keterangan_progress_3" id="keterangan_progress_3" class="form-control editor" data-validation="required" rows="1" data-editor="inline"></textarea>
+									<br>
+									<div class="form-group row">
+										<label class="col-form-label col-sm-3" for="evidence_base"><?php echo lang('evidence_base'); ?></label>		
+										<div class="col-sm-9">
+											<input type="text" name="evidence_base" id="evidence_base"  data-validation="" data-action="<?php echo base_url('upload/file/datetime'); ?>" data-token="<?php echo encode_id([user('id'),(time() + 900)]); ?>" autocomplete="off" class="form-control input-file" value="" placeholder="<?php echo lang('maksimal'); ?> 5MB">
+										</div>
+									</div>
+									<div class="card-header"><b>Comment Auditor</b></div>
+									<textarea name="comment_progress_3" id="comment_progress_3" class="form-control editor" rows="1" data-editor="inline"></textarea>
+									<?php if(user('id_group') != AUDITEE) { ?>
+									<br>
+									<div id = "status_progress" class="form-group row">
+										<label class="col-form-label col-sm-3" for="status_capa"><?php echo (lang('status_capa')); ?></label>		
+										<div class="col-sm-9">
+											<select class="select2 infinity custom-select" name="status_capa" id="status_capa">
+												<option value="1"><?php echo lang('done') . str_repeat('&nbsp;', 5); ?></option>
+												<option value="0"><?php echo lang('revise') ?></option>
+											</select>
+										</div>
+
+									<?php }; ?>
+									</br>
+
+									</div>
+									</div>
+									<!-- !-->
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>		
 			<div class="form-group row">
-			<label class="col-form-label col-sm-3"><?php echo lang('evidence') ?><small><?php echo lang('maksimal'); ?> 5MB</small></label>
-			<div class="col-sm-9">
-				<button type="button" class="btn btn-info" id="add-file" title="<?php echo lang('tambah_dokumen'); ?>"><?php echo lang('tambah_dokumen'); ?></button>
 			</div>
-			</div>
-			<div id="additional-file" class="mb-2"></div>
+
 			<?php
 
-				checkbox_group(lang('status_capa'));
-					checkbox(lang('delivered'),'akses_view',1, 'disabled checked');
-					checkbox(lang('on-progress'),'akses_input',1);
-					checkbox(lang('done'),'akses_edit',1);
-					checkbox(lang('pending'),'akses_delete',1);
-					checkbox(lang('cancle'),'akses_additional',1);
-					checkbox(lang('deadline_exceeded'),'deadline_exceeded',1);
+
 
 				form_button(lang('simpan'),lang('batal'));
 			form_close();
@@ -133,6 +237,10 @@
 <script type="text/javascript">
 
 $(document).ready(function(){
+	// $("#progress-2, #progress-3").parent().hide(); 
+	for (const instance in CKEDITOR.instances) {
+        CKEDITOR.instances[instance].setReadOnly(true);
+    }
 	getData();
 });
 
@@ -176,6 +284,13 @@ function formOpen() {
 	var response = response_edit;
 	if(typeof response.id != 'undefined') {
 		CKEDITOR.instances['isi_capa'].setData(decodeEntities(response.isi_capa));
+		$('#id_progress').val(0);
+		$.each(response.progress,function(k,v){
+			var x = parseInt(k);
+			if( x < 1) {
+				
+			}
+		});
 	} 
 }
 

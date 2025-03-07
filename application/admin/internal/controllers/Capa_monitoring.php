@@ -65,8 +65,6 @@ class Capa_monitoring extends BE_Controller {
 	// }
 
 	function data() {
-
-
 		$arr            = [
 			'select'    => 'a.*,b.periode_audit, b.nama_auditor, b.finding,b.bobot_finding, c.department, d.nama as pic, e.status as status_capa', 
 			'join'      =>  ['tbl_finding_records b on a.id_finding = b.id type LEFT',
@@ -100,8 +98,6 @@ class Capa_monitoring extends BE_Controller {
 		}
 
 		$data['finding'] = get_data('tbl_finding_records a',$arr1)->result();
-
-
 		render($data,'layout:false');
 
 	}
@@ -109,6 +105,13 @@ class Capa_monitoring extends BE_Controller {
 
 	function get_data() {
 		$data = get_data('tbl_capa','id',post('id'))->row_array();
+		$progress = get_data('tbl_capa_progress',[
+			'where' => [
+				'id_capa' => $data['id'],
+				'id_finding' => $data['id_finding']
+			],
+		])->result();
+
 		render($data,'json');
 	}
 	function detail($id='') {
@@ -131,7 +134,19 @@ class Capa_monitoring extends BE_Controller {
 	}
 
 	function save() {
+
+		debug(post());die;
 		$response = save_data('tbl_capa',post(),post(':validation'));
+		if($response['status'] == 'success') {
+
+			$cek = get_data('tbl_capa_progress',[
+				'id_capa' =>$data['id_capa']
+
+			])->row();
+
+			save_data('tbl_capa_progress',$data_progress);
+		}
+
 		render($response,'json');
 	}
 
