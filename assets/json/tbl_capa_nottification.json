@@ -1,0 +1,16 @@
+{
+    "field": {
+        "id": "primary_key",
+        "number_reminder": "int",
+        "nottification": "text",
+        "is_active": "boolean"
+    },
+    "label": {
+        "id": "Id",
+        "number_reminder": "Number Reminder",
+        "nottification": "Nottification",
+        "is_active": "Aktif"
+    },
+    "validation": [],
+    "alias": []
+}

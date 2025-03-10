@@ -105,12 +105,13 @@ class Capa_monitoring extends BE_Controller {
 
 	function get_data() {
 		$data = get_data('tbl_capa','id',post('id'))->row_array();
-		$progress = get_data('tbl_capa_progress',[
+		$data['progress'] = get_data('tbl_capa_progress',[
 			'where' => [
 				'id_capa' => $data['id'],
 				'id_finding' => $data['id_finding']
 			],
 		])->result();
+
 
 		render($data,'json');
 	}
@@ -134,16 +135,70 @@ class Capa_monitoring extends BE_Controller {
 	}
 
 	function save() {
+		$data = post();
 
-		debug(post());die;
-		$response = save_data('tbl_capa',post(),post(':validation'));
+		if($data['activeTab'] == 'progress-1'){
+			$status_capa = $data['status_capa1'];
+		}elseif($data('activeTab') == 1){
+			$status_capa = $data['status_capa2'];
+		}else{
+			$status_capa = $data['status_capa3'];
+		}
+
+		
+
+		if($data['activeTab'] == 'progress-1' && $status_capa == 0) {
+			$data['progress_ke'] = 2;
+		}elseif($data['activeTab'] == 'progress-1' && $status_capa== 1) {
+			$data['progress_ke'] = 1;
+		}elseif($data['activeTab'] == 2 && $status_capa == 0) {
+			$data['progress_ke'] = 3;
+		}elseif($data['activeTab'] == 2 && $status_capa == 1) {
+			$data['progress_ke'] = 2 ;
+		}elseif($data['activeTab'] == 3 && $status_capa == 0) {
+			$data['progress_ke'] = 3;
+		}elseif($data['activeTab'] == 3 && $status_capa == 1) {
+			$data['progress_ke'] = 3;
+		}else{
+			$data['progress_ke'] = 0;
+		};
+
+
+		$response = save_data('tbl_capa',$data,post(':validation'));
+
 		if($response['status'] == 'success') {
 
-			$cek = get_data('tbl_capa_progress',[
-				'id_capa' =>$data['id_capa']
+			$data_progress = [
+				'id' => 0,
+				'id_capa' => $data['id'],
+				'id_finding' => $data['id_finding'],
+				'is_active' => 1,
+				'status' => $status_capa
+			];
 
+
+			if($data['no_progress1'] == '1' && strip_tags($data['keterangan_progress_1']) != '-'){
+				$data_progress['progress'] = $data['keterangan_progress_1'];
+				$data_progress['comment'] = $data['comment_progress_1'];
+				$data_progress['no_progress'] = $data['no_progress1'];
+			}elseif($data['no_progress2'] == '2' && strip_tags($data['keterangan_progress_2']) != '-'){
+				$data_progress['progress'] = $data['keterangan_progress_2'];
+				$data_progress['comment'] = $data['comment_progress_2'];
+				$data_progress['no_progress'] = $data['no_progress2'];
+			}elseif($data_progress['no_progress3'] == '3' && strip_tags($data['keterangan_progress_3']) != '-'){;
+				$data_progress['progress'] = $data['keterangan_progress_3'];
+				$data_progress['comment'] = $data['comment_progress_3'];
+				$data_progress['no_progress'] = $data['no_progress3'];
+			};
+			
+			$cek = get_data('tbl_capa_progress',[
+				'id_capa' =>$data_progress['id_capa'],
+				'id_finding' => $data_progress['id_finding'],
+				'no_progress' => $data_progress['no_progress'] 
 			])->row();
 
+			if(!empty($cek)) $data_progress['id'] = $cek->id;
+	
 			save_data('tbl_capa_progress',$data_progress);
 		}
 
@@ -204,6 +259,35 @@ class Capa_monitoring extends BE_Controller {
 		];
 		$this->load->library('simpleexcel',$config);
 		$this->simpleexcel->export();
+	}
+
+	function capa_nottification() {
+
+		$cek_capa = get_data('tbl_capa',[
+			'where' => [
+					'id' => post('id'),
+				],
+		])->row();
+
+		if(empty($cek_capa)) {
+			$response = [
+				'status' => 'success',
+				'message' => 'tidak ada capa yang due date',
+			];
+			render($response,'json');
+		}else{
+
+			$data = array(
+				'subject'	=> 'Notification Capa Progress',
+				'message'	=> 'Reminder CAPA Mohon untuk segera follow up' . ' ' . $cek_capa->isi_capa,
+				'to'		=> 'dsuherdi@ho.otsuka.co.id',
+			);
+
+			$response = send_mail($data);
+			render($response,'json');
+	
+		
+		}
 	}
 
 }

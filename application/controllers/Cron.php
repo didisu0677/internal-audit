@@ -36,4 +36,8 @@ class Cron extends MY_Controller {
         }
     }
 
+    function capa_nottification (){
+
+        
+    }
 }

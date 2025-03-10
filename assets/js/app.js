@@ -32,7 +32,7 @@ $.ajaxSetup({
 		if($('[data-editor]').length > 0 && typeof window.CKEDITOR != 'undefined' && _ajax_last_uri != 'data' && _ajax_last_uri != 'check_table') {
 			$('[data-editor]').each(function(){
 				if(typeof CKEDITOR.instances[$(this).attr('id')] != 'undefined') {
-					CKEDITOR.instances[$(this).attr('id')].setReadOnly(false);
+					// CKEDITOR.instances[$(this).attr('id')].setReadOnly(false);
 				}
 			});
 		}
@@ -634,7 +634,7 @@ $(function(){
 		if($(this).find('[data-editor]').length > 0 && typeof window.CKEDITOR != 'undefined') {
 			$(this).find('[data-editor]').each(function(){
 				if(typeof CKEDITOR.instances[$(this).attr('id')] != 'undefined') {
-					CKEDITOR.instances[$(this).attr('id')].setReadOnly(false);
+					// CKEDITOR.instances[$(this).attr('id')].setReadOnly(false);
 				}
 			});
 		}

@@ -76,19 +76,20 @@
 </div>
     
 <?php 
-	modal_open('modal-form','','modal-xl','data-openCallback="formOpen"');
+	modal_open('modal-form','Progress Capa','modal-xl','data-openCallback="formOpen"');
 		modal_body();
 			form_open(base_url('internal/capa_monitoring/save'),'post','form');
 				col_init(3,9);
-				input('','id','id');
-				input('','id_finding','id_finding');
-				input('','id_progress','id_progress');
+				input('hidden','id','id');
+				input('hidden','id_finding','id_finding');
+				input('hidden','id_progress','id_progress');
+				input('','activeTab','activeTab');
 				?>
 					
 				<div class="form-group row">
 					<label class="col-form-label col-sm-3" for="isi_capa"><?php echo (lang('capa_plan')); ?></label>	
 					<div class="col-sm-9">
-						<textarea name="isi_capa[]" id="isi_capa" class="form-control editor" data-validation="required" rows="1" data-editor="inline"></textarea>
+						<textarea name="isi_capa" id="isi_capa" class="form-control editor" data-validation="required" rows="1" data-editor="inline"></textarea>
 					</div>
 				</div>
 
@@ -112,9 +113,9 @@
 								<div class="tab-pane fade show active" id="progress_1" role="tabpanel" aria-labelledby="general-tab">
 									<div class="card-header"><b>Keterangan Progress</b></div>
 									<?php 
-									input('','no_progress','1');
+									input('hidden','no_progress1','no_progress1','','1');
 									?>
-									<textarea name="keterangan_progress_1" id="keterangan_progress_1" class="form-control editor" data-validation="required" rows="1" data-editor="inline"></textarea>
+									<textarea name="keterangan_progress_1" id="keterangan_progress_1" class="form-control editor" data-validation="required" rows="4" data-editor="inline"></textarea>
 									<br>
 									<div class="form-group row">
 										<label class="col-form-label col-sm-3" for="evidence_base"><?php echo lang('evidence_base'); ?></label>		
@@ -123,15 +124,15 @@
 										</div>
 									</div>
 									<div class="card-header"><b>Comment Auditor</b></div>
-									<textarea name="comment_progress_1" id="comment_progress_1" class="form-control editor" rows="1" data-editor="inline"></textarea>
+									<textarea name="comment_progress_1" id="comment_progress_1" class="form-control editor" rows="4" data-editor="inline"></textarea>
 									<?php if(user('id_group') != AUDITEE) { ?>
 									<br>
 									<div id = "status_progress" class="form-group row">
-										<label class="col-form-label col-sm-3" for="status_capa"><?php echo (lang('status_capa')); ?></label>		
+										<label class="col-form-label col-sm-3" for="status_capa1"><?php echo (lang('status_capa')); ?></label>		
 										<div class="col-sm-9">
-											<select class="select2 infinity custom-select" name="status_capa" id="status_capa">
+											<select class="select2 infinity custom-select" name="status_capa1" id="status_capa1">
 												<option value="1"><?php echo lang('done') . str_repeat('&nbsp;', 5); ?></option>
-												<option value="0"><?php echo lang('revise') ?></option>
+												<option value="0"><?php echo lang('progress') ?></option>
 											</select>
 										</div>
 
@@ -146,9 +147,9 @@
 									<div class="tab-pane fade" id="progress_2" role="tabpanel" aria-labelledby="email-tab">
 										<div class="card-header"><b>Keterangan Progress</b></div>
 										<?php 
-											input('','no_progress','2');
+										input('hidden','no_progress2','no_progress2','','2');
 										?>
-										<textarea name="keterangan_progress_2" id="keterangan_progress_2" class="form-control editor" data-validation="required" rows="1" data-editor="inline"></textarea>
+										<textarea name="keterangan_progress_2" id="keterangan_progress_2" class="form-control editor" data-validation="required" rows="4" data-editor="inline"></textarea>
 									<br>
 									<div class="form-group row">
 										<label class="col-form-label col-sm-3" for="evidence_base"><?php echo lang('evidence_base'); ?></label>		
@@ -157,13 +158,13 @@
 										</div>
 									</div>
 									<div class="card-header"><b>Comment Auditor</b></div>
-									<textarea name="comment_progress_2" id="comment_progress_2" class="form-control editor" rows="1" data-editor="inline"></textarea>
+									<textarea name="comment_progress_2" id="comment_progress_2" class="form-control editior" rows="4" data-editor="inline"></textarea>
 									<?php if(user('id_group') != AUDITEE) { ?>
 									<br>
 									<div id = "status_progress" class="form-group row">
-										<label class="col-form-label col-sm-3" for="status_capa"><?php echo (lang('status_capa')); ?></label>		
+										<label class="col-form-label col-sm-3" for="status_capa2"><?php echo (lang('status_capa')); ?></label>		
 										<div class="col-sm-9">
-											<select class="select2 infinity custom-select" name="status_capa" id="status_capa">
+											<select class="select2 infinity custom-select" name="status_capa2" id="status_capa2">
 												<option value="1"><?php echo lang('done') . str_repeat('&nbsp;', 5); ?></option>
 												<option value="0"><?php echo lang('revise') ?></option>
 											</select>
@@ -180,9 +181,9 @@
 									<div class="tab-pane fade" id="progress_3" role="tabpanel" aria-labelledby="email-tab">
 										<div class="card-header"><b>Keterangan Progress</b></div>
 										<?php 
-											input('','no_progress','3');
+										input('hidden','no_progress3','no_progress3','','3');
 										?>
-										<textarea name="keterangan_progress_3" id="keterangan_progress_3" class="form-control editor" data-validation="required" rows="1" data-editor="inline"></textarea>
+										<textarea name="keterangan_progress_3" id="keterangan_progress_3" class="form-control editor" data-validation="required" rows="4" data-editor="inline"></textarea>
 									<br>
 									<div class="form-group row">
 										<label class="col-form-label col-sm-3" for="evidence_base"><?php echo lang('evidence_base'); ?></label>		
@@ -191,13 +192,13 @@
 										</div>
 									</div>
 									<div class="card-header"><b>Comment Auditor</b></div>
-									<textarea name="comment_progress_3" id="comment_progress_3" class="form-control editor" rows="1" data-editor="inline"></textarea>
+									<textarea name="comment_progress_3" id="comment_progress_3" class="form-control editor" rows="4" data-editor="inline"></textarea>
 									<?php if(user('id_group') != AUDITEE) { ?>
 									<br>
 									<div id = "status_progress" class="form-group row">
-										<label class="col-form-label col-sm-3" for="status_capa"><?php echo (lang('status_capa')); ?></label>		
+										<label class="col-form-label col-sm-3" for="status_capa3"><?php echo (lang('status_capa')); ?></label>		
 										<div class="col-sm-9">
-											<select class="select2 infinity custom-select" name="status_capa" id="status_capa">
+											<select class="select2 infinity custom-select" name="status_capa3" id="status_capa3">
 												<option value="1"><?php echo lang('done') . str_repeat('&nbsp;', 5); ?></option>
 												<option value="0"><?php echo lang('revise') ?></option>
 											</select>
@@ -236,11 +237,19 @@
 
 <script type="text/javascript">
 
+$('#myTab a').on('click', function (e) {
+            var activeTabId = $(this).attr('id');
+            $('#activeTab').val(activeTabId);
+        });
+
 $(document).ready(function(){
-	// $("#progress-2, #progress-3").parent().hide(); 
-	for (const instance in CKEDITOR.instances) {
-        CKEDITOR.instances[instance].setReadOnly(true);
-    }
+	$("#progress-2, #progress-3").hide();
+
+	var activeTabId = $('#myTab .nav-link.active').attr('id');  // Get the ID of the currently active tab
+    
+    // Set the value of the hidden input to the active tab's ID
+    $('#activeTab').val(activeTabId);
+
 	getData();
 });
 
@@ -282,13 +291,92 @@ function getData() {
 
 function formOpen() {	
 	var response = response_edit;
+	var activeTabId = $('#myTab .nav-link.active').attr('id');  
+    $('#activeTab').val(activeTabId);
+
+	// CKEDITOR.instances['keterangan_progress_1'].setReadOnly(false);
+	// CKEDITOR.instances['comment_progress_1'].setReadOnly(false);
+	CKEDITOR.instances['keterangan_progress_2'].setData('-');
+	CKEDITOR.instances['keterangan_progress_3'].setData('-');
 	if(typeof response.id != 'undefined') {
 		CKEDITOR.instances['isi_capa'].setData(decodeEntities(response.isi_capa));
 		$('#id_progress').val(0);
+
+		$("#progress-1, #progress-2, #progress-3").hide();  
+		if(response.progress_ke == 1) {
+			$("#progress-1").show();
+			$('#progress-2').click();
+			$('#progress-1').addClass('active');
+			$('#progress-2,#progress-3').removeClass('active')
+			CKEDITOR.instances['keterangan_progress_1'].setReadOnly(false);
+			CKEDITOR.instances['comment_progress_1'].setReadOnly(false);
+
+			CKEDITOR.instances['keterangan_progress_2'].setReadOnly(true);
+			CKEDITOR.instances['comment_progress_2'].setReadOnly(true);
+
+			CKEDITOR.instances['keterangan_progress_3'].setReadOnly(true);
+			CKEDITOR.instances['comment_progress_3'].setReadOnly(true);
+		} else if(response.progress_ke == 2) {
+			$("#progress-1, #progress-2").show();
+			$('#progress-2').addClass('active');
+			$('#progress-2').click();
+			$('#progress-1,#progress-3').removeClass('active')
+
+			CKEDITOR.instances['keterangan_progress_1'].setReadOnly(true);
+			CKEDITOR.instances['comment_progress_1'].setReadOnly(true);
+			CKEDITOR.instances['keterangan_progress_2'].setReadOnly(false);
+			CKEDITOR.instances['comment_progress_2'].setReadOnly(false);
+			CKEDITOR.instances['keterangan_progress_3'].setReadOnly(true);
+			CKEDITOR.instances['comment_progress_3'].setReadOnly(true);
+
+		} else if (response.progress_ke == 3) {
+			$("#progress-1, #progress-2, #progress-3").show();
+			$('#progress-3').addClass('active');
+			$('#progress-3').click();
+			$('#progress-1,#progress-2').removeClass('active')
+
+			CKEDITOR.instances['keterangan_progress_3'].setReadOnly(false);
+			CKEDITOR.instances['comment_progress_3'].setReadOnly(false);
+
+			CKEDITOR.instances['keterangan_progress_1'].setReadOnly(true);
+			CKEDITOR.instances['comment_progress_1'].setReadOnly(true);
+			CKEDITOR.instances['keterangan_progress_2'].setReadOnly(true);
+			CKEDITOR.instances['comment_progress_2'].setReadOnly(true);
+		} else {
+			$("#progress-1").show();
+			$('#progress-1').addClass('active');
+			$('#progress-2,#progress-3').removeClass('active')
+
+			CKEDITOR.instances['keterangan_progress_1'].setReadOnly(false);
+			CKEDITOR.instances['keterangan_progress_2'].setReadOnly(true);
+			CKEDITOR.instances['comment_progress_1'].setReadOnly(false);
+			CKEDITOR.instances['comment_progress_2'].setReadOnly(true);
+		}
+
+		CKEDITOR.instances['keterangan_progress_1'].setData('');
+		CKEDITOR.instances['comment_progress_1'].setData('');
+		CKEDITOR.instances['keterangan_progress_2'].setData('');
+		CKEDITOR.instances['comment_progress_2'].setData('');
+		CKEDITOR.instances['keterangan_progress_3'].setData('');
+		CKEDITOR.instances['comment_progress_3'].setData('');
+
 		$.each(response.progress,function(k,v){
-			var x = parseInt(k);
-			if( x < 1) {
-				
+			if( v.no_progress == '1' ) {
+				CKEDITOR.instances['keterangan_progress_1'].setData(decodeEntities(v.progress));
+				CKEDITOR.instances['comment_progress_1'].setData(decodeEntities(v.comment));
+			}else if(v.no_progress == '2' ){
+				CKEDITOR.instances['keterangan_progress_2'].setData(decodeEntities(v.progress));
+				CKEDITOR.instances['comment_progress_2'].setData(decodeEntities(v.comment));
+			}else if(v.no_progress == '3' ) {
+				CKEDITOR.instances['keterangan_progress_3'].setData(decodeEntities(v.progress));
+				CKEDITOR.instances['comment_progress_3'].setData(decodeEntities(v.comment));
+			}else{
+				CKEDITOR.instances['keterangan_progress_1'].setData('');
+				CKEDITOR.instances['comment_progress_1'].setData('');
+				CKEDITOR.instances['keterangan_progress_2'].setData('');
+				CKEDITOR.instances['comment_progress_2'].setData('');
+				CKEDITOR.instances['keterangan_progress_3'].setData('');
+				CKEDITOR.instances['comment_progress_3'].setData('');
 			}
 		});
 	} 
@@ -312,5 +400,24 @@ $(document).on('click','.btn-act-export',function(e){
             jenis_bantuan : $('#jenis_bantuan').val(),
             } , 'get');
 	});
+
+
+var id_email = 0;
+$(document).on('click','.btn-send-reminder',function(e){
+	e.preventDefault();
+	id_email = $(this).attr('data-id');
+	cConfirm.open(lang.apakah_anda_yakin + '?','lanjut');
+});
+function lanjut() {
+	$.ajax({
+		url : base_url + 'internal/capa_monitoring/capa_nottification',
+		data : {id:id_email},
+		type : 'post',
+		dataType : 'json',
+		success : function(res) {
+			cAlert.open(res.message,res.status,'refreshData');
+		}
+	});
+}
 
 </script>

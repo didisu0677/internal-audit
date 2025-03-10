@@ -505,5 +505,8 @@
     "section_code": "Section Code",
     "section_name": "Section Name",
     "group_section": "Group Section",
-    "id_group_section": "Id Group Section"
+    "id_group_section": "Id Group Section",
+    "number_reminder": "Number Reminder",
+    "nottification": "Nottification",
+    "days_nottification" : "Days Nottification"
 }
