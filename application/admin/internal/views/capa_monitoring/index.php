@@ -123,16 +123,30 @@
 											<input type="text" name="evidence_base" id="evidence_base"  data-validation="" data-action="<?php echo base_url('upload/file/datetime'); ?>" data-token="<?php echo encode_id([user('id'),(time() + 900)]); ?>" autocomplete="off" class="form-control input-file" value="" placeholder="<?php echo lang('maksimal'); ?> 5MB">
 										</div>
 									</div>
-									<div class="card-header"><b>Comment Auditor</b></div>
-									<textarea name="comment_progress_1" id="comment_progress_1" class="form-control editor" rows="4" data-editor="inline"></textarea>
+
+									<?php 
+										if(user('id_group') == AUDITEE) {
+											$data_editor = "";
+											$editor = "";
+										}else{
+											$data_editor = "inline";
+											$editor = "editor";
+										}
+									?>
 									<?php if(user('id_group') != AUDITEE) { ?>
+									
+									<div class="card-header"><b>Comment Auditor</b></div>
+									<textarea name="comment_progress_1" id="comment_progress_1" class="form-control <?php echo $editor ;?>" rows="4" data-editor="<?php echo $data_editor;?>"></textarea>
+									
 									<br>
 									<div id = "status_progress" class="form-group row">
 										<label class="col-form-label col-sm-3" for="status_capa1"><?php echo (lang('status_capa')); ?></label>		
 										<div class="col-sm-9">
 											<select class="select2 infinity custom-select" name="status_capa1" id="status_capa1">
-												<option value="1"><?php echo lang('done') . str_repeat('&nbsp;', 5); ?></option>
-												<option value="0"><?php echo lang('progress') ?></option>
+												<?php foreach($status_cp as $u) { 
+													echo '<option value="'.$u['id'].'" data-value="'.$u['status'].'">'.$u['status'].'</option>';
+												}
+												?>
 											</select>
 										</div>
 
@@ -164,10 +178,10 @@
 									<div id = "status_progress" class="form-group row">
 										<label class="col-form-label col-sm-3" for="status_capa2"><?php echo (lang('status_capa')); ?></label>		
 										<div class="col-sm-9">
-											<select class="select2 infinity custom-select" name="status_capa2" id="status_capa2">
-												<option value="1"><?php echo lang('done') . str_repeat('&nbsp;', 5); ?></option>
-												<option value="0"><?php echo lang('revise') ?></option>
-											</select>
+												<?php foreach($status_cp as $u) { 
+													echo '<option value="'.$u['id'].'" data-value="'.$u['status'].'">'.$u['status'].'</option>';
+												}
+												?>
 										</div>
 
 									<?php }; ?>
@@ -198,10 +212,10 @@
 									<div id = "status_progress" class="form-group row">
 										<label class="col-form-label col-sm-3" for="status_capa3"><?php echo (lang('status_capa')); ?></label>		
 										<div class="col-sm-9">
-											<select class="select2 infinity custom-select" name="status_capa3" id="status_capa3">
-												<option value="1"><?php echo lang('done') . str_repeat('&nbsp;', 5); ?></option>
-												<option value="0"><?php echo lang('revise') ?></option>
-											</select>
+												<?php foreach($status_cp as $u) { 
+													echo '<option value="'.$u['id'].'" data-value="'.$u['status'].'">'.$u['status'].'</option>';
+												}
+												?>
 										</div>
 
 									<?php }; ?>
@@ -293,7 +307,6 @@ function formOpen() {
 	var response = response_edit;
 	var activeTabId = $('#myTab .nav-link.active').attr('id');  
     $('#activeTab').val(activeTabId);
-
 	// CKEDITOR.instances['keterangan_progress_1'].setReadOnly(false);
 	// CKEDITOR.instances['comment_progress_1'].setReadOnly(false);
 	CKEDITOR.instances['keterangan_progress_2'].setData('-');
@@ -308,6 +321,10 @@ function formOpen() {
 			$('#progress-2').click();
 			$('#progress-1').addClass('active');
 			$('#progress-2,#progress-3').removeClass('active')
+
+			CKEDITOR.instances['keterangan_progress_2'].setData('-');
+			CKEDITOR.instances['keterangan_progress_3'].setData('-');
+			
 			CKEDITOR.instances['keterangan_progress_1'].setReadOnly(false);
 			CKEDITOR.instances['comment_progress_1'].setReadOnly(false);
 
@@ -346,6 +363,8 @@ function formOpen() {
 			$("#progress-1").show();
 			$('#progress-1').addClass('active');
 			$('#progress-2,#progress-3').removeClass('active')
+			CKEDITOR.instances['keterangan_progress_2'].setData('-');
+			CKEDITOR.instances['keterangan_progress_3'].setData('-');
 
 			CKEDITOR.instances['keterangan_progress_1'].setReadOnly(false);
 			CKEDITOR.instances['keterangan_progress_2'].setReadOnly(true);

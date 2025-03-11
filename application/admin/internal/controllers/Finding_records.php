@@ -435,8 +435,13 @@ class Finding_records extends BE_Controller {
 
 			$response = save_data('tbl_capa',$data,post(':validation'));
 
-			if($id_capa[$i] != 0)
+			if($response['status'] == 'success') {
+				update_data('tbl_finding_records',['status_finding'=>1],['id'=>$data['id_finding']]);
+			};
+			
+			if($id_capa[$i] != 0) 
 			delete_data('tbl_capa',['nomor not' =>$nomor, 'id_finding' =>$data['id_finding'], 'nomor !=' => '']);
+			
 		}
 
 		render($response,'json');

@@ -7,6 +7,14 @@ class Capa_monitoring extends BE_Controller {
 	}
 
 	function index() {
+		$data['status_cp'] = get_data('tbl_status_capa',[
+			'where' => [
+				'is_active' => 1,
+				'id !=' => 1
+			],
+			])->result_array(); 
+
+			
 		if(user('id_group') != AUDITEE){
 			$data['department'] = get_data('tbl_m_audit_section',[
 				'where' => [
@@ -145,19 +153,20 @@ class Capa_monitoring extends BE_Controller {
 			$status_capa = $data['status_capa3'];
 		}
 
+		$data['status_capa'] = $status_capa;
 		
 
-		if($data['activeTab'] == 'progress-1' && $status_capa == 0) {
+		if($data['activeTab'] == 'progress-1' && $status_capa != 3) {
 			$data['progress_ke'] = 2;
-		}elseif($data['activeTab'] == 'progress-1' && $status_capa== 1) {
+		}elseif($data['activeTab'] == 'progress-1' && $status_capa== 3) {
 			$data['progress_ke'] = 1;
-		}elseif($data['activeTab'] == 2 && $status_capa == 0) {
+		}elseif($data['activeTab'] == 2 && $status_capa != 3) {
 			$data['progress_ke'] = 3;
-		}elseif($data['activeTab'] == 2 && $status_capa == 1) {
+		}elseif($data['activeTab'] == 2 && $status_capa == 3) {
 			$data['progress_ke'] = 2 ;
-		}elseif($data['activeTab'] == 3 && $status_capa == 0) {
+		}elseif($data['activeTab'] == 3 && $status_capa != 3) {
 			$data['progress_ke'] = 3;
-		}elseif($data['activeTab'] == 3 && $status_capa == 1) {
+		}elseif($data['activeTab'] == 3 && $status_capa == 3) {
 			$data['progress_ke'] = 3;
 		}else{
 			$data['progress_ke'] = 0;

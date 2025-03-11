@@ -40,7 +40,7 @@
 				th(lang('finding_description') . ' description','','data-content="finding"');
 				th(lang('bobot'),'','data-content="bobot_finding"');
 				// th(lang('bobot_finding'),'','data-content="bobot_finding"');
-				th(lang('status'),'','data-content="status_finding" data-badge="warna_status" data-replace="0:Open|1:Close"');
+				th(lang('status'),'','data-content="status_finding" data-badge="warna_status" data-replace="0:Open|1:Delivered|2:Closed"');
 
 
 				// th(lang('capa'),'','data-content="capa"');

@@ -94,7 +94,7 @@ class Set_nottification extends BE_Controller {
 			'where' => [
 				'id_status_capa !=' => 9,
 				'__m' => 'dateline_capa <= CURDATE() - INTERVAL '.$notif->days_nottification.' DAY',
-				'nomor' => '0003/CAPA.12/2024',
+				// 'nomor' => '0003/CAPA.12/2024',
 			],
 		])->result();
 
