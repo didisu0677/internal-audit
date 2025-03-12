@@ -1,0 +1,14 @@
+{
+    "field": {
+        "id": "primary_key",
+        "internal_control": "text",
+        "is_active": "boolean"
+    },
+    "label": {
+        "id": "Id",
+        "internal_control": "Internal Control",
+        "is_active": "Aktif"
+    },
+    "validation": [],
+    "alias": []
+}

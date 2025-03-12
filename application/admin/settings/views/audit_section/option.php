@@ -11,7 +11,7 @@ foreach($audit_section[0] as $m0) {
 						option($m2->id,'&nbsp; &nbsp; &nbsp; |-----'.$m2->section_code .' - '.$m2->section_name);
                         foreach($audit_section[$m2->id] as $m3) {
                             if($m3->is_active != 0) {
-                                option($m3->id,'&nbsp; &nbsp; &nbsp; &nbsp; |-----'.$m3->section_code .' aa- '.$m3->section_name);
+                                option($m3->id,'&nbsp; &nbsp; &nbsp; &nbsp; |-----'.$m3->section_code .' - '.$m3->section_name);
                             }
                         }
                     }	

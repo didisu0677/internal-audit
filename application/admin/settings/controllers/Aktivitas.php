@@ -11,9 +11,28 @@ class Aktivitas extends BE_Controller {
 	}
 
 	function data() {
-		$data = data_serverside();
-		render($data,'json');
+		$arr            = [
+	        'select'	=> '*',
+	        'where'     => [
+	            'a.is_active' => 1,
+	        ],
+	    ];
+
+	    $data['grup'][0]= get_data('tbl_aktivitas a',$arr)->result();
+        $data['risk'] = get_data('tbl_risk_register','is_active',1)->result_array(); 
+		$data['section'] = get_data('tbl_m_audit_section',[
+			'where' => [
+				'is_active' => 1,
+				'id_group_section' => 5
+			]
+		])->result_array();
+
+        $response	= array(
+            'table'		=> $this->load->view('settings/aktivitas/table',$data,true),
+        );
+	    render($response,'json');
 	}
+	
 
 	function get_data() {
 		$data = get_data('tbl_aktivitas','id',post('id'))->row_array();
@@ -21,7 +40,42 @@ class Aktivitas extends BE_Controller {
 	}
 
 	function save() {
-		$response = save_data('tbl_aktivitas',post(),post(':validation'));
+		$section = post('section');
+		$risk = post('risk');
+
+		if(!empty($section) || !empty($risk)){
+
+			if(is_array($section)) {
+				foreach($section as $p => $v){
+					// debug(json_encode($v,true));die;
+					update_data('tbl_aktivitas',
+						['id_section' => json_encode($v,true)],
+						['id'=>$p]
+					);
+				}
+			}
+
+			if(is_array($risk)) {
+				foreach($risk as $r => $s){
+					// debug(json_encode($v,true));die;
+					update_data('tbl_aktivitas',
+						['id_risk' => json_encode($s,true)],
+						['id'=>$r]
+					);
+				}
+			}
+
+			$response = [
+				'status'	=> 'success',
+				'message'	=> lang('data_berhasil_disimpan')
+			];
+
+		}else{
+			$response = [
+				'status' => 'info',
+				'message' => 'Tidak ada data yang di setting'
+			];
+		}
 		render($response,'json');
 	}
 
@@ -32,7 +86,7 @@ class Aktivitas extends BE_Controller {
 
 	function template() {
 		ini_set('memory_limit', '-1');
-		$arr = ['company' => 'company','site_auditee' => 'site_auditee','id_divisi_auditee' => 'id_divisi_auditee','id_department_auditee' => 'id_department_auditee','id_section_auditee' => 'id_section_auditee','aktivitas' => 'aktivitas','audit_area' => 'audit_area','id_type_aktivitas' => 'id_type_aktivitas','is_active' => 'is_active'];
+		$arr = ['aktivitas' => 'aktivitas','is_active' => 'is_active'];
 		$config[] = [
 			'title' => 'template_import_aktivitas',
 			'header' => $arr,
@@ -44,7 +98,7 @@ class Aktivitas extends BE_Controller {
 	function import() {
 		ini_set('memory_limit', '-1');
 		$file = post('fileimport');
-		$col = ['company','site_auditee','id_divisi_auditee','id_department_auditee','id_section_auditee','aktivitas','audit_area','id_type_aktivitas','is_active'];
+		$col = ['aktivitas','is_active'];
 		$this->load->library('simpleexcel');
 		$this->simpleexcel->define_column($col);
 		$jml = $this->simpleexcel->read($file);
@@ -70,7 +124,7 @@ class Aktivitas extends BE_Controller {
 
 	function export() {
 		ini_set('memory_limit', '-1');
-		$arr = ['company' => 'Company','site_auditee' => 'Site Auditee','id_divisi_auditee' => 'Id Divisi Auditee','id_department_auditee' => 'Id Department Auditee','id_section_auditee' => 'Id Section Auditee','aktivitas' => 'Aktivitas','audit_area' => 'Audit Area','id_type_aktivitas' => 'Id Type Aktivitas','is_active' => 'Aktif'];
+		$arr = ['aktivitas' => 'Aktivitas','is_active' => 'Aktif'];
 		$data = get_data('tbl_aktivitas')->result_array();
 		$config = [
 			'title' => 'data_aktivitas',

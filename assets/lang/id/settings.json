@@ -508,5 +508,7 @@
     "id_group_section": "Id Group Section",
     "number_reminder": "Number Reminder",
     "nottification": "Nottification",
-    "days_nottification" : "Days Nottification"
+    "days_nottification" : "Days Nottification",
+    "audit_section" : "Audit Section",
+    "risk" : "Risk"
 }

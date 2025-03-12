@@ -1,16 +1,32 @@
-<div class="content-header">
+<div class="content-header page-data">
 	<div class="main-container position-relative">
 		<div class="header-info">
 			<div class="content-title"><?php echo $title; ?></div>
 			<?php echo breadcrumb(); ?>
 		</div>
-		<div class="float-right">
-			<?php echo '<button class="btn btn-success btn-save" href="javascript:;" ><i class="fa-save"></i> Save</button>';?>
-			<?php echo access_button('export,import'); ?>
+		
+		<div class="float-right">   		
+    		<?php 
+			echo '<button class="btn btn-success btn-save" href="javascript:;" ><i class="fa-save"></i> Save</button>';
+
+			// $arr = [];
+			// $arr = [
+			// 	['btn-save','Save Data','fa-save'],
+			// 	// ['btn-export','Export Data','fa-upload'],
+			// 	// ['btn-import','Import Data','fa-download' ],
+			// 	// ['btn-template','Template Import','fa-reg-file-alt']
+			// ];
+		
+		
+			// echo access_button('',$arr); 
+
+			?>
+    		</div>
+			<div class="clearfix"></div>
+			
 		</div>
-		<div class="clearfix"></div>
 	</div>
-</div>
+
 <div class="content-body mt-6">
 
 	<div class="main-container mt-2">
@@ -19,7 +35,7 @@
 			<div class="col-sm-12">
 
 				<div class="card">
-				<form id="form-aktivitas" action="<?php echo base_url('settings/aktivitas/save'); ?>" data-callback="reload" method="post" data-submit="ajax">
+				<form id="form-control" action="<?php echo base_url('risk/risk_matrik/save_perubahan'); ?>" data-callback="reload" method="post" data-submit="ajax">
 
 	    			<div class="card-body">
 	    				<div class="table-responsive tab-pane fade active show height-window">
@@ -27,9 +43,8 @@
 						table_open('table table-bordered table-app table-hover table-1');
 							thead();
 								tr();
-									th(lang('aktivitas'),'','class="text-center align-middle headcol"');
-									th(lang('audit_section'),'','class="text-center align-middle headcol"');
 									th(lang('risk'),'','class="text-center align-middle headcol"');
+									th(lang('internal_control'),'','class="text-center align-middle headcol"');
 									
 							tbody();
 						table_close();
@@ -53,35 +68,16 @@
 	</div>
 	
 </div>
-<?php 
-// modal_open('modal-form');
-// 	modal_body();
-// 		form_open(base_url('settings/aktivitas/save'),'post','form');
-// 			col_init(3,9);
-// 			input('hidden','id','id');
-// 			input('text',lang('company'),'company');
-// 			input('text',lang('site_auditee'),'site_auditee');
-// 			input('text',lang('id_divisi_auditee'),'id_divisi_auditee');
-// 			input('text',lang('id_department_auditee'),'id_department_auditee');
-// 			input('text',lang('id_section_auditee'),'id_section_auditee');
-// 			input('text',lang('aktivitas'),'aktivitas');
-// 			input('text',lang('audit_area'),'audit_area');
-// 			input('text',lang('id_type_aktivitas'),'id_type_aktivitas');
-// 			toggle(lang('aktif').'?','is_active');
-// 			form_button(lang('simpan'),lang('batal'));
-// 		form_close();
-// 	modal_footer();
-// modal_close();
+<?php
 modal_open('modal-import',lang('impor'));
 	modal_body();
-		form_open(base_url('settings/aktivitas/import'),'post','form-import');
+		form_open(base_url('transaction/usulan_besaran/import_core'),'post','form-import');
 			col_init(3,9);
-			fileupload('File Excel','fileimport','required','data-accept="xls|xlsx"');
+
 			form_button(lang('impor'),lang('batal'));
 		form_close();
 modal_close();
 ?>
-
 <script type="text/javascript">
 
 
@@ -89,13 +85,10 @@ $(document).ready(function () {
 	getData();
 });	
 
-
-
 function getData() {
-
 	// cLoader.open(lang.memuat_data + '...');
 	$('.overlay-wrap').removeClass('hidden');
-	var page = base_url + 'settings/aktivitas/data';
+	var page = base_url + 'risk/risk_matrik/data';
 		page 	+= '/'+$('#filter_tahun').val();
 
 
@@ -146,7 +139,7 @@ $(function(){
 });
 
 $(document).on('click','.btn-save',function(){
-	$('#form-aktivitas').submit();
+	$('#form-control').submit();
 });
 
 </script>
