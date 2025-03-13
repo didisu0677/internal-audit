@@ -145,33 +145,33 @@ class Capa_monitoring extends BE_Controller {
 	function save() {
 		$data = post();
 
+		$status_capa = '';
 		if($data['activeTab'] == 'progress-1'){
 			$status_capa = $data['status_capa1'];
-		}elseif($data('activeTab') == 1){
+		}elseif($data['activeTab'] == 'progress-2'){
 			$status_capa = $data['status_capa2'];
 		}else{
 			$status_capa = $data['status_capa3'];
 		}
 
 		$data['status_capa'] = $status_capa;
-		
 
+		
 		if($data['activeTab'] == 'progress-1' && $status_capa != 3) {
 			$data['progress_ke'] = 2;
 		}elseif($data['activeTab'] == 'progress-1' && $status_capa== 3) {
 			$data['progress_ke'] = 1;
-		}elseif($data['activeTab'] == 2 && $status_capa != 3) {
+		}elseif($data['activeTab'] == 'progress-2' && $status_capa != 3) {
 			$data['progress_ke'] = 3;
-		}elseif($data['activeTab'] == 2 && $status_capa == 3) {
+		}elseif($data['activeTab'] == 'progress-2' && $status_capa == 3) {
 			$data['progress_ke'] = 2 ;
-		}elseif($data['activeTab'] == 3 && $status_capa != 3) {
+		}elseif($data['activeTab'] == 'progress-3' && $status_capa != 3) {
 			$data['progress_ke'] = 3;
-		}elseif($data['activeTab'] == 3 && $status_capa == 3) {
+		}elseif($data['activeTab'] == 'progress-3' && $status_capa == 3) {
 			$data['progress_ke'] = 3;
 		}else{
 			$data['progress_ke'] = 0;
 		};
-
 
 		$response = save_data('tbl_capa',$data,post(':validation'));
 
@@ -186,27 +186,33 @@ class Capa_monitoring extends BE_Controller {
 			];
 
 
-			if($data['no_progress1'] == '1' && strip_tags($data['keterangan_progress_1']) != '-'){
+			if($data['activeTab'] == 'progress-1'){
 				$data_progress['progress'] = $data['keterangan_progress_1'];
 				$data_progress['comment'] = $data['comment_progress_1'];
 				$data_progress['no_progress'] = $data['no_progress1'];
-			}elseif($data['no_progress2'] == '2' && strip_tags($data['keterangan_progress_2']) != '-'){
+			}elseif($data['activeTab'] == 'progress-2'){
 				$data_progress['progress'] = $data['keterangan_progress_2'];
 				$data_progress['comment'] = $data['comment_progress_2'];
 				$data_progress['no_progress'] = $data['no_progress2'];
-			}elseif($data_progress['no_progress3'] == '3' && strip_tags($data['keterangan_progress_3']) != '-'){;
+			}else{;
 				$data_progress['progress'] = $data['keterangan_progress_3'];
 				$data_progress['comment'] = $data['comment_progress_3'];
 				$data_progress['no_progress'] = $data['no_progress3'];
 			};
 			
 			$cek = get_data('tbl_capa_progress',[
-				'id_capa' =>$data_progress['id_capa'],
-				'id_finding' => $data_progress['id_finding'],
-				'no_progress' => $data_progress['no_progress'] 
+				'where' => [
+					'id_capa' =>$data_progress['id_capa'],
+					'id_finding' => $data_progress['id_finding'],
+					'no_progress' => $data_progress['no_progress'] 
+				],
 			])->row();
 
-			if(!empty($cek)) $data_progress['id'] = $cek->id;
+			if(!isset($cek->id)) {
+				$data_progress['id'] = 0;
+			}else{
+				$data_progress['id'] = $cek->id;
+			} 
 	
 			save_data('tbl_capa_progress',$data_progress);
 		}

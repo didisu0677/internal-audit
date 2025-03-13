@@ -80,10 +80,10 @@
 		modal_body();
 			form_open(base_url('internal/capa_monitoring/save'),'post','form');
 				col_init(3,9);
-				input('','id','id');
-				input('','id_finding','id_finding');
+				input('hidden','id','id');
+				input('hidden','id_finding','id_finding');
 				input('hidden','id_progress','id_progress');
-				input('','activeTab','activeTab');
+				input('hidden','activeTab','activeTab');
 				?>
 					
 				<div class="form-group row">
@@ -147,9 +147,9 @@
 									<div class="tab-pane fade" id="progress_2" role="tabpanel" aria-labelledby="email-tab">
 										<div class="card-header"><b>Keterangan Progress</b></div>
 										<?php 
-										input('hidden','no_progress2','no_progress2','','1');
+										input('hidden','no_progress2','no_progress2','','2');
 										?>
-										<textarea name="keterangan_progress_2" id="keterangan_progress_2" class="form-control xxeditor" data-validation="required" rows="4" xxdata-editor="inline"></textarea>
+										<textarea name="keterangan_progress_2" id="keterangan_progress_2" class="form-control xxeditor" data-validation="" rows="4" xxdata-editor="inline"></textarea>
 										<br>
 										<div class="form-group row">
 											<label class="col-form-label col-sm-3" for="evidence_base"><?php echo lang('evidence_base'); ?> 22</label>        
@@ -182,9 +182,9 @@
 									<div class="tab-pane fade" id="progress_3" role="tabpanel" aria-labelledby="email-tab">
 										<div class="card-header"><b>Keterangan Progress</b></div>
 										<?php 
-										input('hidden','no_progress3','no_progress3','','1');
+										input('hidden','no_progress3','no_progress3','','3');
 										?>
-										<textarea name="keterangan_progress_3" id="keterangan_progress_3" class="form-control xxeditor" data-validation="required" rows="4" xxdata-editor="inline"></textarea>
+										<textarea name="keterangan_progress_3" id="keterangan_progress_3" class="form-control xxeditor" data-validation="" rows="4" xxdata-editor="inline"></textarea>
 										<br>
 										<div class="form-group row">
 											<label class="col-form-label col-sm-3" for="evidence_base"><?php echo lang('evidence_base'); ?></label>        
@@ -315,32 +315,40 @@ function formOpen() {
 			$("#progress-3").click();
 		} else {
 			$("#progress-1").show();
-			$('#progress-1').addClass('active');
-			$('#progress-2, #progress-3').removeClass('active');
 			$('#progress-1').tab('show'); 
 		}
 
-
+		let progressField1 = '';
+		let progressField2 = '';
+		let progressField3 = '';
+		let commentField1 = '';
+		let commentField2 = '';
+		let commentField3 = '';
 		$.each(response.progress, function(k, v) {
 			// Kosongkan semua field terlebih dahulu
-			$("#keterangan_progress_1").val('');
-			$("#keterangan_progress_2").val('');
-			$("#keterangan_progress_3").val('');
 
 			// Tentukan progressField berdasarkan no_progress
-			let progressField = null;
+
 			if (v.no_progress == 1) {
-				progressField = $("#keterangan_progress_1");
+				progressField1 = v.progress;
+				commentField1 = v.comment;
 			} else if (v.no_progress == 2) {
-				progressField = $("#keterangan_progress_2");
+				progressField2 = v.progress;
+				commentField2 = v.comment;
 			} else if (v.no_progress == 3) {
-				progressField = $("#keterangan_progress_3");
+				progressField3 = v.progress;
+				commentField3 = v.comment;
 			}
 
 			// Set nilai progressField
-			if (progressField) {
-				progressField.val(v.progress);
-			}
+			$("#keterangan_progress_1").val(progressField1);
+			$("#keterangan_progress_2").val(progressField2);
+			$("#keterangan_progress_3").val(progressField3);
+
+			$("#comment_progress_1").val(commentField1);
+			$("#comment_progress_2").val(commentField2);
+			$("#comment_progress_3").val(commentField3);
+
 		});
 
 	} 
