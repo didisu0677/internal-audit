@@ -306,20 +306,13 @@ function formOpen() {
 
 		if(response.progress_ke == 1) {
 			$("#progress-1").show();
-			$('#progress-1').addClass('active');
-			$('#progress-2, #progress-3').removeClass('active');
-			$('#progress-1').tab('show'); 
+			$("#progress-1").click();
 		} else if(response.progress_ke == 2) {
-			$("#progress-1, #progress-2").show();
-			$('#progress-2').addClass('active');
-			$('#progress-1, #progress-3').removeClass('active');
-			$('#progress-2').trigger('click'); 
-			$('#progress-2').tab('show'); 
+			$("#progress-1, #progress-2").show()
+			$("#progress-2").click();
 		} else if(response.progress_ke == 3) {
 			$("#progress-1, #progress-2, #progress-3").show();
-			$('#progress-3').addClass('active');
-			$('#progress-1, #progress-2').removeClass('active');
-			$('#progress-3').tab('show'); 
+			$("#progress-3").click();
 		} else {
 			$("#progress-1").show();
 			$('#progress-1').addClass('active');
