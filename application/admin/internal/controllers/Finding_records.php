@@ -265,9 +265,9 @@ class Finding_records extends BE_Controller {
 				]
 			])->result();
 
-			$data['auditee']    = '';
+			$data['auditee1']    = '';
 			foreach($cb_auditee as $d) {
-				$data['auditee'] .= '<option value="'.$d->id.'"
+				$data['auditee1'] .= '<option value="'.$d->id.'"
 				>'.$d->nama.'</option>';
 			}
 		}
@@ -285,26 +285,6 @@ class Finding_records extends BE_Controller {
 			],
 			])->row_array();
 
-			// debug($data);die;
-
-			$pic	= get_data('tbl_user a',[
-				'select'	=> 'a.*',
-				'join' => 'tbl_auditee b on a.username = b.nip type LEFT',
-				'where'		=> [
-					'a.is_active' => 1,
-					'b.id_department' => $data['id_divisi'],
-				], 
-				'sort_by'	=> 'id'
-			])->result();
-
-
-			$data['pic_capa']    = '<option value=""></option>';
-			foreach($pic as $d) {
-				$data['pic_capa'] .= '<option value="'.$d->id.'"
-				data-nama="'.$d->nama.'"
-				>'.$d->nama.'</option>';
-			}
-
 			$data['detail']	= get_data('tbl_capa',[
 				'select'	=> '*',
 				'where' 	=> [
@@ -314,13 +294,15 @@ class Finding_records extends BE_Controller {
 			])->result_array();
 
 
-			$data['user']	= get_data('tbl_user a',[
-				'join' => 'tbl_auditee b on a.username = b.nip type LEFT',
+			$data['user']	= get_data('tbl_detail_auditee a',[
+				'select' => 'distinct b.username,b.nama',
+				'join' => 'tbl_user b on a.nip = b.username type LEFT',
 				'where'	=> [
-					'a.is_active'	=> 1,
-					'b.id_department' => $data['id_divisi']
+					'b.is_active'	=> 1,
+					'a.id_section' => $data['id_section_department']
 				]
 			])->result_array();
+
 
 		render($data,'json');
 	}

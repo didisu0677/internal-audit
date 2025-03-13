@@ -369,9 +369,10 @@ $(document).on('click','.btn-capa',function(){
 					// var konten = '<a href ="'+base_url+'assets/uploads/rekanan/'+response.id_vendor+'/'+v.file+'" target="_blank"><i class="fa-download"></i></a>';
 					
 					// $('#file'+ x).val(v.file) ;
-
+					console.log('ok');
+					$('#username').val(v.pic_capa).trigger('change');
 				} else {
-					addPasal(v.nomor,v.id,v.isi_capa,v.dateline_capa,'',v.isi_capa,'','');
+					addPasal(v.nomor,v.id,v.isi_capa,v.dateline_capa,'',v.isi_capa,v.pic_capa);
 				}
 
 				setTimeout(function(){
@@ -540,13 +541,14 @@ function formOpen1() {
 	get_department();
 	
 	if(typeof response.id != 'undefined') {
-
 		$('#periode_audit').html(response.nomor_schedule).trigger('change');
 		$('#id').val(response.id);
     	$('#id_finding_records').val(response.id);
 		get_department();
 		$('#auditor').val(response.auditor).trigger('change');
-		$('#uditee').val(response.auditee).trigger('change');
+
+		view_auditee(response.auditee);
+		// $('#auditee option[value="'+ response.auditee +'"]').prop('selected', true).trigger('change');
 
 		$('#id_department_auditee').html('<option value=""></option><option value="'+response.id_department_auditee+'">'+response.department+'</option>').trigger('change');
 		$('#id_department_auditee').val(response.id_department_auditee).trigger('change');
@@ -570,6 +572,7 @@ function formOpen1() {
 			},300);
 		});
 
+		view_auditee(response.auditee);
 
 	} else {
 		view_combo();
@@ -706,11 +709,15 @@ function addPasal(nomor,id_capa,isi_capa,tanggal_berlaku,file,lampiran, pic) {
 	if(_isi_capa) $('#isi_capa' + idx).val(_isi_capa);
 	if(_tanggal_berlaku) $('#due_date' + idx).val(_tanggal_berlaku);
 	if(_lampiran) $('#lampiran' + idx).val(_lampiran);
+	if(_pic) $('#username' + idx).val(_pic).trigger('change');
+
 	if(_file) $('#file' + idx).val(_file);
 	if(_isi_capa) {
 		$('#isi_capa' + idx).val(_isi_capa);
 		CKEDITOR.instances['isi_capa'+idx].setData(decodeEntities(_isi_capa));
 	}
+
+
 	idx++;
 	initUploadFile();
 }
@@ -839,16 +846,20 @@ function get_department() {
 }
 
 function get_auditee() {
+	console.log('ok');
 	readonly_ajax = false;
 	$.ajax({
 		url : base_url + 'internal/finding_records/get_auditee',
 		data : {id : $('#periode_audit').val()},
 		type : 'POST',
 		success	: function(response) {
-			$('#auditee').html(response.auditee).trigger('change');
+			$('#auditee').html(response.auditee1).trigger('change');
+			$('#auditee').val(response_edit.auditee).trigger('change');
 			readonly_ajax = true;
 		}
 	});
 }
+
+
 
 </script>
