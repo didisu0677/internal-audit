@@ -290,7 +290,7 @@ class Finding_records extends BE_Controller {
 				'where' 	=> [
 					'id_finding'   => post('id')
 				],
-				'sort_by'  => 'nomor',
+				'sort_by'  => 'id',
 			])->result_array();
 
 

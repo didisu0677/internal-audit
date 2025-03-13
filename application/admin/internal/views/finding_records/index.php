@@ -60,7 +60,7 @@ modal_open('modal-form','','modal-lg','data-openCallback="formOpen1"');
 		form_open(base_url('internal/finding_records/save'),'post','form');
 			col_init(3,9);
 			for($i=0; $i < 1; $i++) { 
-			input('','id','id');
+			input('hidden','id','id');
 			card_open(lang('info_audit'),'mb-2');
 				select2(lang('periode_audit'),'periode_audit','required');
 				// input('text',lang('institusi_audit'),'institusi_audit');
@@ -128,7 +128,7 @@ modal_open('modal-form','','modal-lg','data-openCallback="formOpen1"');
 
 				<label class="col-form-label col-sm-3" for="bobot_finding"><?php echo lang('bobot_finding'); ?></label>
 				<div class="col-sm-9">
-				<select class="select2" name="bobot_finding[]" id="bobot_finding" required>
+				<select class="select2" name="bobot_finding" id="bobot_finding" required>
 						<option value=""></option>
 						<option value="Critical">Critical</option>
 						<option value="Major">Major</option>
@@ -547,7 +547,6 @@ function formOpen1() {
 		get_department();
 		$('#auditor').val(response.auditor).trigger('change');
 
-		view_auditee(response.auditee);
 		// $('#auditee option[value="'+ response.auditee +'"]').prop('selected', true).trigger('change');
 
 		$('#id_department_auditee').html('<option value=""></option><option value="'+response.id_department_auditee+'">'+response.department+'</option>').trigger('change');
