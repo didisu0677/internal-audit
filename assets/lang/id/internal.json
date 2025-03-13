@@ -63,5 +63,6 @@
     "add_finding" : "Add Finding",
     "section" : "Section",
     "evidence_base" : "Evidence Base",
-    "revise" : "Revise"
+    "revise" : "Revise",
+    "download" : "Download"
 }

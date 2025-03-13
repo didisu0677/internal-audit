@@ -55,7 +55,7 @@
 </div>
 <?php 
 
-modal_open('modal-form','','modal-lg','data-openCallback="formOpen1"');
+modal_open('modal-form','Finding','modal-xl','data-openCallback="formOpen1"');
 	modal_body();
 		form_open(base_url('internal/finding_records/save'),'post','form');
 			col_init(3,9);
@@ -149,7 +149,7 @@ modal_open('modal-form','','modal-lg','data-openCallback="formOpen1"');
 					<input type="text" name="file_finding[]" id="file_finding <?php echo $i; ?>"  data-validation="" data-action="<?php echo base_url('upload/file/datetime'); ?>" data-token="<?php echo encode_id([user('id'),(time() + 900)]); ?>" autocomplete="off" class="form-control input-file" value="" placeholder="<?php echo lang('maksimal'); ?> 5MB">
 				</div>
 				<div class="input-group-append">
-					<button class="btn btn-secondary btn-file" type="button"><?php echo lang('unggah'); ?></button>
+					<button class="btn btn-secondary btn-file" type="button"><?php echo lang('download'); ?></button>
 				</div>
 			</div>
 
@@ -185,7 +185,7 @@ modal_open('modal-form','','modal-lg','data-openCallback="formOpen1"');
 modal_close();
 
 // capa //
-modal_open('modal-capa','','modal-xl','data-openCallback="formOpen"');
+modal_open('modal-capa','CAPA Plan','modal-xl','data-openCallback="formOpen"');
 	modal_body('wizard');
 		form_open(base_url('internal/finding_records/save_capa'),'post','form-capa'); ?>
 		
@@ -213,7 +213,7 @@ modal_open('modal-capa','','modal-xl','data-openCallback="formOpen"');
 									<input type="text" name="file[]" id="file<?php echo $i; ?>" data-validation="" data-action="<?php echo base_url('upload/file/datetime'); ?>" data-token="<?php echo encode_id([user('id'),(time() + 900)]); ?>" autocomplete="off" class="form-control input-file" value="" placeholder="<?php echo lang('maksimal'); ?> 5MB">
 								</div>
 								<div class="input-group-append">
-									<button class="btn btn-secondary btn-file" type="button"><?php echo lang('unggah'); ?></button>
+									<button class="btn btn-secondary btn-file" type="button"><?php echo lang('download'); ?></button>
 								</div>
 						</div>
 						<?php
@@ -268,7 +268,7 @@ modal_open('modal-capa','','modal-xl','data-openCallback="formOpen"');
 							</div>
 
 							<div class="input-group-append">
-								<button class="btn btn-secondary btn-file" type="button"><?php echo lang('unggah'); ?></button>
+								<button class="btn btn-secondary btn-file" type="button"><?php echo lang('download'); ?></button>
 							</div>
 						</div>	
 					</div>
@@ -661,7 +661,7 @@ function addPasal(nomor,id_capa,isi_capa,tanggal_berlaku,file,lampiran, pic) {
 				+ '</div>'
 
 			+ '<div class="input-group-append">'
-			+ '<button class="btn btn-secondary btn-file" type="button"><?php echo lang('unggah'); ?></button>'
+			+ '<button class="btn btn-secondary btn-file" type="button"><?php echo lang('download'); ?></button>'
 			+ '</div>'
 			+ '</div>'
 		+ '</div>'
@@ -763,7 +763,7 @@ function addFinding(id_finding_records,bobot_finding,file,lampiran, isi_finding)
 				+ '</div>'
 
 			+ '<div class="input-group-append">'
-			+ '<button class="btn btn-secondary btn-file" type="button"><?php echo lang('unggah'); ?></button>'
+			+ '<button class="btn btn-secondary btn-file" type="button"><?php echo lang('download'); ?></button>'
 			+ '</div>'
 			+ '</div>'
 
