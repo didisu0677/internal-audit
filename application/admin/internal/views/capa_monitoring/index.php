@@ -80,8 +80,8 @@
 		modal_body();
 			form_open(base_url('internal/capa_monitoring/save'),'post','form');
 				col_init(3,9);
-				input('hidden','id','id');
-				input('hidden','id_finding','id_finding');
+				input('','id','id');
+				input('','id_finding','id_finding');
 				input('hidden','id_progress','id_progress');
 				input('','activeTab','activeTab');
 				?>
@@ -152,7 +152,7 @@
 										<textarea name="keterangan_progress_2" id="keterangan_progress_2" class="form-control xxeditor" data-validation="required" rows="4" xxdata-editor="inline"></textarea>
 										<br>
 										<div class="form-group row">
-											<label class="col-form-label col-sm-3" for="evidence_base"><?php echo lang('evidence_base'); ?></label>        
+											<label class="col-form-label col-sm-3" for="evidence_base"><?php echo lang('evidence_base'); ?> 22</label>        
 											<div class="col-sm-9">
 												<input type="text" name="evidence_base" id="evidence_base"  data-validation="" data-action="<?php echo base_url('upload/file/datetime'); ?>" data-token="<?php echo encode_id([user('id'),(time() + 900)]); ?>" autocomplete="off" class="form-control input-file" value="" placeholder="<?php echo lang('maksimal'); ?> 5MB">
 											</div>
@@ -248,6 +248,12 @@ $(document).ready(function(){
     // Set the value of the hidden input to the active tab's ID
     $('#activeTab').val(activeTabId);
 
+	$('.tab, nav-item, nav-tabs').click(function() {
+		// Tindakan yang terjadi saat tab diklik, misalnya:
+		var targetContent = $(this).data('target'); // Mendapatkan konten berdasarkan data target
+		$(targetContent).show().siblings().hide(); // Menampilkan konten yang sesuai, sembunyikan yang lain
+	});
+
 	getData();
 });
 
@@ -292,37 +298,61 @@ function formOpen() {
 	var activeTabId = $('#myTab .nav-link.active').attr('id');  
     $('#activeTab').val(activeTabId);
 	if(typeof response.id != 'undefined') {
+		CKEDITOR.instances['isi_capa'].setReadOnly(true);
 		CKEDITOR.instances['isi_capa'].setData(decodeEntities(response.isi_capa));
 		$('#id_progress').val(0);
 
 		$("#progress-1, #progress-2, #progress-3").hide();  
+
 		if(response.progress_ke == 1) {
 			$("#progress-1").show();
-			$('#progress-2').click();
 			$('#progress-1').addClass('active');
-			$('#progress-2,#progress-3').removeClass('active')
+			$('#progress-2, #progress-3').removeClass('active');
+			$('#progress-1').tab('show'); 
 		} else if(response.progress_ke == 2) {
 			$("#progress-1, #progress-2").show();
 			$('#progress-2').addClass('active');
-			$('#progress-2').click();
-			$('#progress-1,#progress-3').removeClass('active')
-		} else if (response.progress_ke == 3) {
+			$('#progress-1, #progress-3').removeClass('active');
+			$('#progress-2').trigger('click'); 
+			$('#progress-2').tab('show'); 
+		} else if(response.progress_ke == 3) {
 			$("#progress-1, #progress-2, #progress-3").show();
 			$('#progress-3').addClass('active');
-			$('#progress-3').click();
-			$('#progress-1,#progress-2').removeClass('active')
+			$('#progress-1, #progress-2').removeClass('active');
+			$('#progress-3').tab('show'); 
 		} else {
 			$("#progress-1").show();
 			$('#progress-1').addClass('active');
-			$('#progress-2,#progress-3').removeClass('active')
+			$('#progress-2, #progress-3').removeClass('active');
+			$('#progress-1').tab('show'); 
 		}
 
-		$.each(response.progress,function(k,v){
-			
+
+		$.each(response.progress, function(k, v) {
+			// Kosongkan semua field terlebih dahulu
+			$("#keterangan_progress_1").val('');
+			$("#keterangan_progress_2").val('');
+			$("#keterangan_progress_3").val('');
+
+			// Tentukan progressField berdasarkan no_progress
+			let progressField = null;
+			if (v.no_progress == 1) {
+				progressField = $("#keterangan_progress_1");
+			} else if (v.no_progress == 2) {
+				progressField = $("#keterangan_progress_2");
+			} else if (v.no_progress == 3) {
+				progressField = $("#keterangan_progress_3");
+			}
+
+			// Set nilai progressField
+			if (progressField) {
+				progressField.val(v.progress);
+			}
 		});
 
 	} 
 }
+
 
 $(document).on('click','.btn-detail',function(){
 	__id = $(this).attr('data-id');
