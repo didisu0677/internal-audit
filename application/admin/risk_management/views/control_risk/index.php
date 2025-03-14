@@ -12,11 +12,11 @@
 </div>
 <div class="content-body">
 	<?php
-	table_open('',true,base_url('risk/risk_register/data'),'tbl_risk_register');
+	table_open('',true,base_url('risk_management/control_risk/data'),'tbl_internal_control');
 		thead();
 			tr();
 				th('checkbox','text-center','width="30" data-content="id"');
-				th(lang('risk'),'','data-content="risk"');
+				th(lang('internal_control'),'','data-content="internal_control"');
 				th(lang('aktif').'?','text-center','data-content="is_active" data-type="boolean"');
 				th('&nbsp;','','width="30" data-content="action_button"');
 	table_close();
@@ -25,10 +25,10 @@
 <?php 
 modal_open('modal-form');
 	modal_body();
-		form_open(base_url('risk/risk_register/save'),'post','form');
+		form_open(base_url('risk_management/control_risk/save'),'post','form');
 			col_init(3,9);
 			input('hidden','id','id');
-			textarea(lang('risk'),'risk');
+			textarea(lang('internal_control'),'internal_control');
 			toggle(lang('aktif').'?','is_active');
 			form_button(lang('simpan'),lang('batal'));
 		form_close();
@@ -36,7 +36,7 @@ modal_open('modal-form');
 modal_close();
 modal_open('modal-import',lang('impor'));
 	modal_body();
-		form_open(base_url('risk/risk_register/import'),'post','form-import');
+		form_open(base_url('risk_management/control_risk/import'),'post','form-import');
 			col_init(3,9);
 			fileupload('File Excel','fileimport','required','data-accept="xls|xlsx"');
 			form_button(lang('impor'),lang('batal'));

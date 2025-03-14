@@ -35,7 +35,7 @@
 			<div class="col-sm-12">
 
 				<div class="card">
-				<form id="form-control" action="<?php echo base_url('risk/risk_matrik/save_perubahan'); ?>" data-callback="reload" method="post" data-submit="ajax">
+				<form id="form-control" action="<?php echo base_url('risk_management/risk_matrik/save_perubahan'); ?>" data-callback="reload" method="post" data-submit="ajax">
 
 	    			<div class="card-body">
 	    				<div class="table-responsive tab-pane fade active show height-window">
@@ -88,7 +88,7 @@ $(document).ready(function () {
 function getData() {
 	// cLoader.open(lang.memuat_data + '...');
 	$('.overlay-wrap').removeClass('hidden');
-	var page = base_url + 'risk/risk_matrik/data';
+	var page = base_url + 'risk_management/risk_matrik/data';
 		page 	+= '/'+$('#filter_tahun').val();
 
 

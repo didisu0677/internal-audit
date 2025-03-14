@@ -19,7 +19,7 @@
 			<div class="col-sm-12">
 
 				<div class="card">
-				<form id="form-aktivitas" action="<?php echo base_url('settings/aktivitas/save'); ?>" data-callback="reload" method="post" data-submit="ajax">
+				<form id="form-aktivitas" action="<?php echo base_url('risk_management/aktivitas/save'); ?>" data-callback="reload" method="post" data-submit="ajax">
 
 	    			<div class="card-body">
 	    				<div class="table-responsive tab-pane fade active show height-window">
@@ -56,7 +56,7 @@
 <?php 
 // modal_open('modal-form');
 // 	modal_body();
-// 		form_open(base_url('settings/aktivitas/save'),'post','form');
+// 		form_open(base_url('risk_management/aktivitas/save'),'post','form');
 // 			col_init(3,9);
 // 			input('hidden','id','id');
 // 			input('text',lang('company'),'company');
@@ -74,7 +74,7 @@
 // modal_close();
 modal_open('modal-import',lang('impor'));
 	modal_body();
-		form_open(base_url('settings/aktivitas/import'),'post','form-import');
+		form_open(base_url('risk_management/aktivitas/import'),'post','form-import');
 			col_init(3,9);
 			fileupload('File Excel','fileimport','required','data-accept="xls|xlsx"');
 			form_button(lang('impor'),lang('batal'));
@@ -95,7 +95,7 @@ function getData() {
 
 	// cLoader.open(lang.memuat_data + '...');
 	$('.overlay-wrap').removeClass('hidden');
-	var page = base_url + 'settings/aktivitas/data';
+	var page = base_url + 'risk_management/aktivitas/data';
 		page 	+= '/'+$('#filter_tahun').val();
 
 

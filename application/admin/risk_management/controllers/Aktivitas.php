@@ -28,7 +28,7 @@ class Aktivitas extends BE_Controller {
 		])->result_array();
 
         $response	= array(
-            'table'		=> $this->load->view('settings/aktivitas/table',$data,true),
+            'table'		=> $this->load->view('risk_management/aktivitas/table',$data,true),
         );
 	    render($response,'json');
 	}

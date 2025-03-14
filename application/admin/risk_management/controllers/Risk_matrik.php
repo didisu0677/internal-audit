@@ -36,7 +36,7 @@ class Risk_matrik extends BE_Controller {
       
     //    debug($data['cc']);die;
         $response	= array(
-            'table'		=> $this->load->view('risk/risk_matrik/table',$data,true),
+            'table'		=> $this->load->view('risk_management/risk_matrik/table',$data,true),
         );
 	    render($response,'json');
 	}
