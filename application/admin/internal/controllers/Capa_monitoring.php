@@ -144,34 +144,37 @@ class Capa_monitoring extends BE_Controller {
 
 	function save() {
 		$data = post();
+		if(user('id_group') != AUDITEE) { 
+			$status_capa = '';
+			if($data['activeTab'] == 'progress-1'){
+				$status_capa = $data['status_capa1'];
+			}elseif($data['activeTab'] == 'progress-2'){
+				$status_capa = $data['status_capa2'];
+			}else{
+				$status_capa = $data['status_capa3'];
+			}
 
-		$status_capa = '';
-		if($data['activeTab'] == 'progress-1'){
-			$status_capa = $data['status_capa1'];
-		}elseif($data['activeTab'] == 'progress-2'){
-			$status_capa = $data['status_capa2'];
-		}else{
-			$status_capa = $data['status_capa3'];
-		}
-
-		$data['status_capa'] = $status_capa;
-
+			$data['id_status_capa'] = $status_capa;
+			unset($data['tanggal1']) ;
+			unset($data['tanggal2']) ;
+			unset($data['tanggal3']) ;
 		
-		if($data['activeTab'] == 'progress-1' && $status_capa != 3) {
-			$data['progress_ke'] = 2;
-		}elseif($data['activeTab'] == 'progress-1' && $status_capa== 3) {
-			$data['progress_ke'] = 1;
-		}elseif($data['activeTab'] == 'progress-2' && $status_capa != 3) {
-			$data['progress_ke'] = 3;
-		}elseif($data['activeTab'] == 'progress-2' && $status_capa == 3) {
-			$data['progress_ke'] = 2 ;
-		}elseif($data['activeTab'] == 'progress-3' && $status_capa != 3) {
-			$data['progress_ke'] = 3;
-		}elseif($data['activeTab'] == 'progress-3' && $status_capa == 3) {
-			$data['progress_ke'] = 3;
-		}else{
-			$data['progress_ke'] = 0;
-		};
+			if($data['activeTab'] == 'progress-1' && $status_capa != 3) {
+				$data['progress_ke'] = 2;
+			}elseif($data['activeTab'] == 'progress-1' && $status_capa== 3) {
+				$data['progress_ke'] = 1;
+			}elseif($data['activeTab'] == 'progress-2' && $status_capa != 3) {
+				$data['progress_ke'] = 3;
+			}elseif($data['activeTab'] == 'progress-2' && $status_capa == 3) {
+				$data['progress_ke'] = 2 ;
+			}elseif($data['activeTab'] == 'progress-3' && $status_capa != 3) {
+				$data['progress_ke'] = 3;
+			}elseif($data['activeTab'] == 'progress-3' && $status_capa == 3) {
+				$data['progress_ke'] = 3;
+			}else{
+				$data['progress_ke'] = 0;
+			};
+		}
 
 		$response = save_data('tbl_capa',$data,post(':validation'));
 
@@ -182,23 +185,29 @@ class Capa_monitoring extends BE_Controller {
 				'id_capa' => $data['id'],
 				'id_finding' => $data['id_finding'],
 				'is_active' => 1,
-				'status' => $status_capa
 			];
 
+			if(user('id_group') != AUDITEE) { 
+				$data_progress['status'] = $status_capa;
+			}
 
 			if($data['activeTab'] == 'progress-1'){
 				$data_progress['progress'] = $data['keterangan_progress_1'];
-				$data_progress['comment'] = $data['comment_progress_1'];
+				if(user('id_group') != AUDITEE) $data_progress['comment'] = $data['comment_progress_1'];
 				$data_progress['no_progress'] = $data['no_progress1'];
+				$data_progress['tanggal'] = post('tanggal1');
 			}elseif($data['activeTab'] == 'progress-2'){
 				$data_progress['progress'] = $data['keterangan_progress_2'];
-				$data_progress['comment'] = $data['comment_progress_2'];
+				if(user('id_group') != AUDITEE) $data_progress['comment'] = $data['comment_progress_2'];
 				$data_progress['no_progress'] = $data['no_progress2'];
+				$data_progress['tanggal'] = post('tanggal2');
 			}else{;
 				$data_progress['progress'] = $data['keterangan_progress_3'];
-				$data_progress['comment'] = $data['comment_progress_3'];
+				if(user('id_group') != AUDITEE) $data_progress['comment'] = $data['comment_progress_3'];
 				$data_progress['no_progress'] = $data['no_progress3'];
+				$data_progress['tanggal'] = post('tanggal3');
 			};
+
 			
 			$cek = get_data('tbl_capa_progress',[
 				'where' => [

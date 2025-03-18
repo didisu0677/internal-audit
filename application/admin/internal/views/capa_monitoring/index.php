@@ -112,8 +112,12 @@
 								<div class="tab-content" id="myTabContent">
 									<div class="tab-pane fade show active" id="progress_1" role="tabpanel" aria-labelledby="general-tab">
 										<div class="card-header"><b>Keterangan Progress</b></div>
+										<br>
 										<?php 
 										input('hidden','no_progress1','no_progress1','','1');
+										col_init(0,4);
+										input('date','','tanggal1','tanggal1',date('d/m/Y'));
+										col_init(3,9);
 										?>
 										<textarea name="keterangan_progress_1" id="keterangan_progress_1" class="form-control xxeditor" data-validation="required" rows="4" xxdata-editor="inline"></textarea>
 										<br>
@@ -123,6 +127,8 @@
 												<input type="text" name="evidence_base" id="evidence_base"  data-validation="" data-action="<?php echo base_url('upload/file/datetime'); ?>" data-token="<?php echo encode_id([user('id'),(time() + 900)]); ?>" autocomplete="off" class="form-control input-file" value="" placeholder="<?php echo lang('maksimal'); ?> 5MB">
 											</div>
 										</div>
+										<?php
+										?>
 
 										<?php if(user('id_group') != AUDITEE) { ?>
 											<div class="card-header"><b>Comment Auditor</b></div>
@@ -146,8 +152,12 @@
 									<!-- Tab 2 -->
 									<div class="tab-pane fade" id="progress_2" role="tabpanel" aria-labelledby="email-tab">
 										<div class="card-header"><b>Keterangan Progress</b></div>
+										<br>
 										<?php 
 										input('hidden','no_progress2','no_progress2','','2');
+										col_init(0,4);
+										input('date','','tanggal2','tanggal2',date('d/m/Y'));
+										col_init(3,9);
 										?>
 										<textarea name="keterangan_progress_2" id="keterangan_progress_2" class="form-control xxeditor" data-validation="" rows="4" xxdata-editor="inline"></textarea>
 										<br>
@@ -181,8 +191,12 @@
 									<!-- Tab 3 -->
 									<div class="tab-pane fade" id="progress_3" role="tabpanel" aria-labelledby="email-tab">
 										<div class="card-header"><b>Keterangan Progress</b></div>
+										<br>
 										<?php 
 										input('hidden','no_progress3','no_progress3','','3');
+										col_init(0,4);
+										input('date','','tanggal3','tanggal3',date('d/m/Y'));
+										col_init(3,9);
 										?>
 										<textarea name="keterangan_progress_3" id="keterangan_progress_3" class="form-control xxeditor" data-validation="" rows="4" xxdata-editor="inline"></textarea>
 										<br>
@@ -324,20 +338,26 @@ function formOpen() {
 		let commentField1 = '';
 		let commentField2 = '';
 		let commentField3 = '';
+		let tanggal1
+		let tanggal2
+		let tanggal3
+		
 		$.each(response.progress, function(k, v) {
 			// Kosongkan semua field terlebih dahulu
 
 			// Tentukan progressField berdasarkan no_progress
-
 			if (v.no_progress == 1) {
 				progressField1 = v.progress;
 				commentField1 = v.comment;
+				tanggal1 = dayjs(v.tanggal).format('YYYY/mm/dd'); 
 			} else if (v.no_progress == 2) {
-				progressField2 = v.progress;
+				progressField1 = v.progress;
 				commentField2 = v.comment;
+				tanggal2 = dayjs(v.tanggal).format('YYYY/mm/dd'); 
 			} else if (v.no_progress == 3) {
-				progressField3 = v.progress;
+				progressField1 = v.progress;
 				commentField3 = v.comment;
+				tanggal3 = dayjs(v.tanggal).format('YYYY/mm/dd'); 
 			}
 
 			// Set nilai progressField
@@ -348,6 +368,10 @@ function formOpen() {
 			$("#comment_progress_1").val(commentField1);
 			$("#comment_progress_2").val(commentField2);
 			$("#comment_progress_3").val(commentField3);
+
+			$("#tanggal1").val(tanggal1);
+			$("#tanggal2").val(tanggal2);
+			$("#tanggal2").val(tanggal3);
 
 		});
 
