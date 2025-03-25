@@ -145,6 +145,11 @@
 													</select>
 												</div>
 											</div>
+											<?php
+											input('date',lang('due_date'),'add_date1','',date('d/m/Y'));
+											
+											
+											?>
 										<?php }; ?>
 										</br>
 									</div>
@@ -183,6 +188,9 @@
 													</select>
 												</div>
 											</div>
+											<?php
+											input('date',lang('due_date'),'add_date2','',date('d/m/Y'));
+										?>
 										<?php }; ?>
 										</br>
 									</div>
@@ -222,6 +230,10 @@
 													</select>
 												</div>
 											</div>
+											<?php
+											input('date',lang('due_date'),'add_date3','',date('d/m/Y'));
+
+											?>
 										<?php }; ?>
 										</br>
 									</div>
@@ -246,7 +258,7 @@
 ?>
 
 <script type="text/javascript" src="<?php echo base_url('assets/plugins/ckeditor/ckeditor.js') ?>"></script>
-
+<script src="https://unpkg.com/dayjs@1/dayjs.min.js"></script>
 <script type="text/javascript">
 
 $('#myTab a').on('click', function (e) {
@@ -255,6 +267,10 @@ $('#myTab a').on('click', function (e) {
         });
 
 $(document).ready(function(){
+
+	$('label[for="add_date1"]').hide()
+	$('#add_date1').parent().hide();
+
 	$("#progress-2, #progress-3").hide();
 
 	var activeTabId = $('#myTab .nav-link.active').attr('id');  // Get the ID of the currently active tab
@@ -308,6 +324,9 @@ function getData() {
 }
 
 function formOpen() {	
+	$('label[for="add_date1"]').hide()
+	$('#add_date1').parent().hide();
+
 	var response = response_edit;
 	var activeTabId = $('#myTab .nav-link.active').attr('id');  
     $('#activeTab').val(activeTabId);
@@ -344,20 +363,31 @@ function formOpen() {
 		
 		$.each(response.progress, function(k, v) {
 			// Kosongkan semua field terlebih dahulu
-
 			// Tentukan progressField berdasarkan no_progress
 			if (v.no_progress == 1) {
 				progressField1 = v.progress;
 				commentField1 = v.comment;
-				tanggal1 = dayjs(v.tanggal).format('YYYY/mm/dd'); 
+				if(v.tanggal != '0000-00-00'){
+					tanggal1 = dayjs(v.tanggal).format('DD/MM/YYYY'); 
+				}else{
+					tanggal1 = dayjs().format('DD/MM/YYYY'); 
+				}
 			} else if (v.no_progress == 2) {
 				progressField1 = v.progress;
 				commentField2 = v.comment;
-				tanggal2 = dayjs(v.tanggal).format('YYYY/mm/dd'); 
+				if(v.tanggal2 != '0000-00-00'){
+					tanggal2 = dayjs(v.tanggal).format('DD/MM/YYYY'); 
+				}else{
+					tanggal2 = dayjs().format('DD/MM/YYYY'); 
+				}
 			} else if (v.no_progress == 3) {
 				progressField1 = v.progress;
 				commentField3 = v.comment;
-				tanggal3 = dayjs(v.tanggal).format('YYYY/mm/dd'); 
+				if(v.tanggal != '0000-00-00'){
+					tanggal3 = dayjs(v.tanggal).format('DD/MM/YYYY'); 
+				}else{
+					tanggal3 = dayjs().format('DD/MM/YYYY'); 
+				}
 			}
 
 			// Set nilai progressField
@@ -417,4 +447,18 @@ function lanjut() {
 	});
 }
 /// test ///
+
+$(function () {
+	  $("#status_capa1").change(function() {
+	    var val = $(this).val();
+	    if(val == 6) {
+			$('label[for="add_date1"]').show()
+			$('#add_date1').parent().show();
+	    }
+	    else { 
+			$('label[for="add_date1"]').hide()
+			$('#add_date1').parent().hide();
+	    }
+	  });
+	});
 </script>

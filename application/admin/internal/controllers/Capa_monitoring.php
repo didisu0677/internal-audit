@@ -161,20 +161,29 @@ class Capa_monitoring extends BE_Controller {
 		
 			if($data['activeTab'] == 'progress-1' && $status_capa != 3) {
 				$data['progress_ke'] = 2;
+				$data['dateline_capa2'] = $data['add_capa1'];
 			}elseif($data['activeTab'] == 'progress-1' && $status_capa== 3) {
 				$data['progress_ke'] = 1;
+				$data['dateline_capa2'] = $data['add_capa1'];
 			}elseif($data['activeTab'] == 'progress-2' && $status_capa != 3) {
 				$data['progress_ke'] = 3;
+				$data['dateline_capa2'] = $data['add_capa2'];
 			}elseif($data['activeTab'] == 'progress-2' && $status_capa == 3) {
 				$data['progress_ke'] = 2 ;
+				$data['dateline_capa2'] = $data['add_capa2'];
 			}elseif($data['activeTab'] == 'progress-3' && $status_capa != 3) {
 				$data['progress_ke'] = 3;
+				$data['dateline_capa2'] = $data['add_capa3'];
 			}elseif($data['activeTab'] == 'progress-3' && $status_capa == 3) {
 				$data['progress_ke'] = 3;
+				$data['dateline_capa2'] = $data['add_capa3'];
 			}else{
 				$data['progress_ke'] = 0;
 			};
 		}
+		unset($data['add_capa1']);
+		unset($data['add_capa2']);
+		unset($data['add_capa3']);
 
 		$response = save_data('tbl_capa',$data,post(':validation'));
 
