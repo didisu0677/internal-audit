@@ -19,6 +19,7 @@
 				th(lang('number_reminder'),'','data-content="number_reminder"');
 				th(lang('nottification'),'','data-content="nottification"');
 				th(lang('days_nottification'),'','data-content="days_nottification"');
+				th(lang('description'),'','data-content="description"');
 				th(lang('aktif').'?','text-center','data-content="is_active" data-type="boolean"');
 				th('&nbsp;','','width="30" data-content="action_button"');
 	table_close();
@@ -33,6 +34,8 @@ modal_open('modal-form');
 			input('text',lang('number_reminder'),'number_reminder');
 			textarea(lang('nottification'),'nottification');
 			input('text',lang('days_nottification'),'days_nottification');
+			// select2(lang('hitung_dari'),'hitung_dari','required',['dateline_capa','Terakhir nottification']);
+			textarea(lang('description'),'description');
 			toggle(lang('aktif').'?','is_active');
 			form_button(lang('simpan'),lang('batal'));
 		form_close();

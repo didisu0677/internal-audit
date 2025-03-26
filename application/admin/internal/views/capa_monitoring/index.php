@@ -373,7 +373,7 @@ function formOpen() {
 					tanggal1 = dayjs().format('DD/MM/YYYY'); 
 				}
 			} else if (v.no_progress == 2) {
-				progressField1 = v.progress;
+				progressField2 = v.progress;
 				commentField2 = v.comment;
 				if(v.tanggal2 != '0000-00-00'){
 					tanggal2 = dayjs(v.tanggal).format('DD/MM/YYYY'); 
@@ -381,7 +381,7 @@ function formOpen() {
 					tanggal2 = dayjs().format('DD/MM/YYYY'); 
 				}
 			} else if (v.no_progress == 3) {
-				progressField1 = v.progress;
+				progressField3 = v.progress;
 				commentField3 = v.comment;
 				if(v.tanggal != '0000-00-00'){
 					tanggal3 = dayjs(v.tanggal).format('DD/MM/YYYY'); 
@@ -401,7 +401,7 @@ function formOpen() {
 
 			$("#tanggal1").val(tanggal1);
 			$("#tanggal2").val(tanggal2);
-			$("#tanggal2").val(tanggal3);
+			$("#tanggal3").val(tanggal3);
 
 		});
 
