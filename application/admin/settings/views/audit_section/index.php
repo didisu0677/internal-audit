@@ -7,7 +7,7 @@
 		</div>
 		<div class="float-right">
 
-			<button type="button" class="btn btn-success btn-sm btn-sort"><i class="fa-align-right"></i><?php echo lang('atur_posisi'); ?></button>
+			<!-- <button type="button" class="btn btn-success btn-sm btn-sort"><i class="fa-align-right"></i><?php echo lang('atur_posisi'); ?></button> -->
 			<button type="button" class="btn btn-primary btn-sm btn-input" data-id="0"><i class="fa-plus"></i><?php echo lang('tambah'); ?></button>
 
 		</div>
@@ -51,11 +51,11 @@
 			form_close();
 		modal_footer();
 	modal_close();
-	modal_open('modal-sort',lang('atur_posisi'),'modal-lg','modal-info');
-		modal_body();
-		modal_footer();
-			echo '<form><button type="submit" class="btn btn-success" id="save-posisi">'.lang('simpan').'</button></form>';
-	modal_close();
+	// modal_open('modal-sort',lang('atur_posisi'),'modal-lg','modal-info');
+	// 	modal_body();
+	// 	modal_footer();
+	// 		echo '<form><button type="submit" class="btn btn-success" id="save-posisi">'.lang('simpan').'</button></form>';
+	// modal_close();
 ?>
 <script type="text/javascript" src="<?php echo base_url('assets/js/jquery.sortable.min.js'); ?>"></script>
 <script type="text/javascript">

@@ -161,29 +161,31 @@ class Capa_monitoring extends BE_Controller {
 		
 			if($data['activeTab'] == 'progress-1' && $status_capa != 3) {
 				$data['progress_ke'] = 2;
-				$data['dateline_capa2'] = $data['add_capa1'];
+				if (isset($data['add_capa1'])) $data['dateline_capa2'] = $data['add_capa1'];
 			}elseif($data['activeTab'] == 'progress-1' && $status_capa== 3) {
 				$data['progress_ke'] = 1;
-				$data['dateline_capa2'] = $data['add_capa1'];
+				if (isset($data['add_capa1'])) $data['dateline_capa2'] = $data['add_capa1'];
 			}elseif($data['activeTab'] == 'progress-2' && $status_capa != 3) {
 				$data['progress_ke'] = 3;
-				$data['dateline_capa2'] = $data['add_capa2'];
+				if (isset($data['add_capa2'])) $data['dateline_capa2'] = $data['add_capa2'];
 			}elseif($data['activeTab'] == 'progress-2' && $status_capa == 3) {
 				$data['progress_ke'] = 2 ;
-				$data['dateline_capa2'] = $data['add_capa2'];
+				if (isset($data['add_capa2'])) $data['dateline_capa2'] = $data['add_capa2'];
 			}elseif($data['activeTab'] == 'progress-3' && $status_capa != 3) {
 				$data['progress_ke'] = 3;
-				$data['dateline_capa2'] = $data['add_capa3'];
+				if (isset($data['add_capa3'])) $data['dateline_capa2'] = $data['add_capa3'];
 			}elseif($data['activeTab'] == 'progress-3' && $status_capa == 3) {
 				$data['progress_ke'] = 3;
-				$data['dateline_capa2'] = $data['add_capa3'];
+				if (isset($data['add_capa3'])) $data['dateline_capa2'] = $data['add_capa3'];
 			}else{
 				$data['progress_ke'] = 0;
 			};
 		}
-		unset($data['add_capa1']);
-		unset($data['add_capa2']);
-		unset($data['add_capa3']);
+
+		if (isset($data['add_capa1'])) unset($data['add_capa1']);
+		if (isset($data['add_capa2'])) unset($data['add_capa2']);
+		if (isset($data['add_capa3'])) unset($data['add_capa3']);
+
 
 		$response = save_data('tbl_capa',$data,post(':validation'));
 
@@ -232,7 +234,57 @@ class Capa_monitoring extends BE_Controller {
 				$data_progress['id'] = $cek->id;
 			} 
 	
-			save_data('tbl_capa_progress',$data_progress);
+			$res_capa = save_data('tbl_capa_progress',$data_progress);
+
+			$cek_status_finding = get_data('tbl_capa',[
+				'where' => [
+					'id_finding' => $data['id_finding'],
+					'id_status_capa not' => [3,5]
+				],
+			])->result();
+
+			if (empty($cek_status_finding)) {
+				update_data('tbl_finding_records',['status_finding'=>2],['id'=>$data['id_finding']]);
+			}
+
+			/// kirim email dan notifikasi
+			$usr 	= get_data('tbl_capa a',[
+				'select' => 'a.*,b.email, b.id as id_user, b.nama',
+				'join'   => 'tbl_user b on a.pic_capa = b.username',
+				'where'  => [
+					'id' => $data['id'],
+				],
+			])->row();
+
+			if(isset($usr->id)) {
+				$link				= base_url().'internal/capa_monitoring';
+				$desctiption 		= 'Progress Capa nomor : <strong>'.$usr->nomor.'</strong>'. ' sekarang ber status : ' .
+					$data_notifikasi 	= [
+						'title'			=> 'Progress Capa',
+						'description'	=> $desctiption,
+						'notif_link'	=> $link,
+						'notif_date'	=> date('Y-m-d H:i:s'),
+						'notif_type'	=> 'info',
+						'notif_icon'	=> 'fa-exchange-alt',
+						'id_user'		=> $usr->id_user,
+						'transaksi'		=> 'capa_monitoring',
+						'id_transaksi'	=> post('id')
+					];
+					insert_data('tbl_notifikasi',$data_notifikasi);	
+
+				if(setting('email_notification')) {
+					send_mail([
+						'subject'		=> 'Pprogress capa nomor : '.$usr->nomor. ' dengan capa plan '. $usr->isi_capa ,
+						'to'			=> $usr->email,
+						'cc'			=> '',
+						'nama_user'		=> $usr->nama,
+						'description'	=> $desctiption,
+						'detail' => 	$data,
+						'url'			=> $link
+					]);
+				}
+			}
+		///
 		}
 
 		render($response,'json');
@@ -295,10 +347,13 @@ class Capa_monitoring extends BE_Controller {
 	}
 
 	function capa_nottification() {
-
-		$cek_capa = get_data('tbl_capa',[
+		$cek_capa = get_data('tbl_capa a',[
+			'select' => 'a.*,b.email, c.id_section_department',
+			'join'   => ['tbl_user b on a.pic_capa = b.username type LEFT',
+						'tbl_finding_records c on a.id_finding = c.id',
+						],
 			'where' => [
-					'id' => post('id'),
+					'a.id' => post('id'),
 				],
 		])->row();
 
@@ -310,16 +365,37 @@ class Capa_monitoring extends BE_Controller {
 			render($response,'json');
 		}else{
 
+			$cc_user 			= get_data('tbl_user','id_group',[41,40])->result();
+			$cc_email1 = [];
+			foreach($cc_user as $u) {
+				$cc_email1[] 	= $u->email;
+			}
+
+			$cc = get_data('tbl_detail_auditee a',[
+				'select' => 'a.nip, b.email',
+				'join'	 => 'tbl_user b on a.nip = b.username',
+				'where' => [
+					'a.id_section'=>$cek_capa->id_section
+				],
+			])->result();
+
+			$cc_email2 = [];
+			foreach($cc as $c) {
+				$cc_email2[] 	= $c->email;
+			}
+
+			$cc_email = array_merge($cc_email1, $cc_email2);
+
+
 			$data = array(
 				'subject'	=> 'Notification Capa Progress',
 				'message'	=> 'Reminder CAPA Mohon untuk segera follow up' . ' ' . $cek_capa->isi_capa,
 				'to'		=> 'dsuherdi@ho.otsuka.co.id',
+				'cc'		=> $cc_email
 			);
 
 			$response = send_mail($data);
 			render($response,'json');
-	
-		
 		}
 	}
 
