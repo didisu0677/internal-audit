@@ -11,7 +11,6 @@
     "id_section": "Id Section",
     "aktifitas": "Aktifitas",
     "audit_area": "Audit Area",
-    "type_aktifitas": "Type Aktifitas",
-    "sub_aktivitas": "Sub Aktivitass",
-    "test1" : "Test"
+    "tipe_aktivitas": "Tipe Aktivitas",
+    "sub_aktivitas": "Sub Aktivitass"
 } 
