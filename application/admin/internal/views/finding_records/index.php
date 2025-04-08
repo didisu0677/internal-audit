@@ -128,7 +128,7 @@ modal_open('modal-form','Finding','modal-xl','data-openCallback="formOpen1"');
 
 				<label class="col-form-label col-sm-3" for="bobot_finding"><?php echo lang('bobot_finding'); ?></label>
 				<div class="col-sm-9">
-				<select class="select2" name="bobot_finding" id="bobot_finding" required>
+				<select class="select2" name="bobot_finding[]" id="bobot_finding" required>
 						<option value=""></option>
 						<option value="Critical">Critical</option>
 						<option value="Major">Major</option>
@@ -531,15 +531,16 @@ function formOpen() {
 }
 
 function formOpen1() {	
+	CKEDITOR.instances['isi_finding'+0].setReadOnly(false);
 	var response = response_edit;
 	$('#additional-file').html('');
 	$('#additional-finding').html('');
 
-	$('#bobot_finding').trigger('change');
+	// $('#bobot_finding').trigger('change');
 	select_value2 = $('#bobot_finding').html();
     $('#id_finding_records').val(0);
 	get_department();
-	
+	CKEDITOR.instances['isi_finding'+0].setData('');
 	if(typeof response.id != 'undefined') {
 		$('#periode_audit').html(response.nomor_schedule).trigger('change');
 		$('#id').val(response.id);
@@ -554,10 +555,11 @@ function formOpen1() {
 		$.each(response.detail,function(k,v){
 			var x = parseInt(k);
 			if( x < 1) {
+				CKEDITOR.instances['isi_finding'+x].setReadOnly(false);
 				CKEDITOR.instances['isi_finding'+x].setData('');
 				$('#id_finding_records').val(v.id);
 				$('#bobot_finding').val(v.bobot_finding).trigger('change');
-				CKEDITOR.instances['isi_finding'+x].setData(decodeEntities(v.finding));
+					CKEDITOR.instances['isi_finding'+x].setData(decodeEntities(v.finding));
 				// var konten = '<a href ="'+base_url+'assets/uploads/rekanan/'+response.id_vendor+'/'+v.file+'" target="_blank"><i class="fa-download"></i></a>';
 				
 				// $('#file'+ x).val(v.file) ;
@@ -735,10 +737,6 @@ function addFinding(id_finding_records,bobot_finding,file,lampiran, isi_finding)
 	var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
 	var dateTime = date+' '+time;
 	
-		// $('#username').html('<option value=""></option>');
-	// $('#users').each(function(){
-	// 	$('#username').append('<option value="'+$(this).attr('value')+'" data-nama="'+$(this).attr('data-nama')+'">'+$(this).val()+'</option>');
-	// });
 
 	// $('#bobot_finding').trigger('change');
 	// select_value2 = $('#bobot_finding').html();
