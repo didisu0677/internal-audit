@@ -198,7 +198,7 @@ modal_open('modal-capa','CAPA Plan','modal-xl','data-openCallback="formOpen"');
 						input('text',lang('department_auditee'),'department_auditee','','','readonly');
 						input('text',lang('auditee'),'nama_auditee','','','readonly');
 						input('text',lang('site_auditee'),'site','','','readonly');
-						input('text',lang('audit_area'),'area_auditee','','','readonly');
+						// input('text',lang('audit_area'),'area_auditee','','','readonly');
 						card_close();
 						card_open(lang('finding'),'mb-2');
 						?>
