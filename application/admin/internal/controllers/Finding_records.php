@@ -310,6 +310,8 @@ class Finding_records extends BE_Controller {
 
 	function save() {
 		$data = post();
+		$bobot_finding = post('bobot_finding');
+
 		$data['nomor']  = '';
 		$schedule  = get_data('tbl_schedule_audit', 'nomor', $data['periode_audit'])->row();
 		$auditor   = get_data('tbl_m_auditor','id',$data['auditor'])->row();
@@ -381,6 +383,7 @@ class Finding_records extends BE_Controller {
 				$data['id_m_finding'] = post('id');
 				$data['id'] = $id_finding_records[$k];
 				$data['finding'] = $isi_finding[$k];
+
 				$response = save_data('tbl_finding_records',$data,post(':validation'));
 			}
 		}
