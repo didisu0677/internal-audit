@@ -42,9 +42,9 @@ class M_aktivitas extends BE_Controller {
 	}
 
 	function data() {
-
+		$config['access_view'] = false;
 	
-		$data = data_serverside();
+		$data = data_serverside($config);
 		render($data,'json');
 	}
 
@@ -59,6 +59,12 @@ class M_aktivitas extends BE_Controller {
 		])->row_array();
 
 		$data['id_section'] = json_decode($data['id_section']);
+		$data['detail'] = get_data('tbl_sub_aktivitas',[
+			'where' => [
+				'id_aktivitas' => $dt['id_aktivitas']
+			],
+			'sort_by' => 'id',
+			])->result_array();
 		
 		render($data,'json');
 	}
@@ -66,6 +72,7 @@ class M_aktivitas extends BE_Controller {
 	function save() {
 		$data = post();
 		$id_section = post('id_section');
+		$sub_aktivitas = post('sub_aktivitas');
 
 		$data['id_section'] = json_encode($id_section);
 
@@ -103,6 +110,11 @@ class M_aktivitas extends BE_Controller {
 				}
 
 				$response = save_data('tbl_m_aktivitas',$data,post(':validation'));
+
+				delete_data('tbl_sub_aktivitas','id_aktivitas',$response['id']);
+				foreach($sub_aktivitas as $s => $k) {
+					save_data('tbl_sub_aktivitas',['id_aktivitas'=>$response['id'],'sub_aktivitas' =>$sub_aktivitas[$s], 'is_active' => 1]);
+				} 
 			}
 		}
 
