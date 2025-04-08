@@ -12,5 +12,9 @@
     "aktifitas": "Aktifitas",
     "audit_area": "Audit Area",
     "type_aktifitas": "Type Aktifitas",
+<<<<<<< HEAD
     "sub_aktivitas": "Sub Aktivitas"
+=======
+    "sub_aktivitas": "Sub Aktivitass"
+>>>>>>> refs/remotes/origin/main
 }

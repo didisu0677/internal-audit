@@ -167,7 +167,8 @@ class Finding_records extends BE_Controller {
 				'id_section_department' => $data['id_section_department'],
 				'auditee' => $data['auditee'],
 				'auditor' => $data['auditor'],
-				'periode_audit' => $data['periode_audit']
+				'periode_audit' => $data['periode_audit'],
+
 
 			]
 		])->result();

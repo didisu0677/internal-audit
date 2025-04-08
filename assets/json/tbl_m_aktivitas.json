@@ -1,0 +1,30 @@
+{
+    "field": {
+        "id": "primary_key",
+        "parent_id": "int",
+        "id_company": "int",
+        "id_location": "int",
+        "id_divisi": "int",
+        "id_department": "int",
+        "id_section": "int",
+        "aktifitas": "text",
+        "audit_area": "varchar",
+        "type_aktifitas": "int",
+        "is_active": "boolean"
+    },
+    "label": {
+        "id": "Id",
+        "parent_id": "Parent Id",
+        "id_company": "Id Company",
+        "id_location": "Id Location",
+        "id_divisi": "Id Divisi",
+        "id_department": "Id Department",
+        "id_section": "Id Section",
+        "aktifitas": "Aktifitas",
+        "audit_area": "Audit Area",
+        "type_aktifitas": "Type Aktifitas",
+        "is_active": "Aktif"
+    },
+    "validation": [],
+    "alias": []
+}
