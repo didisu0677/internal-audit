@@ -65,14 +65,49 @@ class M_aktivitas extends BE_Controller {
 			],
 			'sort_by' => 'id',
 			])->result_array();
+
+		
+		$data['risk'] = get_data('tbl_risk_register',[
+			'where' => [
+				'id_aktivitas' => $dt['id_aktivitas']
+			],
+			'sort_by' => 'id',
+			])->result_array();
+
+		
+		$data['ctrl_item'] = get_data('tbl_internal_control',[
+			'where' => [
+				'id_aktivitas' => $dt['id_aktivitas']
+			],
+			'sort_by' => 'id',
+			])->result_array();
 		
 		render($data,'json');
 	}
 
 	function save() {
 		$data = post();
+		$id_sub_aktivitas = post('id_sub_aktivitas');
+
 		$id_section = post('id_section');
 		$sub_aktivitas = post('sub_aktivitas');
+
+		$id_risk = post('id_risk');
+		$risk = post('risk');
+		$dampak = post('dampak');
+		$score_dampak = post('score_dampak');
+		$kemungkinan = post('kemungkinan');
+		$score_kemungkinan = post('score_kemungkinan');
+		$bobot_risk = post('bobot_risk');
+
+		$id_control = post('id_control');
+		$ctrl_existing = post('ctrl_existing');
+		$ctrl_location = post('ctrl_location');
+		$no_pnp = post('no_pnp');
+		$jenis_pnp = post('jenis_pnp');
+		$penerbit = post('penerbit');
+		$tgl_pnp = post('tgl_pnp');
+
 
 		$data['id_section'] = json_encode($id_section);
 
@@ -111,11 +146,69 @@ class M_aktivitas extends BE_Controller {
 
 				$response = save_data('tbl_m_aktivitas',$data,post(':validation'));
 
-				delete_data('tbl_sub_aktivitas','id_aktivitas',$response['id']);
-				foreach($sub_aktivitas as $s => $k) {
-					save_data('tbl_sub_aktivitas',['id_aktivitas'=>$response['id'],'sub_aktivitas' =>$sub_aktivitas[$s], 'is_active' => 1]);
-				} 
+				$res = [];
+				if(is_array($sub_aktivitas)) {
+					foreach($sub_aktivitas as $s => $k) {
+						$data_s = [
+							'id'		=> $id_sub_aktivitas[$s],
+							'id_aktivitas' => $response['id'],
+							'sub_aktivitas' => $sub_aktivitas[$s],
+							'is_active' => 1
+						];
+						$res1 = save_data('tbl_sub_aktivitas',$data_s);
+						$res[] = $res1['id'] ;
+					} 
+
+					delete_data('tbl_sub_aktivitas',['id not' => $res, 'id_aktivitas' =>$response['id']]);
+				}
 			}
+
+			$res_vr = [];
+			if(is_array($risk)) {
+				foreach($risk as $r => $vr) {
+					$data_r = [
+						'id'	=> $id_risk[$r],
+						'id_aktivitas'=>$response['id'],
+						'risk'=>$risk[$r],
+						'dampak' => $dampak[$r],
+						'score_dampak' => $score_dampak[$r],
+						'kemungkinan' =>$kemungkinan[$r],
+						'score_kemungkinan' => $score_kemungkinan[$r],
+						'bobot' => $bobot_risk[$r],
+						'is_active'=>1
+					];
+
+					$res_vr1 = save_data('tbl_risk_register',$data_r);
+					$res_vr[] = $res_vr1['id'];
+				}
+				delete_data('tbl_risk_register',['id not' => $res_vr, 'id_aktivitas' =>$response['id']]);
+			}
+
+			
+
+			$res_vc = [];
+			if(is_array($ctrl_existing)){
+				foreach($ctrl_existing as $c => $vc) {
+					$data_c = [
+						'id'	=> $id_control[$c],
+						'id_aktivitas'=>$response['id'],
+						'internal_control'=>$ctrl_existing[$c],
+						'location_control' => $ctrl_location[$c],
+						'no_pnp' => $no_pnp[$c],
+						'jenis_pnp' => $jenis_pnp[$c],
+						'penerbit_pnp' => $penerbit[$c],
+						'tanggal_pnp' => $tgl_pnp[$c],
+						'is_active'=>1
+					];
+
+					$res_vc1 = save_data('tbl_internal_control',$data_c);
+					$res_vc[] = $res_vc1['id'];
+				}
+
+				delete_data('tbl_internal_control',['id not' => $res_vc, 'id_aktivitas' => $response['id']]);
+			}
+
+			
 		}
 
 		render($response,'json');
