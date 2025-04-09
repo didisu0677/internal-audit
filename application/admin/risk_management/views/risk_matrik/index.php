@@ -43,8 +43,11 @@
 						table_open('table table-bordered table-app table-hover table-1');
 							thead();
 								tr();
-									th(lang('risk'),'','class="text-center align-middle headcol"');
+									th(lang('aktivitas'),'','class="text-center align-middle headcol"');
+									th(lang('sub_aktivitas'),'','class="text-center align-middle headcol"');
+									th(lang('audit_section'),'','class="text-center align-middle headcol"');
 									th(lang('internal_control'),'','class="text-center align-middle headcol"');
+									th(lang('risk'),'','class="text-center align-middle headcol"');
 									
 							tbody();
 						table_close();

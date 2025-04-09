@@ -17,6 +17,12 @@
 			tr();
 				th('checkbox','text-center','width="30" data-content="id"');
 				th(lang('risk'),'','data-content="risk"');
+				th(lang('dampak'),'','data-content="dampak"');
+				th(lang('score_dampak'),'','data-content="score_dampak"');
+				th(lang('kemungkinan'),'','data-content="kemungkinan"');
+				th(lang('score_kemungkinan'),'','data-content="score_kemungkinan"');
+				th(lang('bobot'),'','data-content="bobot"');
+				th(lang('aktivitas'),'','data-content="aktivitas" data-table="tbl_aktivitas"');
 				th(lang('aktif').'?','text-center','data-content="is_active" data-type="boolean"');
 				th('&nbsp;','','width="30" data-content="action_button"');
 	table_close();

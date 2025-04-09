@@ -16,7 +16,8 @@ class Risk_matrik extends BE_Controller {
 
     function data($tahun = "", $tipe = 'table') {
         $arr            = [
-	        'select'	=> '*',
+	        'select'	=> 'a.*,b.aktivitas',
+			'join'		=> 'tbl_aktivitas b on a.id_aktivitas = b.id type LEFT',
 	        'where'     => [
 	            'a.is_active' => 1,
                 // 'a.id' => 4
@@ -27,8 +28,11 @@ class Risk_matrik extends BE_Controller {
         // $tahun = get('tahun');
 
 
-	    $data['grup'][0]= get_data('tbl_risk_register a',$arr)->result();
-        $data['int_control'] = get_data('tbl_internal_control','is_active',1)->result_array(); 
+	    $data['grup'][0]= get_data('tbl_m_aktivitas a',$arr)->result();
+        $data['section'] = get_data('tbl_m_audit_section','is_active',1)->result_array(); 
+		$data['int_control'] = get_data('tbl_internal_control','is_active',1)->result_array();
+		$data['risk'] = get_data('tbl_risk_register','is_active',1)->result_array(); 
+		$data['sub'] = get_data('tbl_sub_aktivitas','is_active',1)->result_array();
 
         // debug($data['grup'][0]);die;
 
