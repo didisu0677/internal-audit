@@ -17,6 +17,12 @@
 			tr();
 				th('checkbox','text-center','width="30" data-content="id"');
 				th(lang('internal_control'),'','data-content="internal_control"');
+				th(lang('location_control'),'','data-content="location_control"');
+				th(lang('no_pnp'),'','data-content="no_pnp"');
+				th(lang('jenis_pnp'),'','data-content="jenis_pnp"');
+				th(lang('penerbit_pnp'),'','data-content="penerbit_pnp"');
+				th(lang('tanggal_pnp'),'','data-content="tanggal_pnp"');
+				th(lang('aktivitas'),'','data-content="aktivitas" data-table="tbl_aktivitas"');
 				th(lang('aktif').'?','text-center','data-content="is_active" data-type="boolean"');
 				th('&nbsp;','','width="30" data-content="action_button"');
 	table_close();

@@ -12,5 +12,15 @@
     "aktifitas": "Aktifitas",
     "audit_area": "Audit Area",
     "tipe_aktivitas": "Tipe Aktivitas",
-    "sub_aktivitas": "Sub Aktivitass"
+    "sub_aktivitas": "Sub Aktivitass",
+    "dampak" : "Dampak",
+    "score_dampak" : "Score Dampak",
+    "kemungkinan" : "kemungkinan",
+    "score_kemungkinan" : "Score Kemungkinan",
+    "bobot" : "Bobot",
+    "location_control" : "Location Control",
+    "no_pnp" : "No PnP",
+    "jenis_pnp" : "Jenis PnP",
+    "penerbit_pnp" : "Penerbit Pnp",
+    "tanggal_pnp" : "Tanggal Pnp"
 } 
