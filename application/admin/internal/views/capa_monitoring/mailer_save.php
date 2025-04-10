@@ -1,11 +1,5 @@
-<h3 style="word-break: break-all; overflow: hidden; text-overflow: ellipsis;">Yth Bapak/Ibu <?php echo $to; ?></h3>
-<div style="color: #e83e8c; padding: 15px 0; text-align: center; font-family: SFMono-Regular,Menlo,Monaco,Consolas,'Liberation Mono','Courier New',monospace;">
-	<?php echo $message; ?>
+<p style="text-align: justify;">Yth Bapak/Ibu <?php echo $nama_user; ?> <br> <?php echo $description; ?></br></p>
+<p style="text-align: justify;"> <?php echo $description2; ?></p>
+<div style="text-align:center; padding: 10px;">
+	<a href="<?php echo $url; ?>" style="background: #16D39A; color: #fff; padding: .5rem 1rem; border-radius: .175rem; text-decoration: none;">Capa Progress</a>
 </div>
-<div>
-jika sudah melakukan progress, mohon untuk update di sistem internal audit di link berikut 
-<br>
-<span>
-	
-</span> 
-<div>

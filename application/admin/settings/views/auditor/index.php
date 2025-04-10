@@ -17,6 +17,8 @@
 			tr();
 				th('checkbox','text-center','width="30" data-content="id"');
 				th(lang('nama'),'','data-content="nama"');
+				th(lang('nip'),'','data-content="nip"');
+				th(lang('email'),'','data-content="email"');
 				th(lang('jabatan'),'','data-content="jabatan"');
 				th(lang('institusi'),'','data-content="institusi"');
 				th(lang('aktif').'?','text-center','data-content="is_active" data-type="boolean"');
@@ -31,6 +33,8 @@ modal_open('modal-form');
 			col_init(3,9);
 			input('hidden','id','id');
 			input('text',lang('nama'),'nama');
+			input('text',lang('email'),'email','email|unique');
+			input('text',lang('nip'),'nip','required|min-length:5');
 			input('text',lang('jabatan'),'jabatan');
 			select2(lang('institusi'),'id_institusi','required',$institusi,'id','nama_institusi');
 			toggle(lang('aktif').'?','is_active');
