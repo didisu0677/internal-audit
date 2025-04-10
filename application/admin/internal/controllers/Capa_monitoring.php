@@ -248,18 +248,35 @@ class Capa_monitoring extends BE_Controller {
 			}
 
 			/// kirim email dan notifikasi
-			$usr 	= get_data('tbl_capa a',[
-				'select' => 'a.*,b.email, b.id as id_user, b.nama',
-				'join'   => 'tbl_user b on a.pic_capa = b.username',
-				'where'  => [
-					'a.id' => $data['id'],
-				],
-			])->row();
+
+			if(user('id_group') == AUDITEE) 
+			
+				$usr 	= get_data('tbl_capa a',[
+					'select' => 'a.*,b.email, b.nama',
+					'join'   => ['tbl_finding_records c on a.id_finding = c.id',
+								 'tbl_auditor b on c.auditor = b.id'
+								],	
+					'where'  => [
+						'a.id' => $data['id'],
+					],
+				])->row();
+			}else{
+				$usr 	= get_data('tbl_capa a',[
+					'select' => 'a.*,b.email, b.nama',
+					'join'   => ['tbl_finding_records c on a.id_finding = c.id',
+								 'tbl_user b on a.pic_capa = b.username'
+								],	
+					'where'  => [
+						'a.id' => $data['id'],
+					],
+				])->row();
+			}
 
 
 			if(isset($usr->id)) {
 				$link				= base_url().'internal/capa_monitoring';
-				$desctiption 		= 'Progress Capa nomor : <strong>'.$usr->nomor.'</strong>'. ' sekarang ber status : ' ;					$data_notifikasi 	= [
+				$desctiption 		= 'Progress Capa nomor : <strong>'.$usr->nomor.'</strong>'. ' sekarang ber status : ' ;		
+				$data_notifikasi 	= [
 						'title'			=> 'Progress Capa',
 						'description'	=> $desctiption,
 						'notif_link'	=> $link,

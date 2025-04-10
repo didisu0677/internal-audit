@@ -325,17 +325,19 @@ class Finding_records extends BE_Controller {
 		if(isset($dept->id)) {
 			$div = get_data('tbl_m_audit_section','section_code',substr($dept->section_code, 2, 2))->row();
 
-			if(isset($div->id)) $data['id_divisi'] = $div->id;
+			// if(isset($div->id)) $data['id_divisi'] = $div->id;
+			$data['id_divisi'] = $div->level3
 
 
-			$d = get_data('tbl_m_audit_section',[
-					'where' => [
-						'section_code' => substr($dept->section_code, 4, 1),
-						'parent_id' => $div->id,
-					],
-				])->row();
+			// $d = get_data('tbl_m_audit_section',[
+			// 		'where' => [
+			// 			'section_code' => substr($dept->section_code, 4, 1),
+			// 			'parent_id' => $div->id,
+			// 		],
+			// 	])->row();
 			
-			if(isset($d->id)) $data['id_department_auditee'] = $d->id;
+			// if(isset($d->id)) $data['id_department_auditee'] = $d->id;
+			$data['id_department_auditee'] = $div->level4
 			
 		}
 
