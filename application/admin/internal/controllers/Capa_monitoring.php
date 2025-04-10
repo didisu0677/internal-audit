@@ -249,7 +249,7 @@ class Capa_monitoring extends BE_Controller {
 
 			/// kirim email dan notifikasi
 
-			if(user('id_group') == AUDITEE) 
+			if(user('id_group') == AUDITEE) {
 			
 				$usr 	= get_data('tbl_capa a',[
 					'select' => 'a.*,b.email, b.nama',
