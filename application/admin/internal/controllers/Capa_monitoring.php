@@ -252,9 +252,10 @@ class Capa_monitoring extends BE_Controller {
 			if(user('id_group') == AUDITEE) {
 			
 				$usr 	= get_data('tbl_capa a',[
-					'select' => 'a.*,b.email, b.nama',
-					'join'   => ['tbl_finding_records c on a.id_finding = c.id',
-								 'tbl_auditor b on c.auditor = b.id'
+					'select' => 'a.*,b.email, b.nama, d.id as id_user, c.id_section_department as id_section',
+					'join'   => ['tbl_finding_records c on a.id_finding = c.id type LEFT',
+								 'tbl_m_auditor b on c.auditor = b.id type LEFT',
+								 'tbl_user d on b.nip = d.username type LEFT'
 								],	
 					'where'  => [
 						'a.id' => $data['id'],
@@ -262,15 +263,36 @@ class Capa_monitoring extends BE_Controller {
 				])->row();
 			}else{
 				$usr 	= get_data('tbl_capa a',[
-					'select' => 'a.*,b.email, b.nama',
-					'join'   => ['tbl_finding_records c on a.id_finding = c.id',
-								 'tbl_user b on a.pic_capa = b.username'
+					'select' => 'a.*,b.email, b.nama,b.id as id_user, c.id_section_department as id_section',
+					'join'   => ['tbl_finding_records c on a.id_finding = c.id type LEFT',
+								 'tbl_user b on a.pic_capa = b.username type LEFT'
 								],	
 					'where'  => [
 						'a.id' => $data['id'],
 					],
 				])->row();
 			}
+
+			$cc_user 			= get_data('tbl_user','id_group',[41,40])->result();
+			$cc_email1 = [];
+			foreach($cc_user as $u) {
+				if($u->email != $usr->email) $cc_email1[] 	= $u->email;
+			}
+
+			$cc = get_data('tbl_detail_auditee a',[
+				'select' => 'a.nip, b.email',
+				'join'	 => 'tbl_user b on a.nip = b.username',
+				'where' => [
+					'a.id_section'=>$usr->id_section
+				],
+			])->result();
+
+			$cc_email2 = [];
+			foreach($cc as $c) {
+				if($c->email != $usr->email) $cc_email2[] 	= $c->email;
+			}
+
+			$cc_email = array_merge($cc_email1, $cc_email2);
 
 
 			if(isset($usr->id)) {
@@ -291,11 +313,12 @@ class Capa_monitoring extends BE_Controller {
 
 				if(setting('email_notification')) {
 					send_mail([
-						'subject'		=> 'Pprogress capa nomor : '.$usr->nomor. ' dengan capa plan '. $usr->isi_capa ,
-						'to'			=> $usr->email,
-						'cc'			=> '',
+						'subject'		=> 'Progress capa nomor : '.$usr->nomor. ' dengan capa plan '. $usr->isi_capa ,
+						'to'			=> 'dsuherdi@ho.otsuka.co.id', //$usr->email,
+						// 'cc'			=> $cc_email,
 						'nama_user'		=> $usr->nama,
 						'description'	=> $desctiption,
+						'description2'	=> 'Silakan cek dan update progress di link berikut :',
 						'detail' => 	$data,
 						'url'			=> $link
 					]);
