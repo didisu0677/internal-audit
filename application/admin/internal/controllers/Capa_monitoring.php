@@ -252,14 +252,14 @@ class Capa_monitoring extends BE_Controller {
 				'select' => 'a.*,b.email, b.id as id_user, b.nama',
 				'join'   => 'tbl_user b on a.pic_capa = b.username',
 				'where'  => [
-					'id' => $data['id'],
+					'a.id' => $data['id'],
 				],
 			])->row();
 
+
 			if(isset($usr->id)) {
 				$link				= base_url().'internal/capa_monitoring';
-				$desctiption 		= 'Progress Capa nomor : <strong>'.$usr->nomor.'</strong>'. ' sekarang ber status : ' .
-					$data_notifikasi 	= [
+				$desctiption 		= 'Progress Capa nomor : <strong>'.$usr->nomor.'</strong>'. ' sekarang ber status : ' ;					$data_notifikasi 	= [
 						'title'			=> 'Progress Capa',
 						'description'	=> $desctiption,
 						'notif_link'	=> $link,
