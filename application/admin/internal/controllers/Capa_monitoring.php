@@ -314,8 +314,8 @@ class Capa_monitoring extends BE_Controller {
 				if(setting('email_notification')) {
 					send_mail([
 						'subject'		=> 'Progress capa nomor : '.$usr->nomor. ' dengan capa plan '. $usr->isi_capa ,
-						'to'			=> 'dsuherdi@ho.otsuka.co.id', //$usr->email,
-						// 'cc'			=> $cc_email,
+						'to'			=> $usr->email,
+						'cc'			=> $cc_email,
 						'nama_user'		=> $usr->nama,
 						'description'	=> $desctiption,
 						'description2'	=> 'Silakan cek dan update progress di link berikut :',
