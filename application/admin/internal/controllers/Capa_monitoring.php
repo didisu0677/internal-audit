@@ -324,7 +324,7 @@ class Capa_monitoring extends BE_Controller {
 					]);
 				}
 			}
-		///
+			///
 		}
 
 		render($response,'json');
