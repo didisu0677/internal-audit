@@ -16,8 +16,11 @@
 			</select>
 
 			
-
-			<?php echo access_button('delete,active,inactive,export,import'); ?>
+			
+			<?php 
+			if(user('id_group')!=AUDITEE)
+			echo access_button('delete,active,inactive,export,import'); 
+			?>
 		</div>
 		<div class="clearfix"></div>
 	</div>

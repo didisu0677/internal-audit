@@ -125,14 +125,21 @@ class Finding_records extends BE_Controller {
 	   		 ];
 		}else{
 			$config = [
-				'access_edit'	=> true,
-				'access_delete'	=> true,
+				'access_edit'	=> false,
+				'access_delete'	=> false,
 				'access_view'	=> false,
 	   		 ];
 		}
-		$config['join'][] = 'tbl_auditee ON tbl_auditee.id = tbl_finding_records.auditee TYPE LEFT';
-		$config['button'][]	= button_serverside('btn-default','btn-capa',['far fa-copy',lang('capa_plan'),true],'act-dokumen');
 
+
+		$config['join'][] = 'tbl_auditee ON tbl_auditee.id = tbl_finding_records.auditee TYPE LEFT';
+		$config['button'][]	= button_serverside('btn-default','btn-capa',['far fa-copy',lang('capa_plan'),true],'act-dokumen',['status_finding !='=>2]);
+		if(user('id_group') != AUDITEE) {
+	        $config['button'][]	= button_serverside('btn-warning','btn-input',['fa-edit',lang('ubah'),true],'edit',['status_finding !='=>2]);
+		}
+		if(user('id_group') != AUDITEE) {
+	        $config['button'][]	= button_serverside('btn-danger','btn-delete',['fa-trash-alt',lang('hapus'),true],'delete',['status_finding !='=>2]);
+	    }
 
 		if($department && $department != 'ALL') {
 	    	$config['where']['id_department_auditee']	= $department;	
@@ -387,6 +394,71 @@ class Finding_records extends BE_Controller {
 
 				$response = save_data('tbl_finding_records',$data,post(':validation'));
 			}
+
+			/// kirim email dan notifikasi
+			$usr 	= get_data('tbl_auditee a',[
+				'select' => 'a.*,b.id as id_user',
+				'join' => 'tbl_user b on a.nip = b.username type LEFT',
+				'where'  => [
+					'a.id' => $data['auditee'],
+				],
+			])->row();
+		
+
+			$cc_user 			= get_data('tbl_user','id_group',[41,40])->result();
+			$cc_email1 = [];
+			foreach($cc_user as $u) {
+				if($u->email != $usr->email) $cc_email1[] 	= $u->email;
+			}
+
+			$cc = get_data('tbl_detail_auditee a',[
+				'select' => 'a.nip, b.email',
+				'join'	 => 'tbl_user b on a.nip = b.username',
+				'where' => [
+					'a.id_section'=>$data['id_section_department']
+				],
+			])->result();
+
+			$cc_email2 = [];
+			foreach($cc as $c) {
+				if($c->email != $usr->email) $cc_email2[] 	= $c->email;
+			}
+
+			$cc_email = array_merge($cc_email1, $cc_email2);
+
+
+			if(isset($usr->id)) {
+				$section = get_data('tbl_m_audit_section','id',$data['id_section_department'])->row();
+
+				$link				= base_url().'internal/finding_records';
+				$desctiption 		= 'Finding Internal Audit department : ' .$section->section_name. ' untuk audit area '. $data['audit_area'] ;		
+				$data_notifikasi 	= [
+						'title'			=> 'Finding Internal Audit',
+						'description'	=> $desctiption,
+						'notif_link'	=> $link,
+						'notif_date'	=> date('Y-m-d H:i:s'),
+						'notif_type'	=> 'info',
+						'notif_icon'	=> 'fa-exchange-alt',
+						'id_user'		=> $usr->id_user,
+						'transaksi'		=> 'finding_records',
+						'id_transaksi'	=> post('id')
+					];
+					insert_data('tbl_notifikasi',$data_notifikasi);	
+
+				if(setting('email_notification')) {
+					send_mail([
+						'subject'		=> 'Finding Internal Audit',
+						'to'			=> $usr->email,
+						'cc'			=> $cc_email,
+						'nama_user'		=> $usr->nama,
+						'description'	=> 'Terdapat ' . $desctiption,
+						'description2'	=> 'Untuk mengetahui lebih lanjut silakan cek di link berikut :',
+						'detail' => 	$data,
+						'url'			=> $link
+					]);
+				}
+			}
+			///
 		}
 
 		render($response,'json');
