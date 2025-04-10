@@ -7,7 +7,7 @@
 		
 		<div class="float-right">   		
     		<?php 
-			echo '<button class="btn btn-success btn-save" href="javascript:;" ><i class="fa-save"></i> Save</button>';
+			// echo '<button class="btn btn-success btn-save" href="javascript:;" ><i class="fa-save"></i> Save</button>';
 
 			// $arr = [];
 			// $arr = [

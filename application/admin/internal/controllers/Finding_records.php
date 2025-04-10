@@ -168,8 +168,7 @@ class Finding_records extends BE_Controller {
 				'auditee' => $data['auditee'],
 				'auditor' => $data['auditor'],
 				'periode_audit' => $data['periode_audit'],
-
-
+				'DATE_FORMAT(create_at, "%d-%m-%Y %H:%i") =' => date('d-m-Y H:i', strtotime($data['create_at']))
 			]
 		])->result();
 		
