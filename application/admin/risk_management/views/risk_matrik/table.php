@@ -4,7 +4,7 @@
 		<tr>
 			<td style="width:1px; white-space: nowrap;"><?php echo $m0->aktivitas; ?></td>
 			<td style="width:1px;">							
-			<select class="select2 filter infinity" style="width: 250px;" multiple data-width="200" name="section[<?php echo $m0->id; ?>][]"> 
+			<select class="select2 filter infinity" style="width: 250px;" multiple data-width="200" name="section[<?php echo $m0->id; ?>][]" disabled> 
 				<?php ; 
 				$selected = ''; ?>
 
@@ -20,7 +20,7 @@
 			</select>
 			</td>
 			<td style="width:1px; white-space: nowrap;">							
-			<select class="select2 filter infinity" style="width: 250px;" multiple data-width="200" name="section[<?php echo $m0->id; ?>][]"> 
+			<select class="select2 filter infinity" style="width: 250px;" multiple data-width="200" name="section[<?php echo $m0->id; ?>][]" disabled> 
 				<?php ; 
 				$selected = ''; ?>
 
@@ -36,7 +36,7 @@
 			</select>
 			</td>
 			<td style="width:1px; white-space: nowrap;">							
-			<select class="select2 filter infinity" style="width: 350px;" multiple data-width="200" name="control[<?php echo $m0->id; ?>][]"> 
+			<select class="select2 filter infinity" style="width: 350px;" multiple data-width="200" name="control[<?php echo $m0->id; ?>][]" disabled> 
 				<?php  
 				$selected = ''; ?>
 
@@ -53,7 +53,7 @@
 			</td>
 
 			<td style="width:1px; white-space: nowrap;">							
-			<select class="select2 filter infinity" style="width: 350px;" multiple data-width="200" name="control[<?php echo $m0->id; ?>][]"> 
+			<select class="select2 filter infinity" style="width: 350px;" multiple data-width="200" name="control[<?php echo $m0->id; ?>][]" disabled> 
 				<?php  
 				$selected = ''; ?>
 
