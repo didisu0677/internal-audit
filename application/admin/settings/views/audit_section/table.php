@@ -7,9 +7,9 @@
 		<!-- <td class="text-center"><?php echo $m0->urutan; ?></td> -->
 		<td class="text-center"><?php echo $m0->is_active ? '<span class="badge badge-success">TRUE</span>' : '<span class="badge badge-danger">FALSE</span>' ; ?></td>
 		<td class="button">
-			<?php if($access_edit && user('id_group') == 1 && ENVIRONMENT == 'development') { ?>
+			<?php if($access_edit) { ?>
 			<button type="button" class="btn btn-warning btn-input" data-key="edit" data-id="<?php echo $m0->id; ?>" title="<?php echo lang('ubah'); ?>"><i class="fa-edit"></i></button>
-			<?php } if($access_delete && user('id_group') == 1 && ENVIRONMENT == 'development') { ?>
+			<?php } if($access_delete) { ?>
 			<button type="button" class="btn btn-danger btn-delete" data-key="delete" data-id="<?php echo $m0->id; ?>" title="<?php echo lang('hapus'); ?>"><i class="fa-trash-alt"></i></button>
 			<?php } ?>
 		</td>
@@ -23,9 +23,9 @@
 			<!-- <td class="text-center"><?php echo $m1->urutan; ?></td> -->
 			<td class="text-center"><?php echo $m1->is_active ? '<span class="badge badge-success">TRUE</span>' : '<span class="badge badge-danger">FALSE</span>' ; ?></td>
 			<td class="button">
-				<?php if($access_edit && user('id_group') == 1 && ENVIRONMENT == 'development') { ?>
+				<?php if($access_edit) { ?>
 				<button type="button" class="btn btn-warning btn-input" data-key="edit" data-id="<?php echo $m1->id; ?>" title="<?php echo lang('ubah'); ?>"><i class="fa-edit"></i></button>
-				<?php } if($access_delete && user('id_group') == 1 && ENVIRONMENT == 'development') { ?>
+				<?php } if($access_delete) { ?>
 				<button type="button" class="btn btn-danger btn-delete" data-key="delete" data-id="<?php echo $m1->id; ?>" title="<?php echo lang('hapus'); ?>"><i class="fa-trash-alt"></i></button>
 				<?php } ?>
 			</td>
@@ -39,9 +39,9 @@
 				<!-- <td class="text-center"><?php echo $m2->urutan; ?></td> -->
 				<td class="text-center"><?php echo $m2->is_active ? '<span class="badge badge-success">TRUE</span>' : '<span class="badge badge-danger">FALSE</span>' ; ?></td>
 				<td class="button">
-					<?php if($access_edit && user('id_group') == 1 && ENVIRONMENT == 'development') { ?>
+					<?php if($access_edit && ENVIRONMENT == 'development') { ?>
 					<button type="button" class="btn btn-warning btn-input" data-key="edit" data-id="<?php echo $m2->id; ?>" title="<?php echo lang('ubah'); ?>"><i class="fa-edit"></i></button>
-					<?php } if($access_delete && user('id_group') == 1 && ENVIRONMENT == 'development') { ?>
+					<?php } if($access_delete && ENVIRONMENT == 'development') { ?>
 					<button type="button" class="btn btn-danger btn-delete" data-key="delete" data-id="<?php echo $m2->id; ?>" title="<?php echo lang('hapus'); ?>"><i class="fa-trash-alt"></i></button>
 					<?php } ?>
 				</td>
@@ -55,9 +55,9 @@
 					<!-- <td class="text-center"><?php echo $m3->urutan; ?></td> -->
 					<td class="text-center"><?php echo $m3->is_active ? '<span class="badge badge-success">TRUE</span>' : '<span class="badge badge-danger">FALSE</span>' ; ?></td>
 					<td class="button">
-						<?php if($access_edit && user('id_group') == 1 && ENVIRONMENT == 'development') { ?>
+						<?php if($access_edit && ENVIRONMENT == 'development') { ?>
 						<button type="button" class="btn btn-warning btn-input" data-key="edit" data-id="<?php echo $m3->id; ?>" title="<?php echo lang('ubah'); ?>"><i class="fa-edit"></i></button>
-						<?php } if($access_delete && user('id_group') == 1 && ENVIRONMENT == 'development') { ?>
+						<?php } if($access_delete && ENVIRONMENT == 'development') { ?>
 						<button type="button" class="btn btn-danger btn-delete" data-key="delete" data-id="<?php echo $m3->id; ?>" title="<?php echo lang('hapus'); ?>"><i class="fa-trash-alt"></i></button>
 						<?php } ?>
 					</td>
@@ -71,9 +71,9 @@
 					<!-- <td class="text-center"><?php echo $m4->urutan; ?></td> -->
 					<td class="text-center"><?php echo $m4->is_active ? '<span class="badge badge-success">TRUE</span>' : '<span class="badge badge-danger">FALSE</span>' ; ?></td>
 					<td class="button">
-						<?php if($access_edit && user('id_group') == 1 && ENVIRONMENT == 'development') { ?>
+						<?php if($access_edit && ENVIRONMENT == 'development') { ?>
 						<button type="button" class="btn btn-warning btn-input" data-key="edit" data-id="<?php echo $m4->id; ?>" title="<?php echo lang('ubah'); ?>"><i class="fa-edit"></i></button>
-						<?php } if($access_delete && user('id_group') == 1 && ENVIRONMENT == 'development') { ?>
+						<?php } if($access_delete && ENVIRONMENT == 'development') { ?>
 						<button type="button" class="btn btn-danger btn-delete" data-key="delete" data-id="<?php echo $m4->id; ?>" title="<?php echo lang('hapus'); ?>"><i class="fa-trash-alt"></i></button>
 						<?php } ?>
 					</td>
