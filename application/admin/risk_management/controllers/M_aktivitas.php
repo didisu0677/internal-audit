@@ -36,6 +36,11 @@ class M_aktivitas extends BE_Controller {
 			}
 		}
 
+		$data['sub']   = get_data('tbl_aktivitas',[
+			'is_active => 1',
+			'parent_id' => 0
+		])->result_array();
+
 		// debug($data['option']);die;
 
 		render($data);
@@ -43,6 +48,7 @@ class M_aktivitas extends BE_Controller {
 
 	function data() {
 		$config['access_view'] = false;
+		$config['sort_by'] = 'aktivitas';
 	
 		$data = data_serverside($config);
 		render($data,'json');
@@ -114,6 +120,7 @@ class M_aktivitas extends BE_Controller {
 		$response = save_data('tbl_aktivitas',$data,post(':validation'));
 
 		if($response['status']= 'success') {
+
 			foreach($id_section as $k => $v){
 				$section = get_data('tbl_m_audit_section a',[
 					'select' => 'a.*,b.section_name as company, c.section_name as location, d.section_name as divisi, e.section_name as department, f.section_name as section',
@@ -129,7 +136,7 @@ class M_aktivitas extends BE_Controller {
 					]
 					])->row();
 
-
+				
 				if(!empty($section)) {
 					$data['id_company'] = $section->level1 ;
 					$data['company'] = $section->company ;
@@ -142,6 +149,15 @@ class M_aktivitas extends BE_Controller {
 					$data['id_section'] = $section->level5 ;
 					$data['section'] = $section->section ;
 					$data['id_aktivitas'] = $response['id'] ;
+					
+					if(!empty($data['parent_id'])) { 
+						$cek_aktivias = get_data('tbl_aktivitas','id',$data['parent_id'])->row();
+						if($cek_aktivias){
+							$data['sub_aktivitas'] = $data['aktivitas'];
+							$data['aktivitas'] = $cek_aktivias->aktivitas;
+						}
+					}
+									
 				}
 
 				$response = save_data('tbl_m_aktivitas',$data,post(':validation'));
