@@ -20,19 +20,47 @@ class Risk_matrik extends BE_Controller {
 			'join'		=> 'tbl_aktivitas b on a.id_aktivitas = b.id type LEFT',
 	        'where'     => [
 	            'a.is_active' => 1,
+				'a.parent_id' => 0,
                 // 'a.id' => 4
 	        ],
 	    ];
 
 
         // $tahun = get('tahun');
-
-
 	    $data['grup'][0]= get_data('tbl_m_aktivitas a',$arr)->result();
+		foreach($data['grup'][0] as $s) {
+			$data['det'][$s->id] = get_data('tbl_m_aktivitas a',[
+				'where' => [
+					'is_active' => 1,
+					'parent_id' => $s->id
+				]
+			])->result();
+		} 
+
+
         $data['section'] = get_data('tbl_m_audit_section','is_active',1)->result_array(); 
 		$data['int_control'] = get_data('tbl_internal_control','is_active',1)->result_array();
 		$data['risk'] = get_data('tbl_risk_register','is_active',1)->result_array(); 
 		$data['sub'] = get_data('tbl_sub_aktivitas','is_active',1)->result_array();
+
+		$data['dampak'] = get_data('tbl_risk_register',[
+			'select' => 'id, id_aktivitas, dampak',
+			'where' => [
+				'is_active' => 1,
+				'dampak !=' => ''
+			]
+
+		])->result_array(); 
+
+		
+		$data['kemungkinan'] = get_data('tbl_risk_register',[
+			'select' => 'id, id_aktivitas, kemungkinan',
+			'where' => [
+				'is_active' => 1,
+				'kemungkinan !=' => ''
+			]
+
+		])->result_array(); 
 
         // debug($data['grup'][0]);die;
 

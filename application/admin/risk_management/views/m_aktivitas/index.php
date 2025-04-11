@@ -22,7 +22,8 @@
 				th(lang('id_divisi'),'','data-content="divisi"');
 				th(lang('id_department'),'','data-content="department"');
 				th(lang('id_section'),'','data-content="section"');
-				th(lang('aktivitas'),'','data-content="aktivitas" data-table="tbl_aktivitas"');
+				th(lang('aktivitas'),'','data-content="aktivitas"');
+				th(lang('sub_aktivitas'),'','data-content="sub_aktivitas"');
 				th(lang('aktif').'?','text-center','data-content="is_active" data-type="boolean"');
 				th('&nbsp;','','width="30" data-content="action_button"');
 	table_close();
@@ -37,10 +38,10 @@ modal_open('modal-form','','modal-xl','data-openCallback="formOpen"');
 			input('hidden','id','id');
 			select2(lang('audit_section'),'id_section[]','required',$option,'id','nama','','multiple');
 			textarea(lang('aktivitas'),'aktivitas');
-			input('text',lang('audit_area'),'audit_area');
+			select2(lang('sub_aktivitas'),'parent_id','',$sub,'id','aktivitas');
 			input('text',lang('tipe_aktivitas'),'type_aktivitas');
 			?>
-			<div class="card">
+			<!-- <div class="card">
 				<div class="card-body">
 					<div id="result" class="table-responsive mb-2">
 						<table class="table table-bordered table-detail table-app">
@@ -57,7 +58,9 @@ modal_open('modal-form','','modal-xl','data-openCallback="formOpen"');
 						</table>
 					</div>
 				</div>
-			</div>
+			</div> -->
+
+
 			</br>
 			<div class="card">
 				<div class="card-header">Risk Register</div>
@@ -66,14 +69,19 @@ modal_open('modal-form','','modal-xl','data-openCallback="formOpen"');
 						<table class="table table-bordered table-app table-dokter">
 							<thead>
 								<tr>
-									<th width="10"><div class="btn-group" role="group""></button><button type="button" class="btn btn-sm btn-success btn-icon-only btn-add-riskitem" title="'+lang.tambah_item+'"><i class="fa-plus"></i></button></div></th>
-									<th width="300">Resiko Existing</th>
-									<th>Dampak</th>
-									<th width="60">Score Dampak</th>
-									<th>Kemungkinan</th>
-									<th width="60">Score Kemungkinan</th>
-									<th width="60">Bobot</th>
+									<th width="10" rowspan="2"><div class="btn-group" role="group""></button><button type="button" class="btn btn-sm btn-success btn-icon-only btn-add-riskitem" title="'+lang.tambah_item+'"><i class="fa-plus"></i></button></div></th>
+									<th width="300" rowspan="2">Resiko Existing</th>
+									<th class="text-center" colspan="2">Dampak </th>
+									<th class="text-center" colspan="2">Kemungkinan</th>
+									<th width="60" rowspan="2">Total Score</th>
+									<th rowspan="2">Bobot</th>
 								</tr>
+									<th>Dampak</th>
+									<th width="60">score</th>
+									<th>kemungkinan</th>
+									<th width="60">score</th>
+								<tr>
+								<tr>
 							</thead>
 							<tbody>
 							</tbody>
@@ -201,6 +209,7 @@ function add_itemrisk() {
 				konten += '<td><input type="text" autocomplete="off" class="form-control score_dampak" name="score_dampak[]" id = "score_dampak'+index0+'" value ="" aria-label="" data-validation=""/></td>';
 				konten += '<td width="250"><input type="text" autocomplete="off" class="form-control kemungkinan" name="kemungkinan[]" id = "kemungkinan'+index0+'" value ="" aria-label="" data-validation=""/></td>';
 				konten += '<td><input type="text" autocomplete="off" class="form-control score_kemungkinan" name="score_kemungkinan[]" id = "score_kemungkinan'+index0+'" value ="" aria-label="" data-validation=""/></td>';	
+				konten += '<td><input type="text" autocomplete="off" class="form-control total_score" name="total_score[]" id = "total_score'+index0+'" value ="" aria-label="" data-validation=""/></td>'	
 				konten += '<td><input type="text" autocomplete="off" class="form-control bobot_risk" name="bobot_risk[]" id = "bobot_risk'+index0+'" value ="" aria-label="" data-validation=""/></td>'			
 		+ '</tr>';
 	$('#result2 tbody').append(konten);
@@ -223,7 +232,7 @@ function add_itemcontrol() {
 				konten += '<td><input type="text" autocomplete="off" class="form-control no_pnp" name="no_pnp[]" id = "no_pnp'+index1+'" value ="" aria-label="" data-validation=""/></td>';
 				konten += '<td width="250"><input type="text" autocomplete="off" class="form-control jenis_pnp" name="jenis_pnp[]" id = "jenis_pnp'+index1+'" value ="" aria-label="" data-validation=""/></td>';
 				konten += '<td><input type="text" autocomplete="off" class="form-control penerbit" name="penerbit[]" id = "penerbit'+index1+'" value ="" aria-label="" data-validation=""/></td>';	
-				konten += '<td><input type="text" autocomplete="off" class="form-control tgl_pnp" name="tgl_pnp[]" id = "tgl_pnp'+index1+'" value ="" aria-label="" data-validation=""/></td>'			
+				konten += '<td><input type="date" autocomplete="off" class="form-control tgl_pnp" name="tgl_pnp[]" id = "tgl_pnp'+index1+'" value ="" aria-label="" data-validation=""/></td>'			
 		+ '</tr>';
 	$('#result3 tbody').append(konten);
 	index1++;

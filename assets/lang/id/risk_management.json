@@ -22,5 +22,12 @@
     "no_pnp" : "No PnP",
     "jenis_pnp" : "Jenis PnP",
     "penerbit_pnp" : "Penerbit Pnp",
-    "tanggal_pnp" : "Tanggal Pnp"
+    "tanggal_pnp" : "Tanggal Pnp",
+    "location" : "Lokasi",
+    "divisi" : "Divisi",
+    "department" : "Departemen",
+    "section" : "Section",
+    "score" : "Skor",
+    "total_score" : "Total Skor"
+
 } 

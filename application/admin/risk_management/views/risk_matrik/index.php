@@ -43,12 +43,20 @@
 						table_open('table table-bordered table-app table-hover table-1');
 							thead();
 								tr();
+									th(lang('location'),'','class="text-center align-middle headcol"');
+									th(lang('divisi'),'','class="text-center align-middle headcol"');
+									th(lang('department'),'','class="text-center align-middle headcol"');
+									th(lang('section'),'','class="text-center align-middle headcol"');
 									th(lang('aktivitas'),'','class="text-center align-middle headcol"');
 									th(lang('sub_aktivitas'),'','class="text-center align-middle headcol"');
-									th(lang('audit_section'),'','class="text-center align-middle headcol"');
 									th(lang('internal_control'),'','class="text-center align-middle headcol"');
 									th(lang('risk'),'','class="text-center align-middle headcol"');
-									
+									th(lang('dampak'),'','class="text-center align-middle headcol"');
+									th(lang('score'),'','class="text-center align-middle headcol"');
+									th(lang('kemungkinan'),'','class="text-center align-middle headcol"');
+									th(lang('score'),'','class="text-center align-middle headcol"');
+									th(lang('total_score'),'','class="text-center align-middle headcol"');
+									th(lang('bobot'),'','class="text-center align-middle headcol"');
 							tbody();
 						table_close();
 						?>
