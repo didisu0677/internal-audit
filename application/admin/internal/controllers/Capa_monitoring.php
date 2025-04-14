@@ -19,7 +19,7 @@ class Capa_monitoring extends BE_Controller {
 			$data['department'] = get_data('tbl_m_audit_section',[
 				'where' => [
 					'is_active' => 1,
-					'__m' => 'id in (select id_department_auditee from tbl_finding_records)'
+					'__m' => 'id in (select id_section_department from tbl_finding_records)'
 				],
 				])->result_array();
 
@@ -46,8 +46,8 @@ class Capa_monitoring extends BE_Controller {
 			// if(!empty($dept->id_department) && isset($dept->id_department)) $dept1 = json_decode($dept->id_department,true);
 
 			$data['department'] = get_data('tbl_m_audit_section a',[
-				'select' => 'b.id as id, b.section_code, b.section_name, b.description',
-				'join' => 'tbl_m_audit_section b on a.parent_id = b.id type LEFT',
+				'select' => 'a.id as id, a.section_code, a.section_name, a.description',
+				// 'join' => 'tbl_m_audit_section b on a.parent_id = b.id type LEFT',
 				'where' => [
 					'a.is_active' => 1,
 					'a.id' => $arr_d,
@@ -74,9 +74,8 @@ class Capa_monitoring extends BE_Controller {
 
 	function data() {
 		$arr            = [
-			'select'    => 'a.*,b.periode_audit, b.nama_auditor, b.finding,b.bobot_finding, c.department, d.nama as pic, e.status as status_capa', 
+			'select'    => 'a.*,b.id_section_department,b.periode_audit, b.nama_auditor, b.finding,b.bobot_finding, d.nama as pic, e.status as status_capa', 
 			'join'      =>  ['tbl_finding_records b on a.id_finding = b.id type LEFT',
-							 'tbl_m_department c on b.id_department_auditee = c.id type LEFT',
 							 'tbl_user d on a.pic_capa = d.username type LEFT',
 							 'tbl_status_capa e on a.id_status_capa = e.id type LEFT'
 							],
@@ -89,8 +88,8 @@ class Capa_monitoring extends BE_Controller {
 		$data['capa'] = get_data('tbl_capa a',$arr)->result();
 
 		$arr1 = [
-			'select' => 'a.*,b.department',
-				'join' => 'tbl_m_department b on a.id_department_auditee = b.id type LEFT',
+			'select' => 'a.*,b.section_name as department',
+				'join' => 'tbl_m_audit_section b on a.id_section_department = b.id type LEFT',
 				'where' => [
 					'a.is_active' => 0
 				],
@@ -102,7 +101,7 @@ class Capa_monitoring extends BE_Controller {
 		}
 
 		if(post('dept') && post('dept') != 'ALL') {
-			$arr1['where']['a.id_department_auditee'] = post('dept');
+			$arr1['where']['a.id_section_department'] = post('dept');
 		}
 
 		$data['finding'] = get_data('tbl_finding_records a',$arr1)->result();
