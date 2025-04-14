@@ -85,6 +85,17 @@ modal_open('modal-form','','modal-xl','data-openCallback="formOpen"');
 							</thead>
 							<tbody>
 							</tbody>
+							<tfoot>
+								<tr>
+									<td colspan="2"></td>
+									<td>Rata-Rata Score</td>
+									<td><input type="text" name="rata2_dampak" id="rata2_dampak" autocomplete="off" class="form-control text-right" data-readonly="true" /></td>
+									<td>Rata-Rata Score</td>
+									<td><input type="text" name="rata2_kemungkinan" id="rata2_kemungkinan" autocomplete="off" class="form-control " data-readonly="true" /></td>
+									<td><input type="text" name="rata2_total" id="rata2_total" autocomplete="off" class="form-control " data-readonly="true" /></td>
+									<td><input type="text" name="bobot" id="bobot" autocomplete="off" class="form-control " data-readonly="true" /></td>
+								</tr>
+							</tfoot>
 						</table>
 					</div>
 				</div>
@@ -156,12 +167,14 @@ function formOpen() {
 	$('#result2 tbody').html('')
 	$('#result3 tbody').html('')
 	if(typeof response.id != 'undefined') {
+		$('total_score').val(response.total_score);
+		$('score_dampak').val(response.score_dampak);
+		$('score_kemungkinan').val(response.score_kemungkinan);
 		$.each(response.detail,function(k,v){
 			add_sub_aktivitas();
 			var f = $('#result tbody tr').last();
 			f.find('.sub_aktivitas').val(v.sub_aktivitas);
 			f.find('.id_sub_aktivitas').val(v.id);
-
 		});
 
 		$.each(response.risk,function(k,v){
@@ -173,6 +186,7 @@ function formOpen() {
 			f.find('.score_dampak').val(v.score_dampak);
 			f.find('.kemungkinan').val(v.kemungkinan);
 			f.find('.score_kemungkinan').val(v.score_kemungkinan);
+			f.find('.total_score').val(v.total_score);
 			f.find('.bobot_risk').val(v.bobot);
 
 		});
@@ -187,7 +201,6 @@ function formOpen() {
 			f.find('.jenis_pnp').val(v.jenis_pnp);
 			f.find('.penerbit').val(v.penerbit_pnp);
 			f.find('.tgl_pnp').val(v.tanggal_pnp);
-
 		});
 	} 
 	is_edit = false;
@@ -222,6 +235,8 @@ $(document).on('click','.btn-add-controlitem',function(){
 
 $(document).on('click','.btn-removerisk',function(){
 	$(this).closest('tr').remove();
+	calculate_dampak();
+	calculate_kemungkinan();
 });
 
 function add_itemcontrol() {
@@ -242,4 +257,54 @@ $(document).on('click','.btn-removecontrol',function(){
 	$(this).closest('tr').remove();
 });
 
+$(document).on('keyup','.score_dampak',function(){
+	calculate_dampak();
+});
+
+$(document).on('keyup','.score_kemungkinan',function(){
+	calculate_kemungkinan();
+});
+
+function calculate_dampak() {
+	var total = 0;
+	var jml = 0;
+	var idx = 0 ;
+	$('#result2 tbody tr').each(function(){
+		if($(this).find('.score_dampak').length == 1) {
+			var subtotal = moneyToNumber($(this).find('.score_dampak').val());
+			var score_kemungkinan = moneyToNumber($(this).find('.score_kemungkinan').val());
+			total += subtotal;
+			jml++;
+
+			if(score_kemungkinan > 0) {
+				$('#total_score'+idx).val(customFormat(subtotal * score_kemungkinan));
+			}
+		}
+		idx++;
+	});
+
+	$('#rata2_dampak').val(customFormat(total / jml));
+	$('#rata2_total').val(customFormat($('#rata2_dampak').val() * $('#rata2_kemungkinan').val()));
+}
+
+function calculate_kemungkinan() {
+	var total2 = 0;
+	var jml2 = 0;
+	var idx1 = 0;
+	$('#result2 tbody tr').each(function(){
+		if($(this).find('.score_kemungkinan').length == 1) {
+			var subtotal2= moneyToNumber($(this).find('.score_kemungkinan').val());
+			var score_dampak = moneyToNumber($(this).find('.score_dampak').val());
+			total2 += subtotal2;
+			jml2++;
+
+			$('#total_score'+idx1).val(customFormat(subtotal2 * score_dampak));
+			total_score = moneyToNumber($(this).find('.total_score').val());
+		}
+		idx1++;
+	});
+
+	$('#rata2_kemungkinan').val(customFormat(total2 / jml2));
+	$('#rata2_total').val(customFormat($('#rata2_dampak').val() * $('#rata2_kemungkinan').val()));
+}
 </script>

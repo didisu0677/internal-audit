@@ -13,7 +13,7 @@ class Finding_records extends BE_Controller {
 			$data['department'] = get_data('tbl_m_audit_section',[
 				'where' => [
 					'is_active' => 1,
-					'__m' => 'id in (select id_department_auditee from tbl_finding_records)'
+					'__m' => 'id in (select id_section_department from tbl_finding_records)'
 				],
 				])->result_array();
 
@@ -47,8 +47,8 @@ class Finding_records extends BE_Controller {
 			// if(!empty($dept->id_department) && isset($dept->id_department)) $dept1 = json_decode($dept->id_department,true);
 
 			$data['department'] = get_data('tbl_m_audit_section a',[
-				'select' => 'b.id as id, b.section_code, b.section_name, b.description',
-				'join' => 'tbl_m_audit_section b on a.parent_id = b.id type LEFT',
+				'select' => 'a.id as id, a.section_code, a.section_name, a.description',
+				// 'join' => 'tbl_m_audit_section b on a.parent_id = b.id type LEFT',
 				'where' => [
 					'a.is_active' => 1,
 					'a.id' => $arr_d,
@@ -142,7 +142,7 @@ class Finding_records extends BE_Controller {
 	    }
 
 		if($department && $department != 'ALL') {
-	    	$config['where']['id_department_auditee']	= $department;	
+	    	$config['where']['id_section_department']	= $department;	
 	    }
 
 		$data = data_serverside($config);
