@@ -33,9 +33,7 @@
 					<div class="col-sm-12">
 						<div class="input-group">
 							<select class = "select2 infinity custom-select" style="width: 300px;" id="department">
-								<?php if(user('id_group') != AUDITEE) { ?>
 								<option value="ALL">ALL Department</option>
-								<?php } ?>
 								<?php foreach($department as $d){ ?>
 								<option value="<?php echo $d['id']; ?>"><?php echo $d['description'] . ' | '. $d['section_name']; ?></option>
 								<?php } ?>
