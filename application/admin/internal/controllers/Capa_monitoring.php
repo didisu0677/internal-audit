@@ -14,12 +14,12 @@ class Capa_monitoring extends BE_Controller {
 			],
 			])->result_array(); 
 
-			
 		if(user('id_group') != AUDITEE){
 			$data['department'] = get_data('tbl_m_audit_section',[
+				'select' => 'distinct id, section_code, section_name, description',
 				'where' => [
 					'is_active' => 1,
-					'__m' => 'id in (select id_section_department from tbl_finding_records where id in (select id_finding from tbl_capa))'
+					'__m' => 'id in (select id_section_department from tbl_finding_records where id in (select id_finding from tbl_capa))',
 				],
 				])->result_array();
 
@@ -35,6 +35,7 @@ class Capa_monitoring extends BE_Controller {
 					'a.nip' => user('username') 
 				]
 			])->result();
+			// debug($data['department']);die;
 
 			$arr_d = [];
 			foreach($dept as $d) {
@@ -54,7 +55,7 @@ class Capa_monitoring extends BE_Controller {
 				],
 				])->result_array();
 
-			// debug($data['department']);die;
+
 
 			$data['tahun'] = get_data('tbl_finding_records',[
 				'select' => 'distinct year(tgl_mulai_audit) as tahun',

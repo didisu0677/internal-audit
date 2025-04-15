@@ -18,7 +18,7 @@ class Finding_records extends BE_Controller {
 				])->result_array();
 
 				$data['tahun'] = get_data('tbl_finding_records',[
-					'select' => 'distinct year(tgl_mulai_audit)',
+					'select' => 'distinct year(tgl_mulai_audit) as tahun',
 				])->result();
 		}else{
 			// $dept = get_data('tbl_auditee a',[
@@ -59,7 +59,7 @@ class Finding_records extends BE_Controller {
 			// debug($data['department']);die;
 
 			$data['tahun'] = get_data('tbl_finding_records',[
-				'select' => 'distinct year(tgl_mulai_audit)',
+				'select' => 'distinct year(tgl_mulai_audit) as tahun',
 				'where' => [
 					'id_section_department' => $arr_d
 				]
@@ -112,7 +112,7 @@ class Finding_records extends BE_Controller {
 		render($data);
 	}
 
-	function data($department="") {
+	function data($tahun="",$department="") {
 
 		$config	= [];		
 
@@ -173,6 +173,10 @@ class Finding_records extends BE_Controller {
 	    	$config['where']['id_section_department']	= $department;	
 	    }else{
 			$config['where']['id_section_department']	= $arr_d;	
+		}
+
+		if($tahun) {
+			$config['where']['year(tgl_mulai_audit)']	= $tahun;	
 		}
 
 		$data = data_serverside($config);
