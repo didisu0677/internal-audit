@@ -35,7 +35,7 @@
 							<select class = "select2 infinity custom-select" style="width: 300px;" id="department">
 								<option value="ALL">ALL Department</option>
 								<?php foreach($department as $d){ ?>
-								<option value="<?php echo $d['id']; ?>"><?php echo $d['description'] . ' | '. $d['section_name']; ?></option>
+								<option value="<?php echo $d['id']; ?>"><?php echo $d['id'] .'-'. $d['description'] . ' | '. $d['section_name']; ?></option>
 								<?php } ?>
 							</select>
 						</div>
