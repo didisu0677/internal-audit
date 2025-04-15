@@ -7,8 +7,8 @@
 		<div class="float-right">
 			<label class=""><?php echo lang('department'); ?> &nbsp</label>					
 			<select class = "select2 infinity custom-select" style="width: 500px;" id="department">
-				<?php if(user('id_group') != AUDITEE) { ?>
 				<option value="ALL">ALL Department</option>
+				<?php if(user('id_group') != AUDITEE) { ?>
 				<?php } ?>
 				<?php foreach($department as $d){ ?>
 				<option value="<?php echo $d['id']; ?>"><?php echo $d['description'] . ' | ' . $d['section_name']; ?></option>
