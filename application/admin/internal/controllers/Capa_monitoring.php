@@ -46,7 +46,7 @@ class Capa_monitoring extends BE_Controller {
 			// if(!empty($dept->id_department) && isset($dept->id_department)) $dept1 = json_decode($dept->id_department,true);
 
 			$data['department'] = get_data('tbl_m_audit_section a',[
-				'select' => 'a.id as id, a.section_code, a.section_name, a.description',
+				'select' => 'distinct a.id as id, a.section_code, a.section_name, a.description',
 				'where' => [
 					'a.is_active' => 1,
 					'a.id' => $arr_d,
