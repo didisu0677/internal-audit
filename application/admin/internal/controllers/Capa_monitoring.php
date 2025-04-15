@@ -19,7 +19,7 @@ class Capa_monitoring extends BE_Controller {
 			$data['department'] = get_data('tbl_m_audit_section',[
 				'where' => [
 					'is_active' => 1,
-					'__m' => 'id in (select id_section_department from tbl_finding_records)'
+					'__m' => 'id in (select id_section_department from tbl_finding_records where id in (select id_finding from tbl_capa))'
 				],
 				])->result_array();
 
@@ -29,7 +29,7 @@ class Capa_monitoring extends BE_Controller {
 
 		}else{
 			$dept = get_data('tbl_detail_auditee a',[
-				'select' => 'a.nip,a.id_department,a.id_section',
+				'select' => 'distinct a.id_section',
 				'join' => 'tbl_user b on a.nip = b.username',
 				'where' => [
 					'a.nip' => user('username') 
@@ -47,11 +47,10 @@ class Capa_monitoring extends BE_Controller {
 
 			$data['department'] = get_data('tbl_m_audit_section a',[
 				'select' => 'a.id as id, a.section_code, a.section_name, a.description',
-				// 'join' => 'tbl_m_audit_section b on a.parent_id = b.id type LEFT',
 				'where' => [
 					'a.is_active' => 1,
 					'a.id' => $arr_d,
-					'__m' => 'a.id in (select id_section_department from tbl_finding_records)'
+					'__m' => 'a.id in (select id_section_department from tbl_finding_records where id in (select id_finding from tbl_capa))'
 				],
 				])->result_array();
 
