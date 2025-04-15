@@ -5,6 +5,13 @@
 			<?php echo breadcrumb(); ?>
 		</div>
 		<div class="float-right">
+			<label class=""><?php echo lang('tahun'); ?>  &nbsp</label>
+			<select class="select2 infinity custom-select" style="width: 80px;" id="filter_tahun">
+				<?php foreach ($tahun as $tahun) { ?>
+                <option value="<?php echo $tahun->tahun; ?>"<?php if($tahun->tahun == user('tahun_budget')) echo ' selected'; ?>><?php echo $tahun->tahun; ?></option>
+                <?php } ?>
+			</select>
+
 			<label class=""><?php echo lang('department'); ?> &nbsp</label>					
 			<select class = "select2 infinity custom-select" style="width: 500px;" id="department">
 				<option value="ALL">ALL Department</option>
@@ -510,14 +517,24 @@ var idy = 999;
 
 $(document).ready(function() {
 	var url = base_url + 'internal/finding_records/data/' ;
-		url 	+= '/'+$('#department').val() 
+		url 	+= '/'+$('#filter_tahun').val();
+		url 	+= '/'+$('#department').val() ;
 	$('[data-serverside]').attr('data-serverside',url);
 	refreshData();
 });	
 
 $('#department').change(function(){
 	var url = base_url + 'internal/finding_records/data/' ;
-		url 	+= '/'+$('#department').val() 
+		url 	+= '/'+$('#filter_tahun').val();
+		url 	+= '/'+$('#department').val(); 
+	$('[data-serverside]').attr('data-serverside',url);
+	refreshData();
+});
+
+$('#filter_tahun').change(function(){
+	var url = base_url + 'internal/finding_records/data/' ;
+		url 	+= '/'+$('#filter_tahun').val();
+		url 	+= '/'+$('#department').val(); 
 	$('[data-serverside]').attr('data-serverside',url);
 	refreshData();
 });
