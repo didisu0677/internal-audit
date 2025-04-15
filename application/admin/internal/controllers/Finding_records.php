@@ -131,6 +131,34 @@ class Finding_records extends BE_Controller {
 	   		 ];
 		}
 
+		/// cari department //
+		if(user('id_group') != AUDITEE){
+			$dept = get_data('tbl_m_audit_section',[
+				'select' => 'id as id_section',
+				'where' => [
+					'is_active' => 1,
+					'__m' => 'id in (select id_section_department from tbl_finding_records)'
+				],
+				])->result();
+
+		}else{
+
+			$dept = get_data('tbl_detail_auditee a',[
+				'select' => 'a.nip,a.id_department,a.id_section',
+				'join' => 'tbl_user b on a.nip = b.username',
+				'where' => [
+					'a.nip' => user('username') 
+				]
+			])->result();
+		}
+
+		$arr_d = [];
+		foreach($dept as $d) {
+			$arr_d[] = $d->id_section;
+		}
+		
+		//
+
 
 		$config['join'][] = 'tbl_auditee ON tbl_auditee.id = tbl_finding_records.auditee TYPE LEFT';
 		$config['button'][]	= button_serverside('btn-default','btn-capa',['far fa-copy',lang('capa_plan'),true],'act-dokumen',['status_finding !='=>2]);
@@ -143,7 +171,9 @@ class Finding_records extends BE_Controller {
 
 		if($department && $department != 'ALL') {
 	    	$config['where']['id_section_department']	= $department;	
-	    }
+	    }else{
+			$config['where']['id_section_department']	= $arr_d;	
+		}
 
 		$data = data_serverside($config);
 		render($data,'json');

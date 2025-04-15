@@ -73,6 +73,33 @@ class Capa_monitoring extends BE_Controller {
 	// }
 
 	function data() {
+
+		// cari department 
+		if(user('id_group') != AUDITEE){
+			$dept = get_data('tbl_m_audit_section',[
+				'select' => 'id as id_section',
+				'where' => [
+					'is_active' => 1,
+					'__m' => 'id in (select b.id_section_department from tbl_finding_records b where b.id in (select id_finding from tbl_capa))'
+				],
+				])->result();
+
+		}else{
+			$dept = get_data('tbl_detail_auditee a',[
+				'select' => 'a.nip,a.id_department,a.id_section',
+				'join' => 'tbl_user b on a.nip = b.username',
+				'where' => [
+					'a.nip' => user('username') 
+				]
+			])->result();
+		}
+
+		$arr_d = [];
+		foreach($dept as $d) {
+			$arr_d[] = $d->id_section;
+		}
+
+		//
 		$arr            = [
 			'select'    => 'a.*,b.id_section_department,b.periode_audit, b.nama_auditor, b.finding,b.bobot_finding, d.nama as pic, e.status as status_capa', 
 			'join'      =>  ['tbl_finding_records b on a.id_finding = b.id type LEFT',
@@ -102,6 +129,8 @@ class Capa_monitoring extends BE_Controller {
 
 		if(post('dept') && post('dept') != 'ALL') {
 			$arr1['where']['a.id_section_department'] = post('dept');
+		}else{
+			$arr1['where']['a.id_section_department'] = $arr_d;
 		}
 
 		$data['finding'] = get_data('tbl_finding_records a',$arr1)->result();
