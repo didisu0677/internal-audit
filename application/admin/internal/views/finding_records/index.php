@@ -8,7 +8,7 @@
 			<label class=""><?php echo lang('tahun'); ?>  &nbsp</label>
 			<select class="select2 infinity custom-select" style="width: 80px;" id="filter_tahun">
 				<?php foreach ($tahun as $tahun) { ?>
-                <option value="<?php echo $tahun->tahun; ?>"<?php if($tahun->tahun == user('tahun_budget')) echo ' selected'; ?>><?php echo $tahun->tahun; ?></option>
+                <option value="<?php echo $tahun->tahun; ?>"<?php if($tahun->tahun == date('Y')) echo ' selected'; ?>><?php echo $tahun->tahun; ?></option>
                 <?php } ?>
 			</select>
 
@@ -555,7 +555,9 @@ function formOpen1() {
 	$('#additional-finding').html('');
 
 	// $('#bobot_finding').trigger('change');
-	select_value2 = $('#bobot_finding').html();
+	select_value2 = $('#bobot_finding option').map(function () {
+		return `<option value="${this.value}">${$(this).text()}</option>`;
+	}).get().join('');
     $('#id_finding_records').val(0);
 	get_department();
 	CKEDITOR.instances['isi_finding'+0].setData('');

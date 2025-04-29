@@ -36,9 +36,8 @@ class M_aktivitas extends BE_Controller {
 			}
 		}
 
-		$data['sub']   = get_data('tbl_aktivitas',[
+		$data['opt_aktivitas']   = get_data('tbl_aktivitas',[
 			'is_active => 1',
-			'parent_id' => 0
 		])->result_array();
 
 		// debug($data['option']);die;
@@ -46,12 +45,72 @@ class M_aktivitas extends BE_Controller {
 		render($data);
 	}
 
-	function data() {
-		$config['access_view'] = false;
-		$config['sort_by'] = 'aktivitas';
+	// function data() {
+	// 	$config['access_view'] = false;
+	// 	$config['sort_by'] = 'aktivitas';
 	
-		$data = data_serverside($config);
-		render($data,'json');
+	// 	$data = data_serverside($config);
+	// 	render($data,'json');
+	// }
+
+	function data($tahun = "", $tipe = 'table') {
+        $arr            = [
+	        'select'	=> 'a.*,b.aktivitas',
+			'join'		=> 'tbl_aktivitas b on a.id_aktivitas = b.id type LEFT',
+	        'where'     => [
+	            'a.is_active' => 1,
+				'a.parent_id' => 0,
+                // 'a.id' => 4
+	        ],
+	    ];
+
+
+        // $tahun = get('tahun');
+	    $data['grup'][0]= get_data('tbl_m_aktivitas a',$arr)->result();
+		foreach($data['grup'][0] as $s) {
+			$data['det'][$s->id] = get_data('tbl_m_aktivitas a',[
+				'where' => [
+					'is_active' => 1,
+					'parent_id' => $s->id
+				]
+			])->result();
+		} 
+
+
+        $data['section'] = get_data('tbl_m_audit_section','is_active',1)->result_array(); 
+		$data['int_control'] = get_data('tbl_internal_control','is_active',1)->result_array();
+		$data['risk'] = get_data('tbl_risk_register','is_active',1)->result_array(); 
+		$data['sub'] = get_data('tbl_sub_aktivitas','is_active',1)->result_array();
+
+		$data['dampak'] = get_data('tbl_risk_register',[
+			'select' => 'id, id_aktivitas, dampak',
+			'where' => [
+				'is_active' => 1,
+				'dampak !=' => ''
+			]
+
+		])->result_array(); 
+
+		
+		$data['kemungkinan'] = get_data('tbl_risk_register',[
+			'select' => 'id, id_aktivitas, kemungkinan',
+			'where' => [
+				'is_active' => 1,
+				'kemungkinan !=' => ''
+			]
+
+		])->result_array(); 
+
+        // debug($data['grup'][0]);die;
+
+
+      
+    //    debug($data['cc']);die;
+        $response	= array(
+            'table'		=> $this->load->view('risk_management/m_aktivitas/table',$data,true),
+        );
+
+	    render($response,'json');
 	}
 
 	function get_data() {
@@ -102,7 +161,6 @@ class M_aktivitas extends BE_Controller {
 		$risk = post('risk');
 		$dampak = post('dampak');
 		$score_dampak = post('score_dampak');
-		$kemungkinan = post('kemungkinan');
 		$score_kemungkinan = post('score_kemungkinan');
 		$bobot_risk = post('bobot_risk');
 
@@ -188,7 +246,6 @@ class M_aktivitas extends BE_Controller {
 						'risk'=>$risk[$r],
 						'dampak' => $dampak[$r],
 						'score_dampak' => $score_dampak[$r],
-						'kemungkinan' =>$kemungkinan[$r],
 						'score_kemungkinan' => $score_kemungkinan[$r],
 						'bobot' => $bobot_risk[$r],
 						'is_active'=>1
@@ -285,5 +342,4 @@ class M_aktivitas extends BE_Controller {
 		$this->load->library('simpleexcel',$config);
 		$this->simpleexcel->export();
 	}
-
 }

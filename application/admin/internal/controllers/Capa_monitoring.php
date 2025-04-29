@@ -25,6 +25,8 @@ class Capa_monitoring extends BE_Controller {
 
 				$data['tahun'] = get_data('tbl_finding_records',[
 					'select' => 'distinct year(tgl_mulai_audit) as tahun',
+					'sort_by' => 'year(tgl_mulai_audit)',
+					'sort' => 'DESC',
 				])->result();
 
 		}else{
@@ -60,7 +62,9 @@ class Capa_monitoring extends BE_Controller {
 			$data['tahun'] = get_data('tbl_finding_records',[
 				'select' => 'distinct year(tgl_mulai_audit) as tahun',
 				'where' => [
-					'id_section_department' => $arr_d
+					'id_section_department' => $arr_d,
+					'sort_by' => 'year(tgl_mulai_audit)',
+					'sort' => 'DESC'
 				]
 			])->result();
 		}

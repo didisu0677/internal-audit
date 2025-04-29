@@ -64,5 +64,11 @@
     "section" : "Section",
     "evidence_base" : "Evidence Base",
     "revise" : "Revise",
-    "download" : "Download"
+    "download" : "Download",
+    "aktivitas" : "Aktivitas",
+    "sub_aktivitas" : "Sub Aktivitas",
+    "risk" : "Resiko",
+    "keterangan" : "Keterangan",
+    "location" : "Lokasi",
+    "internal_control" : "Internal Kontrol"
 }
