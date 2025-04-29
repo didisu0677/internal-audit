@@ -555,7 +555,9 @@ function formOpen1() {
 	$('#additional-finding').html('');
 
 	// $('#bobot_finding').trigger('change');
-	select_value2 = $('#bobot_finding').html();
+	select_value2 = $('#bobot_finding option').map(function () {
+		return `<option value="${this.value}">${$(this).text()}</option>`;
+	}).get().join('');
     $('#id_finding_records').val(0);
 	get_department();
 	CKEDITOR.instances['isi_finding'+0].setData('');
