@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Audit_section extends BE_Controller {
+class Divisi_dept_section extends BE_Controller {
 
 	function __construct() {
 		parent::__construct();
@@ -35,15 +35,15 @@ class Audit_section extends BE_Controller {
 			}
 			if($tipe == 'sortable') {
 				$response	= array(
-					'content' => $this->load->view('settings/audit_section/sortable',$data,true)
+					'content' => $this->load->view('settings/divisi_dept_section/sortable',$data,true)
 				);
 			} else {
 				$data['access_edit']	= $audit_section['access_edit'];
 				$data['access_delete']	= $audit_section['access_delete'];
 
 				$response	= array(
-					'table'		=> $this->load->view('settings/audit_section/table',$data,true),
-					'option'	=> $this->load->view('settings/audit_section/option',$data,true)
+					'table'		=> $this->load->view('settings/divisi_dept_section/table',$data,true),
+					'option'	=> $this->load->view('settings/divisi_dept_section/option',$data,true)
 				);
 			}
 		} else {

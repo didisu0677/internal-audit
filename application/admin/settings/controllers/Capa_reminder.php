@@ -1,6 +1,6 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
-class Status_capa extends BE_Controller {
+class Capa_reminder extends BE_Controller {
 
 	function __construct() {
 		parent::__construct();
@@ -16,25 +16,25 @@ class Status_capa extends BE_Controller {
 	}
 
 	function get_data() {
-		$data = get_data('tbl_status_capa','id',post('id'))->row_array();
+		$data = get_data('tbl_score_capa','id',post('id'))->row_array();
 		render($data,'json');
 	}
 
 	function save() {
-		$response = save_data('tbl_status_capa',post(),post(':validation'));
+		$response = save_data('tbl_score_capa',post(),post(':validation'));
 		render($response,'json');
 	}
 
 	function delete() {
-		$response = destroy_data('tbl_status_capa','id',post('id'));
+		$response = destroy_data('tbl_score_capa','id',post('id'));
 		render($response,'json');
 	}
 
 	function template() {
 		ini_set('memory_limit', '-1');
-		$arr = ['status' => 'status','is_active' => 'is_active'];
+		$arr = ['description' => 'description','score' => 'score','is_active' => 'is_active'];
 		$config[] = [
-			'title' => 'template_import_status_capa',
+			'title' => 'template_import_score_capa',
 			'header' => $arr,
 		];
 		$this->load->library('simpleexcel',$config);
@@ -44,7 +44,7 @@ class Status_capa extends BE_Controller {
 	function import() {
 		ini_set('memory_limit', '-1');
 		$file = post('fileimport');
-		$col = ['status','is_active'];
+		$col = ['description','score','is_active'];
 		$this->load->library('simpleexcel');
 		$this->simpleexcel->define_column($col);
 		$jml = $this->simpleexcel->read($file);
@@ -55,7 +55,7 @@ class Status_capa extends BE_Controller {
 					$data = $this->simpleexcel->parsing($i,$j);
 					$data['create_at'] = date('Y-m-d H:i:s');
 					$data['create_by'] = user('nama');
-					$save = insert_data('tbl_status_capa',$data);
+					$save = insert_data('tbl_score_capa',$data);
 					if($save) $c++;
 				}
 			}
@@ -70,10 +70,10 @@ class Status_capa extends BE_Controller {
 
 	function export() {
 		ini_set('memory_limit', '-1');
-		$arr = ['status' => 'Status','is_active' => 'Aktif'];
-		$data = get_data('tbl_status_capa')->result_array();
+		$arr = ['description' => 'Description','score' => 'Score','is_active' => 'Aktif'];
+		$data = get_data('tbl_score_capa')->result_array();
 		$config = [
-			'title' => 'data_status_capa',
+			'title' => 'data_score_capa',
 			'data' => $data,
 			'header' => $arr,
 		];
