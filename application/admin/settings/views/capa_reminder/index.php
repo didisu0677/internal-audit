@@ -12,7 +12,7 @@
 </div>
 <div class="content-body">
 	<?php
-	table_open('',true,base_url('settings/score_capa/data'),'tbl_score_capa');
+	table_open('',true,base_url('settings/capa_reminder/data'),'tbl_score_capa');
 		thead();
 			tr();
 				th('checkbox','text-center','width="30" data-content="id"');
@@ -26,7 +26,7 @@
 <?php 
 modal_open('modal-form');
 	modal_body();
-		form_open(base_url('settings/score_capa/save'),'post','form');
+		form_open(base_url('settings/capa_reminder/save'),'post','form');
 			col_init(3,9);
 			input('hidden','id','id');
 			input('text',lang('description'),'description');
@@ -38,7 +38,7 @@ modal_open('modal-form');
 modal_close();
 modal_open('modal-import',lang('impor'));
 	modal_body();
-		form_open(base_url('settings/score_capa/import'),'post','form-import');
+		form_open(base_url('settings/capa_reminder/import'),'post','form-import');
 			col_init(3,9);
 			fileupload('File Excel','fileimport','required','data-accept="xls|xlsx"');
 			form_button(lang('impor'),lang('batal'));

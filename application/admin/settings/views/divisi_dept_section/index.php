@@ -34,7 +34,7 @@
 <?php 
 	modal_open('modal-form','','modal-lg');
 		modal_body();
-			form_open(base_url('settings/audit_section/save'),'post','form');
+			form_open(base_url('settings/divisi_dept_section/save'),'post','form');
 				col_init(3,9);
 				input('hidden','id','id');
 				select2(lang('sub_dari'),'parent_id');
@@ -62,7 +62,7 @@
 	function getData() {
 		cLoader.open(lang.memuat_data + '...');
 		$.ajax({
-			url 	: base_url + 'settings/audit_section/data',
+			url 	: base_url + 'settings/divisi_dept_section/data',
 			data 	: {},
 			type	: 'get',
 			dataType: 'json',
@@ -123,7 +123,7 @@
 	$('.btn-sort').click(function(){
 		$('#modal-sort .modal-body').html('');
 		$.ajax({
-			url : base_url + 'settings/audit_section/data/sortable',
+			url : base_url + 'settings/divisi_dept_section/data/sortable',
 			type : 'get',
 			dataType : 'json',
 			success : function(response) {
@@ -171,7 +171,7 @@
 		e.preventDefault();
 		var serialized = $('ol.sortable').nestedSortable('serialize');
 		$.ajax({
-			url : base_url + 'settings/audit_section/save_sortable',
+			url : base_url + 'settings/divisi_dept_section/save_sortable',
 			type : 'post',
 			data : serialized,
 			dataType : 'json',
