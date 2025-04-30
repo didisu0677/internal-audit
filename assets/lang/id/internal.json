@@ -70,5 +70,6 @@
     "risk" : "Resiko",
     "keterangan" : "Keterangan",
     "location" : "Lokasi",
-    "internal_control" : "Internal Kontrol"
+    "internal_control" : "Internal Kontrol",
+    "location_control" : "Lokasi Kontrol"
 }
