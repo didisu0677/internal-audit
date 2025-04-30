@@ -44,7 +44,7 @@
 					} ?>
 				</select>
 			</td>
-			<td style="width:1px; white-space: nowrap;"></td>
+
 			<td class="button">
 				<button type="button" class="btn btn-warning btn-input" data-key="edit" data-id="<?php echo $m0->id; ?>" title="<?php echo lang('ubah'); ?>"><i class="fa-edit"></i></button>
 				<button type="button" class="btn btn-danger btn-delete" data-key="delete" data-id="<?php echo $m0->id; ?>" title="<?php echo lang('hapus'); ?>"><i class="fa-trash-alt"></i></button>

@@ -77,6 +77,7 @@ class Rcm extends BE_Controller {
 
 			// debug($rk);die;
 			$data['risk'][$g->id_rk] = get_data('tbl_risk_register',[
+				'select' => 'CONCAT(risk," - ", bobot) as risk, keterangan',
 				'where' => [
 					'id' => $id_r
 				],
@@ -146,6 +147,8 @@ class Rcm extends BE_Controller {
 		// 	],
 		// 	'sort_by' => 'id',
 		// 	])->result_array();
+
+		$data['bobot']		= $this->get_bobot('return');
 		
 		render($data,'json');
 	}
@@ -423,5 +426,19 @@ class Rcm extends BE_Controller {
 		
 		render($response, 'json');
 		
+	}
+
+	function get_bobot($type='echo') {
+
+	    $data 		 = '<option value=""></option>';
+		$data       .= '<option value="Critical">Critical</option>';
+		$data       .= '<option value="Major">Major</option>';
+		$data       .= '<option value="Moderate">Moderate</option>';
+		$data       .= '<option value="Minor">Minor</option>';
+		$data       .= '<option value="Improvement">Improvement</option>v';
+	    
+	    if($type == 'echo') echo $data;
+	    else return $data;
+	    
 	}
 }

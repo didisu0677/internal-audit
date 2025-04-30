@@ -75,11 +75,12 @@ modal_open('modal-form','','modal-xl','data-openCallback="formOpen"');
 					</div>
 				</div>
 			</div>
+			<br>
 			<?php
 
 			
 
-			toggle(lang('aktif').'?','is_active');
+			// toggle(lang('aktif').'?','is_active');
 			form_button(lang('simpan'),lang('batal'));
 		form_close();
 	modal_footer();

@@ -49,7 +49,7 @@
 								th(lang('risk'),'','class="text-center align-middle headcol"');
 								th(lang('internal_control'),'','class="text-center align-middle headcol"');
 								th(lang('keterangan'),'','class="text-center align-middle headcol"');
-								th(lang('bobot'),'','class="text-center align-middle headcol"');
+								// th(lang('bobot'),'','class="text-center align-middle headcol"');
 								th('&nbsp;','','width="30"');
 						tbody();
 					table_close();
@@ -106,9 +106,9 @@ modal_open('modal-form','','modal-xl','data-openCallback="formOpen"');
 					</div>
 				</div>
 			</div>
-
+			<br>
 			<?php
-			toggle(lang('aktif').'?','is_active');
+			// toggle(lang('aktif').'?','is_active');
 			form_button(lang('simpan'),lang('batal'));
 		form_close();
 	modal_footer();
@@ -188,15 +188,17 @@ $(function(){
 // 	$('#form-control').submit();
 // });
 
-
+var bobot = '';
 function formOpen() {
 	is_edit = true;
 	var index1 = 0;
+	get_bobot();
 	var response = response_edit;
 	$('#result tbody').html('');
 	$('#result2 tbody').html('')
 	$('#result3 tbody').html('')
 	if(typeof response.id != 'undefined') {
+		bobot = response.bobot;
 		$('total_score').val(response.total_score);
 		$('score_dampak').val(response.score_dampak);
 		$('score_kemungkinan').val(response.score_kemungkinan);
@@ -218,7 +220,8 @@ function formOpen() {
 			f.find('.kemungkinan').val(v.kemungkinan);
 			f.find('.score_kemungkinan').val(v.score_kemungkinan);
 			f.find('.total_score').val(v.total_score);
-			f.find('.bobot_risk').val(v.bobot);
+			// f.find('.bobot_risk').val(v.bobot);
+			f.find('.bobot_risk').val(v.bobot).trigger('change');
 		});
 
 		$.each(response.ctrl_item,function(k,v){
@@ -253,7 +256,8 @@ function add_itemrisk() {
 				konten += '<td width="150"><input type="text" autocomplete="off" class="form-control keterangan" name="keterangan[]" id = "keterangan'+index1+'" value ="" aria-label="" data-validation=""/></td>';
 				konten += '<td><input type="text" autocomplete="off" class="form-control score_dampak" name="score_dampak[]" id = "score_dampak'+index1+'" value ="" aria-label="" data-validation=""/></td>';
 				konten += '<td><input type="text" autocomplete="off" class="form-control score_kemungkinan" name="score_kemungkinan[]" id = "score_kemungkinan'+index1+'" value ="" aria-label="" data-validation=""/></td>';	
-				konten += '<td><input type="text" autocomplete="off" class="form-control bobot_risk" name="bobot_risk[]" id = "bobot_risk'+index1+'" value ="" aria-label="" data-validation=""/></td>'			
+				// konten += '<td><input type="text" autocomplete="off" class="form-control bobot_risk" name="bobot_risk[]" id = "bobot_risk'+index1+'" value ="" aria-label="" data-validation=""/></td>'			
+				konten += '<td><select class="form-control bobot_risk" name="bobot_risk[]" id = "bobot_risk'+index1+'" value ="" aria-label="" data-validation="required">'+bobot+'</select></td>';
 		+ '</tr>';
 	$('#result2 tbody').append(konten);
 	index1++;
@@ -350,4 +354,18 @@ $('#modal-form').on('hidden.bs.modal', function () {
 		wi.close();
 	}
 });
+
+function get_bobot() {
+	if(proccess) {
+		readonly_ajax = false;
+		$.ajax({
+			url : base_url + 'risk_management/rcm/get_bobot',
+			data : {},
+			type : 'POST',
+			success	: function(response) {
+				bobot = response;
+			}
+		});
+	}
+}
 </script>
