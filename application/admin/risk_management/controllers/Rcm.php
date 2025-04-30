@@ -157,6 +157,7 @@ class Rcm extends BE_Controller {
 		$id_risk = post('id_risk');
 		$risiko = post('risk');
 
+
 		$aktivitas = post('id_aktivitas');
 
 		$keterangan = post('keterangan');
@@ -260,6 +261,7 @@ class Rcm extends BE_Controller {
 						$data['section'] = $section->section ;
 						$data['id_risk'] = $risk['id'];
 						$data['id_rk'] = $response['id'];
+						$data['id_risk1'] = json_encode($id_risk1);
 						$data['is_active'] = 1;
 					}
 					$cekm = get_data('tbl_m_aktivitas',[	
@@ -307,7 +309,19 @@ class Rcm extends BE_Controller {
 					// 	update_data('tbl_m_aktivitas',$data_u,['id'=>$data['id_rk']]);
 					// }
 
+
 					$response_m = save_data('tbl_m_aktivitas',$data,post(':validation'));
+
+
+					if($response_m['status'] == 'success') {
+						delete_data('tbl_annual_audit_plan','id_m_aktivitas',$response_m['id']);
+
+						foreach($id_risk as $i => $v) {
+							$r = get_data('tbl_risk_register','id',$v)->row();
+							$ann = save_data('tbl_annual_audit_plan',['id'=> 0,'id_risk'=>$v,'id_m_aktivitas'=>$response_m['id'],'bobot'=>$r->bobot,'is_active'=>1]);
+
+						}
+					}
 					
 				}
 															
