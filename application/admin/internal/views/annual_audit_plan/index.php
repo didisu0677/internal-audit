@@ -7,16 +7,11 @@
 		
 		<div class="float-right">   		
     		<?php 
-				echo access_button('delete,active,inactive,export,import'); 
-			// echo '<button class="btn btn-success btn-save" href="javascript:;" ><i class="fa-save"></i> Save</button>';
 
-			// $arr = [];
-			// $arr = [
-			// 	['btn-save','Save Data','fa-save'],
-			// 	// ['btn-export','Export Data','fa-upload'],
-			// 	// ['btn-import','Import Data','fa-download' ],
-			// 	// ['btn-template','Template Import','fa-reg-file-alt']
-			// ];
+			$arr = [
+				['btn-export','Export Data','fa-upload'],
+			];
+			echo access_button('',$arr); 
 		
 		
 			// echo access_button('',$arr); 
@@ -35,7 +30,7 @@
 			<form id="form-control" action="<?php echo base_url('internal/annual_audit_plan/save_perubahan'); ?>" data-callback="reload" method="post" data-submit="ajax">
 
 				<div class="card-body">
-					<div class="table-responsive tab-pane fade active show height-window">
+					<div class="table-responsive tab-pane fade active show height-window" id="result">
 					<?php
 					table_open('table table-bordered table-app table-hover table-1');
 						thead();
@@ -142,11 +137,6 @@ $(function(){
 	getData();
 });
 
-// $(document).on('click','.btn-save',function(){
-// 	$('#form-control').submit();
-// });
-
-
 function formOpen() {
 	is_edit = true;
 	var index1 = 0;
@@ -194,4 +184,34 @@ function formOpen() {
 	is_edit = false;
 }
 
+$(document).on('click', '.btn-export', function() {
+	var currentdate = new Date();
+	var datetime = currentdate.getDate() + "/" +
+		(currentdate.getMonth() + 1) + "/" +
+		currentdate.getFullYear() + " @ " +
+		currentdate.getHours() + ":" +
+		currentdate.getMinutes() + ":" +
+		currentdate.getSeconds();
+
+	var table = '';
+	table += '<table>'; // Add border style here
+
+	// Add table rows
+	table += '<tr><td colspan="1">PT Otsuka Indonesia</td></tr>';
+	table += '<tr><td colspan="1">' +' Annual Audit Plan </td></tr>';
+	table += '<tr><td colspan="1"> Print date </td><td>: ' + datetime + '</td></tr>';
+	table += '</table><br><br>';
+
+	// Add content body
+	table += $(result).html();
+
+	var target = table;
+	// window.open('data:application/vnd.ms-excel,' + encodeURIComponent(target));
+
+	htmlToExcel(target)
+	
+	// $('.bg-grey-1,.bg-grey-2.bg-grey-2-1,.bg-grey-2-2,.bg-grey-3').each(function(){
+	// 	$(this).removeAttr('bgcolor');
+	// });
+});
 </script>

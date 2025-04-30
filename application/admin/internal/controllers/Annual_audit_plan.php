@@ -87,18 +87,4 @@ class Annual_audit_plan extends BE_Controller {
 	    render($response,'json');
 	}
 
-
-	function export() {
-		ini_set('memory_limit', '-1');
-		$arr = ['parent_id' => 'Parent Id','id_company' => 'Id Company','id_location' => 'Id Location','id_divisi' => 'Id Divisi','id_department' => 'Id Department','id_section' => 'Id Section','aktivitas' => 'aktivitas','audit_area' => 'Audit Area','type_aktivitas' => 'Type aktivitas','is_active' => 'Aktif'];
-		$data = get_data('tbl_m_aktivitas')->result_array();
-		$config = [
-			'title' => 'data_rcm',
-			'data' => $data,
-			'header' => $arr,
-		];
-		$this->load->library('simpleexcel',$config);
-		$this->simpleexcel->export();
-	}
-
 }
