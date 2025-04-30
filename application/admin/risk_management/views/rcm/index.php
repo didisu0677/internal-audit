@@ -264,63 +264,21 @@ function add_itemrisk() {
 }
 
 
-$(document).on('click','.btn-removerisk',function(){
-	$(this).closest('tr').remove();
-	calculate_dampak();
-	calculate_kemungkinan();
-});
-
-
 $(document).on('keyup','.score_dampak',function(){
-	calculate_dampak();
+	const dampak = $('#score_dampak'+(index1-1)).val();
+	const kemungkinan = $('#score_kemungkinan'+(index1-1)).val();
+	const score = getScore(dampak, kemungkinan);
+	$('#bobot_risk'+(index1-1)).val(score).trigger('change');
 });
 
 $(document).on('keyup','.score_kemungkinan',function(){
-	calculate_kemungkinan();
+	const dampak = $('#score_dampak'+(index1-1)).val();
+	const kemungkinan = $('#score_kemungkinan'+(index1-1)).val();
+	const score = getScore(dampak, kemungkinan);
+	$('#bobot_risk'+(index1-1)).val(score).trigger('change');
 });
 
-function calculate_dampak() {
-	var total = 0;
-	var jml = 0;
-	var idx = 0 ;
-	$('#result2 tbody tr').each(function(){
-		if($(this).find('.score_dampak').length == 1) {
-			var subtotal = moneyToNumber($(this).find('.score_dampak').val());
-			var score_kemungkinan = moneyToNumber($(this).find('.score_kemungkinan').val());
-			total += subtotal;
-			jml++;
 
-			if(score_kemungkinan > 0) {
-				$('#total_score'+idx).val(customFormat(subtotal * score_kemungkinan));
-			}
-		}
-		idx++;
-	});
-
-	$('#rata2_dampak').val(customFormat(total / jml));
-	$('#rata2_total').val(customFormat($('#rata2_dampak').val() * $('#rata2_kemungkinan').val()));
-}
-
-function calculate_kemungkinan() {
-	var total2 = 0;
-	var jml2 = 0;
-	var idx1 = 0;
-	$('#result2 tbody tr').each(function(){
-		if($(this).find('.score_kemungkinan').length == 1) {
-			var subtotal2= moneyToNumber($(this).find('.score_kemungkinan').val());
-			var score_dampak = moneyToNumber($(this).find('.score_dampak').val());
-			total2 += subtotal2;
-			jml2++;
-
-			$('#total_score'+idx1).val(customFormat(subtotal2 * score_dampak));
-			total_score = moneyToNumber($(this).find('.total_score').val());
-		}
-		idx1++;
-	});
-
-	$('#rata2_kemungkinan').val(customFormat(total2 / jml2));
-	$('#rata2_total').val(customFormat($('#rata2_dampak').val() * $('#rata2_kemungkinan').val()));
-}
 
 var wi, timer;
 
@@ -367,5 +325,49 @@ function get_bobot() {
 			}
 		});
 	}
+}
+
+const scoreMatrix = {
+  "6,6": "Critical",
+  "6,5": "Critical",
+  "6,4": "Major",
+  "6,3": "Major",
+  "6,2": "Minor",
+  "6,1": "Minor",
+  "5,6": "Critical",
+  "5,5": "Major",
+  "5,4": "Major",
+  "5,3": "Moderate",
+  "5,2": "Moderate",
+  "5,1": "Minor",
+  "4,6": "Major",
+  "4,5": "Major",
+  "4,4": "Moderate",
+  "4,3": "Moderate",
+  "4,2": "Moderate",
+  "4,1": "Minor",
+  "3,6": "Major",
+  "3,5": "Moderate",
+  "3,4": "MOderate",
+  "3,3": "MOderate",
+  "3,2": "Minor",
+  "3,1": "Minor",
+  "2,6": "Moderate",
+  "2,5": "Moderate",
+  "2,4": "Moderate",
+  "2,3": "Minor",
+  "2,2": "Minor",
+  "2,1": "Minor",
+  "1,6": "Minor",
+  "1,5": "Minor",
+  "1,4": "Minor",
+  "1,3": "Minor",
+  "1,2": "Minor",
+  "1,1": "Minor",
+};
+
+function getScore(dampak, kemungkinan) {
+  const key = `${dampak},${kemungkinan}`;
+  return scoreMatrix[key] || "Unknown"; // fallback kalau kombinasi tidak terdaftar
 }
 </script>
