@@ -114,7 +114,12 @@ class Control_register extends BE_Controller {
 	}
 
 	function delete() {
-		$response = destroy_data('tbl_internal_control','id',post('id'));
+
+		$cek = get_data('tbl_internal_control','id',post('id'))->row();
+
+		$response = destroy_data('tbl_internal_control',['id_aktivitas'=>$cek->id_aktivitas,'id_sub_aktivitas'=>$cek->id_sub_aktivitas]);
+
+
 		render($response,'json');
 	}
 

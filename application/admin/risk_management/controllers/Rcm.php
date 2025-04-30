@@ -109,8 +109,6 @@ class Rcm extends BE_Controller {
 	}
 
 	function get_data() {
-		$data = get_data('tbl_m_aktivitas','id',post('id'))->row_array();
-
 		$data = get_data('tbl_m_aktivitas a',[
 			'select' => 'a.id, a.id_rk, b.id_section,b.id_sub_aktivitas, b.id_risk',
 			'join'   => 'tbl_risk_control b on a.id_rk = b.id type LEFT',
@@ -335,7 +333,12 @@ class Rcm extends BE_Controller {
 	}
 
 	function delete() {
-		$response = destroy_data('tbl_m_aktivitas','id',post('id'));
+		$cek = get_data('tbl_m_aktivitas','id',post('id'));
+		$response = destroy_data('tbl_m_aktivitas','id_rk',$cek->id_rk);
+		if($response['status']= 'success') {
+			delete_data('tbl_risk_control','id',$cek->id_rk);
+			delete_data('tbl_annual_audit_plan','id_m_aktivitas',$cek->id);
+		}
 		render($response,'json');
 	}
 
