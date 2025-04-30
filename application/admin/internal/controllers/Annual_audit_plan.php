@@ -38,48 +38,8 @@ class Annual_audit_plan extends BE_Controller {
 	        ],
 	    ];
 
-
-        // $tahun = get('tahun');
 	    $data['grup']= get_data('tbl_annual_audit_plan a',$arr)->result();
 
-		// debug($data['grup']);die;
-
-
-		// $data['risk'] = [];
-		// foreach($data['grup'] as $g) {
-		// 	$rk = get_data('tbl_risk_control', 'id', $g->id_rk)->row();
-		// 	$id_r = json_decode($rk->id_risk);
-		// 	$count = count($id_r);
-
-		// 	// debug($rk);die;
-		// 	$data['risk'][$g->id][$g->id_rk] = get_data('tbl_risk_register',[
-		// 		'select' => '*',
-		// 		'where' => [
-		// 			'id' => $id_r
-		// 		],
-		// 	])->result_array();
-
-		// 	$data['col'][$g->id_rk] = $count;
-
-
-		// 	$data['int_control'][$g->id_aktivitas][$g->id_sub_aktivitas] = get_data('tbl_internal_control',[
-		// 		'select' => 'id_internal_control as id,internal_control',
-		// 		'where' => [
-		// 			'is_active' => 1,
-		// 			'id_aktivitas' => $g->id_aktivitas,
-		// 			'id_sub_aktivitas' => $g->id_sub_aktivitas,
-		// 		]
-		// 	])->result_array();
-
-
-		// } 
-
-		// debug($data['int_control']);die;
-		
-
-        // $data['section'] = get_data('tbl_m_audit_section','is_active',1)->result_array(); 
-
-	
         $response	= array(
             'table'		=> $this->load->view('internal/annual_audit_plan/table',$data,true),
         );
