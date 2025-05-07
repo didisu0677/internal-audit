@@ -54,16 +54,16 @@ class Cron extends MY_Controller {
                     $days_notif = "akan telah mencapai due date";
                     break;
                 case 30:
-                    $days_notif = "akan telah mencapai due date (selama 30 hari)";
+                    $days_notif = "akan telah melewati due date (selama 30 hari)";
                     break;
                 case 60:
-                    $days_notif = "akan telah mencapai due date (selama 60 hari)";
+                    $days_notif = "akan telah melewati due date (selama 60 hari)";
                     break;
                 case 90:
-                    $days_notif = "akan telah mencapai due date (selama 90 hari)";
+                    $days_notif = "akan telah melewati due date (selama 90 hari)";
                     break;
                 case 120:
-                    $days_notif = "akan telah mencapai due date (selama 120 hari)";
+                    $days_notif = "akan telah melewati due date (selama 120 hari)";
                     break;
                 default:
                     echo "Nilai tidak dikenali";
@@ -76,9 +76,9 @@ class Cron extends MY_Controller {
                             ],
 
                 'where' => [
-                    // 'a.id_status_capa !=' => 9,
-                    // '__m' => 'a.dateline_capa = CURDATE() - INTERVAL '.$n->days_nottification.' DAY',
-                    'nomor' => '0007/CAPA.02/2025',
+                    'a.id_status_capa !=' => 9,
+                    '__m' => 'a.dateline_capa = CURDATE() - INTERVAL '.$n->days_nottification.' DAY',
+                    // 'nomor' => '0007/CAPA.02/2025',
                 ],
             ])->result();
 

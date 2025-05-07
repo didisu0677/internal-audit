@@ -90,16 +90,39 @@ class Set_nottification extends BE_Controller {
 			],
 			])->row();
 
+			$days = $notif->days_nottification ;
+            switch ($days) {
+                case -30:
+                    $days_notif = "akan mencapai due date (30 hari lagi)";
+                    break;
+                case 0:
+                    $days_notif = "akan telah mencapai due date";
+                    break;
+                case 30:
+                    $days_notif = "akan telah melewati due date (selama 30 hari)";
+                    break;
+                case 60:
+                    $days_notif = "akan telah melewati due date (selama 60 hari)";
+                    break;
+                case 90:
+                    $days_notif = "akan telah melewati due date (selama 90 hari)";
+                    break;
+                case 120:
+                    $days_notif = "akan telah melewati due date (selama 120 hari)";
+                    break;
+                default:
+                    echo "Nilai tidak dikenali";
+            }
+
 		$cek_capa = get_data('tbl_capa a',[
-			'select' => 'a.*,b.email, c.id_section_department',
+			'select' => 'a.*,b.nama, b.email, c.id_section_department',
 			'join'   => ['tbl_user b on a.pic_capa = b.username type LEFT',
 						'tbl_finding_records c on a.id_finding = c.id',
 						],
-
 			'where' => [
 				'a.id_status_capa !=' => 9,
 				'__m' => 'a.dateline_capa <= CURDATE() - INTERVAL '.$notif->days_nottification.' DAY',
-				// 'nomor' => '0003/CAPA.12/2024',
+				// 'nomor' => '0007/CAPA.02/2025',
 			],
 		])->result();
 
@@ -122,22 +145,37 @@ class Set_nottification extends BE_Controller {
 					'select' => 'a.nip, b.email',
 					'join'	 => 'tbl_user b on a.nip = b.username',
 					'where' => [
-						'a.id_section'=>$c->id_section
+						'a.id_section'=>$c->id_section_department
 					],
 				])->result();
 
 				$cc_email2 = [];
-				foreach($cc as $c) {
-					$cc_email2[] 	= $c->email;
+				foreach($cc as $c1) {
+					$cc_email2[] 	= $c1->email;
 				}
 
 				$cc_email = array_merge($cc_email1, $cc_email2);
 
+				$message  = '<p style="text-align: justify;">Yth. Bapak/Ibu '.$c->nama.',</p>';
+				$message .= '<p style="text-align: justify;">Pengingat: CAPA Plan yang telah Anda input di sistem Audit Management System  : '.$days_notif.'</p>';
+				$message .= '<ul>
+								<li><strong>Capa:</strong>'.$c->isi_capa.'</li>
+								<li><strong>Due Date:</strong>'.date_indo($c->dateline_capa).'</li>
+								<li><strong>PIC:</strong>'.$c->nama.'</li>
+							</ul>';
+				
+				$message .= '<p style="text-align: justify;">Mohon pastikan pelaksanaan CAPA sesuai rencana dan dokumen bukti pelaksanaannya diunggah tepat waktu.';
+				$message .= '<p style="text-align: justify;">Cek dan update progres Anda di:';
+				$message .= '<br>
+							 <a href="https://development.otsuka.co.id/internal-audit" target="_blank" style="background: #16D39A; color: #fff; padding: .5rem 1rem; border-radius: .175rem; text-decoration: none;">Audit Management System</a>
+							</p>';
+
 
 				$data = array(
-					'subject'	=> 'Notification Capa Progress',
-					'message'	=> $notif->nottification . ' ' . $c->isi_capa,
-					'to'		=> $c->email, //'dsuherdi@ho.otsuka.co.id',
+					'subject'	=> 'CAPA Plan ' . $days_notif,
+					'description' => $message,
+					// 'to' => 'dsuherdi@ho.otsuka.co.id',
+					'to'		=> $c->email, 
 					'cc'		=> $cc_email,
 				);
 

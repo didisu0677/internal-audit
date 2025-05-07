@@ -17,7 +17,7 @@
 			tr();
 				th('checkbox','text-center','width="30" data-content="id"');
 				th(lang('number_reminder'),'','data-content="number_reminder"');
-				th(lang('nottification'),'','data-content="nottification"');
+				// th(lang('nottification'),'','data-content="nottification"');
 				th(lang('days_nottification'),'','data-content="days_nottification"');
 				th(lang('description'),'','data-content="description"');
 				th(lang('aktif').'?','text-center','data-content="is_active" data-type="boolean"');
