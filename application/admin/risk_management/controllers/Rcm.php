@@ -117,6 +117,7 @@ class Rcm extends BE_Controller {
 			]
 		])->row_array();
 		
+		
 		if(!empty($data['id_section'])) $data['id_section'] = json_decode($data['id_section']);
 		if(!empty($data['id_sub_aktivitas'])) $data['id_aktivitas'] = json_decode($data['id_sub_aktivitas']);
 
@@ -275,7 +276,7 @@ class Rcm extends BE_Controller {
 							'id_aktivitas' => $cek_aktivitas->id,
 							'id_sub_aktivitas' => $cek_aktivitas->id,
 							'id_aktivitas' => $cek_aktivitas->id_aktivitas,
-							'id_rk' => $data['id_rk'],
+							// 'id_rk' => $data['id_rk'],
 						],
 					])->row();
 
