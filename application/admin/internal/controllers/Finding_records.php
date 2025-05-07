@@ -465,7 +465,7 @@ class Finding_records extends BE_Controller {
 				$section = get_data('tbl_m_audit_section','id',$data['id_section_department'])->row();
 
 				$link				= base_url().'internal/finding_records';
-				$desctiption 		= 'Finding Internal Audit department : ' .$section->section_name. ' untuk audit area '. $data['audit_area'] ;		
+				$desctiption 		= 'Telah dicatat finding audit pada sistem Audit Management System terkait departemen Anda: ' .$section->section_name ;		
 				$data_notifikasi 	= [
 						'title'			=> 'Finding Internal Audit',
 						'description'	=> $desctiption,
@@ -481,11 +481,11 @@ class Finding_records extends BE_Controller {
 
 				if(setting('email_notification')) {
 					send_mail([
-						'subject'		=> 'Finding Internal Audit',
+						'subject'		=> 'Notifikasi Temuan Audit – Mohon Tindak Lanjut CAPA Plan',
 						'to'			=> $usr->email,
 						'cc'			=> $cc_email,
 						'nama_user'		=> $usr->nama,
-						'description'	=> 'Terdapat ' . $desctiption,
+						'description'	=> 'Telah dicatat finding audit pada sistem Audit Management System terkait departemen Anda: ' ,
 						'description2'	=> 'Untuk mengetahui lebih lanjut silakan cek di link berikut :',
 						'detail' => 	$data,
 						'url'			=> $link

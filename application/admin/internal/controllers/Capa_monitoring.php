@@ -63,9 +63,9 @@ class Capa_monitoring extends BE_Controller {
 				'select' => 'distinct year(tgl_mulai_audit) as tahun',
 				'where' => [
 					'id_section_department' => $arr_d,
-					'sort_by' => 'year(tgl_mulai_audit)',
-					'sort' => 'DESC'
-				]
+				],
+				'sort_by' => 'year(tgl_mulai_audit)',
+				'sort' => 'DESC'
 			])->result();
 		}
 		render($data);
