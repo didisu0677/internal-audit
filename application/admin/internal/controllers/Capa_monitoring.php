@@ -479,8 +479,8 @@ class Capa_monitoring extends BE_Controller {
 
 
 			$data = array(
-				'subject'	=> 'Notification Capa Progress',
-				'message'	=> 'Reminder CAPA Mohon untuk segera follow up' . ' ' . $cek_capa->isi_capa,
+				'subject'	=> 'Notification Capa Plan Progress',
+				'message'	=> 'Reminder CAPA - Mohon untuk segera follow up' . ' ' . $cek_capa->isi_capa,
 				'to'		=> 'dsuherdi@ho.otsuka.co.id',
 				'cc'		=> $cc_email
 			);
