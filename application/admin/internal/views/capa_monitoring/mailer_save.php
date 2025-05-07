@@ -13,5 +13,5 @@
 <p style="text-align: justify;">Terima kasih atas kerja samanya.</p>
 <br>
 <br>
-<p style="text-align: justify;">Salam,</p>
-<p style="text-align: justify;">Audit Management System – Notifikasi Otomatis</p>
+<p style="text-align: justify;">Salam,<br>
+Audit Management System – Notifikasi Otomatis</p>

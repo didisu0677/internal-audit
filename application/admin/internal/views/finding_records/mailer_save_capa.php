@@ -8,5 +8,5 @@
 	<a href="<?php echo $url; ?>" target="_blank" style="background: #16D39A; color: #fff; padding: .5rem 1rem; border-radius: .175rem; text-decoration: none;">Audit Management System</a>
 </p>
 <p style="text-align: justify;">Terima kasih atas perhatian dan koordinasinya.</p>
-<p style="text-align: justify;">Salam,</p>
-<p style="text-align: justify;">Audit Management System – Notifikasi Otomatis</p>
+<p style="text-align: justify;">Salam,<br>
+Audit Management System – Notifikasi Otomatis</p>
