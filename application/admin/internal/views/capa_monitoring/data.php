@@ -30,7 +30,7 @@ foreach($finding as $v) {
             <?php if($u->id_status_capa != 3) { ?>
             <button type="button" class="btn btn-warning btn-input" data-key="edit" data-id="<?php echo $u->id; ?>" title="<?php echo lang('update_capa'); ?>"><i class="fa-edit"></i></button>
             <?php } ?>
-            <?php if(user('id_group') != 38 && $u->id_status_capa != 3) { ?>
+            <?php if(user('id_group') != 38 && $u->id_status_capa == 30) { ?>
             <button type="button" class="btn btn-danger btn-send-reminder" data-key="send" data-id="<?php echo $u->id; ?>" title="<?php echo lang('send_reminder') ; ?>"><i class="fa-envelope"></i></button>
             <?php } ?>
         </td>    
