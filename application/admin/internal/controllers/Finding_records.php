@@ -426,73 +426,80 @@ class Finding_records extends BE_Controller {
 				$data['id'] = $id_finding_records[$k];
 				$data['finding'] = $isi_finding[$k];
 
-				$response = save_data('tbl_finding_records',$data,post(':validation'));
-			}
+				$response_f = save_data('tbl_finding_records',$data,post(':validation'));
 
-			/// kirim email dan notifikasi
-			$usr 	= get_data('tbl_auditee a',[
-				'select' => 'a.*,b.id as id_user',
-				'join' => 'tbl_user b on a.nip = b.username type LEFT',
-				'where'  => [
-					'a.id' => $data['auditee'],
-				],
-			])->row();
-		
+				/// kirim email dan notifikasi
+				$usr 	= get_data('tbl_auditee a',[
+					'select' => 'a.*,b.id as id_user',
+					'join' => 'tbl_user b on a.nip = b.username type LEFT',
+					'where'  => [
+						'a.id' => $data['auditee'],
+					],
+				])->row();
+			
 
-			$cc_user 			= get_data('tbl_user','id_group',[41,40])->result();
-			$cc_email1 = [];
-			foreach($cc_user as $u) {
-				if($u->email != $usr->email) $cc_email1[] 	= $u->email;
-			}
-
-			$cc = get_data('tbl_detail_auditee a',[
-				'select' => 'a.nip, b.email',
-				'join'	 => 'tbl_user b on a.nip = b.username',
-				'where' => [
-					'a.id_section'=>$data['id_section_department']
-				],
-			])->result();
-
-			$cc_email2 = [];
-			foreach($cc as $c) {
-				if($c->email != $usr->email) $cc_email2[] 	= $c->email;
-			}
-
-			$cc_email = array_merge($cc_email1, $cc_email2);
-
-
-			if(isset($usr->id)) {
-				$section = get_data('tbl_m_audit_section','id',$data['id_section_department'])->row();
-
-				$link				= base_url().'internal/finding_records';
-				$desctiption 		= 'Telah dicatat finding audit pada sistem Audit Management System terkait departemen Anda: ' .$section->section_name ;		
-				$data_notifikasi 	= [
-						'title'			=> 'Finding Internal Audit',
-						'description'	=> $desctiption,
-						'notif_link'	=> $link,
-						'notif_date'	=> date('Y-m-d H:i:s'),
-						'notif_type'	=> 'info',
-						'notif_icon'	=> 'fa-exchange-alt',
-						'id_user'		=> $usr->id_user,
-						'transaksi'		=> 'finding_records',
-						'id_transaksi'	=> post('id')
-					];
-					insert_data('tbl_notifikasi',$data_notifikasi);	
-
-				if(setting('email_notification')) {
-					send_mail([
-						'subject'		=> 'Notifikasi Temuan Audit – Mohon Tindak Lanjut CAPA Plan',
-						'to'			=> $usr->email,
-						'cc'			=> $cc_email,
-						'nama_user'		=> $usr->nama,
-						'description'	=> 'Telah dicatat finding audit pada sistem Audit Management System terkait departemen Anda: ' ,
-						'description2'	=> 'Untuk mengetahui lebih lanjut silakan cek di link berikut :',
-						'detail' => 	$data,
-						'url'			=> $link
-					]);
+				$cc_user 			= get_data('tbl_user','id_group',[41,40])->result();
+				$cc_email1 = [];
+				foreach($cc_user as $u) {
+					if($u->email != $usr->email) $cc_email1[] 	= $u->email;
 				}
+
+				$cc = get_data('tbl_detail_auditee a',[
+					'select' => 'a.nip, b.email',
+					'join'	 => 'tbl_user b on a.nip = b.username',
+					'where' => [
+						'a.id_section'=>$data['id_section_department']
+					],
+				])->result();
+
+				$cc_email2 = [];
+				foreach($cc as $c) {
+					if($c->email != $usr->email) $cc_email2[] 	= $c->email;
+				}
+
+				$cc_email = array_merge($cc_email1, $cc_email2);
+
+
+				if(isset($usr->id)) {
+					$section = get_data('tbl_m_audit_section','id',$data['id_section_department'])->row();
+
+					$link				= base_url().'internal/finding_records';
+					$desctiption 		= 'Telah dicatat finding audit pada sistem Audit Management System terkait departemen Anda: ' .$section->section_name ;		
+					$data_notifikasi 	= [
+							'title'			=> 'Finding Internal Audit',
+							'description'	=> $desctiption,
+							'notif_link'	=> $link,
+							'notif_date'	=> date('Y-m-d H:i:s'),
+							'notif_type'	=> 'info',
+							'notif_icon'	=> 'fa-exchange-alt',
+							'id_user'		=> $usr->id_user,
+							'transaksi'		=> 'finding_records',
+							'id_transaksi'	=> post('id')
+						];
+						insert_data('tbl_notifikasi',$data_notifikasi);	
+
+					if(setting('email_notification')) {
+						send_mail([
+							'subject'		=> 'Notifikasi Temuan Audit – Mohon Tindak Lanjut CAPA Plan',
+							'to'			=> $usr->email,
+							'cc'			=> $cc_email,
+							'nama_user'		=> $usr->nama,
+							'description'	=> 'Telah dicatat finding audit pada sistem Audit Management System terkait departemen Anda: ' ,
+							'description2'	=> 'Untuk mengetahui lebih lanjut silakan cek di link berikut :',
+							'detail' => 	get_data('tbl_finding_records a',[
+								'select' => 'a.*,b.section_name',
+								'join'	 => 'tbl_m_audit_section b on a.id_section_department = b.id type LEFT',
+								'where'  => [
+									'a.id' => $response_f['id'],
+								]
+							])->row_array(),
+							'url'			=> $link
+						]);
+					}
+				}
+				///
 			}
-			///
+
 		}
 
 		render($response,'json');
@@ -526,18 +533,94 @@ class Finding_records extends BE_Controller {
 	
 			$data['id_status_capa'] = 1;
 
-			$response = save_data('tbl_capa',$data,post(':validation'));
+			$response_capa = save_data('tbl_capa',$data,post(':validation'));
 
-			if($response['status'] == 'success') {
+			if($response_capa['status'] == 'success') {
 				update_data('tbl_finding_records',['status_finding'=>1],['id'=>$data['id_finding']]);
 			};
 			
 			if($id_capa[$i] != 0) 
 			delete_data('tbl_capa',['nomor not' =>$nomor, 'id_finding' =>$data['id_finding'], 'nomor !=' => '']);
-			
 		}
 
-		render($response,'json');
+		if($response_capa['status'] == 'success') {
+			/// kirim email dan notifikasi
+			$usr 	= get_data('tbl_finding_records a',[
+				'select' => 'a.id, a.auditor, b.nama, a.id_section_department, b.email, c.id as id_user',
+				'join' => ['tbl_m_auditor b on a.auditor = b.id type LEFT',
+						   'tbl_user c on b.nip = c.username type LEFT'
+			],
+				'where'  => [
+					'a.id' => $data['id_finding'],
+				],
+			])->row();
+
+
+			$cc_user 			= get_data('tbl_user','id_group',[41,40])->result();
+			$cc_email1 = [];
+			foreach($cc_user as $u) {
+				if($u->email != $usr->email) $cc_email1[] 	= $u->email;
+			}
+
+			$cc = get_data('tbl_detail_auditee a',[
+				'select' => 'a.nip, b.email',
+				'join'	 => 'tbl_user b on a.nip = b.username',
+				'where' => [
+					'a.id_section'=>$usr->id_section_department
+				],
+			])->result();
+
+			$cc_email2 = [];
+			foreach($cc as $c) {
+				if($c->email != $usr->email) $cc_email2[] 	= $c->email;
+			}
+
+			$cc_email = array_merge($cc_email1, $cc_email2);
+
+
+			if(isset($usr->id)) {
+				$section = get_data('tbl_m_audit_section','id',$usr->id_section_department)->row();
+
+				$link				= base_url().'internal/capa_monitoring';
+				$desctiption 		= 'Departemen ' .$section->section_name . ' telah mengisi rencana perbaikan (CAPA Plan) pada sistem Audit Management System ';		
+				$data_notifikasi 	= [
+						'title'			=> 'CAPA Plan Telah Diinput',
+						'description'	=> $desctiption,
+						'notif_link'	=> $link,
+						'notif_date'	=> date('Y-m-d H:i:s'),
+						'notif_type'	=> 'info',
+						'notif_icon'	=> 'fa-exchange-alt',
+						'id_user'		=> $usr->id_user,
+						'transaksi'		=> 'finding_records',
+						'id_transaksi'	=> post('id')
+					];
+					insert_data('tbl_notifikasi',$data_notifikasi);	
+
+				if(setting('email_notification')) {
+					send_mail([
+						'subject'		=> 'CAPA Plan Telah Diinput',
+						'to'			=> $usr->email,
+						'cc'			=> $cc_email,
+						'nama_user'		=> $usr->nama,
+						'description'	=> $desctiption ,
+						'description2'	=> 'Untuk mengetahui lebih lanjut silakan cek di link berikut :',
+						'detail' => 	get_data('tbl_finding_records a',[
+										'select' => 'a.*, b.section_name, c.nama as nama_auditee',
+										'join'	=> ['tbl_m_audit_section b on a.id_section_department = b.id type LEFT',
+												    'tbl_auditee c on a.auditee = c.id type LEFT',
+													],
+										'where' => [
+											'a.id' =>$data['id_finding'],
+										],
+										])->row_array(),
+						'url'			=> $link
+					]);
+				}
+			}
+			///
+		}
+
+		render($response_capa,'json');
 	}
 
 	function delete() {

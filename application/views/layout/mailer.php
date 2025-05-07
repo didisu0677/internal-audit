@@ -1,10 +1,10 @@
 <div style="width: auto; max-width: 600px; margin-left: auto; margin-right: auto; padding: 15px 10px; font-family: helvetica,'Open Sans',sans-serif; color: #484848; line-height: 22px;">
-	<img src="<?php echo base_url(dir_upload('setting')).setting('logo'); ?>" alt="<?php echo setting('title'); ?>" style="width: 200px; margin: 10px auto; display: block;">
+	<!-- <img src="<?php echo base_url(dir_upload('setting')).setting('logo'); ?>" alt="<?php echo setting('title'); ?>" style="width: 200px; margin: 10px auto; display: block;"> -->
 	<div style="min-height: 200px; padding: 10px;">
 		<?php echo $content; ?>
 	</div>
 	<div style="margin-top: 10px; padding: 10px; border-top: 1px solid #ddd;">
-		<img src="<?php echo base_url(dir_upload('setting')).setting('logo_perusahaan'); ?>" alt="<?php echo setting('title'); ?>" style="width: 100px; margin: 5px 0; display: block;">
+		<!-- <img src="<?php echo base_url(dir_upload('setting')).setting('logo_perusahaan'); ?>" alt="<?php echo setting('title'); ?>" style="width: 100px; margin: 5px 0; display: block;"> -->
 		<div style="font-weight: 600;"><?php echo setting('company'); ?></div>
 		<div><?php echo setting('alamat_perusahaan'); ?></div>
 		<?php if(setting('telp_perusahaan')) { ?>
