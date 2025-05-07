@@ -86,10 +86,9 @@ class Cron extends MY_Controller {
                     }
 
                     $cc_email = array_merge($cc_email1, $cc_email2);
-
-
+                    
                     $data = array(
-                        'subject'	=> 'Notification Capa Progress',
+                        'subject'	=> 'CAPA Plan Department Anda ',
                         'message'	=> $n->nottification . ' ' . $c->isi_capa,
                         'to'		=> $c->email, //'dsuherdi@ho.otsuka.co.id',
                         'cc'		=> $cc_email,

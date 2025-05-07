@@ -282,18 +282,24 @@ class Capa_monitoring extends BE_Controller {
 			/// kirim email dan notifikasi
 
 			if(user('id_group') == AUDITEE) {
-			
+
 				$usr 	= get_data('tbl_capa a',[
-					'select' => 'a.*,b.email, b.nama, d.id as id_user, c.id_section_department as id_section',
+					'select' => 'a.*,b.email, b.nama, d.id as id_user, c.id_section_department as id_section, e.section_name',
 					'join'   => ['tbl_finding_records c on a.id_finding = c.id type LEFT',
 								 'tbl_m_auditor b on c.auditor = b.id type LEFT',
-								 'tbl_user d on b.nip = d.username type LEFT'
+								 'tbl_user d on b.nip = d.username type LEFT',
+								 'tbl_m_audit_section e on c.id_section_department = e.id type LEFT',
 								],	
 					'where'  => [
 						'a.id' => $data['id'],
 					],
 				])->row();
+
+				$oleh = "Auditee" ;
+				$message = 'Auditee dari departemen ' . $usr->section_name . ' telah memperbarui pelaksanaan CAPA Plan di sistem Audit Management System untuk temuan audit berikut';
+			
 			}else{
+
 				$usr 	= get_data('tbl_capa a',[
 					'select' => 'a.*,b.email, b.nama,b.id as id_user, c.id_section_department as id_section',
 					'join'   => ['tbl_finding_records c on a.id_finding = c.id type LEFT',
@@ -303,6 +309,10 @@ class Capa_monitoring extends BE_Controller {
 						'a.id' => $data['id'],
 					],
 				])->row();
+
+				$oleh = "Auditor" ;
+				$message = 'Auditor telah memperbarui pelaksanaan CAPA Plan department anda di sistem Audit Management System untuk temuan audit berikut';
+
 			}
 
 			$cc_user 			= get_data('tbl_user','id_group',[41,40])->result();
@@ -329,9 +339,9 @@ class Capa_monitoring extends BE_Controller {
 
 			if(isset($usr->id)) {
 				$link				= base_url().'internal/capa_monitoring';
-				$desctiption 		= 'Progress Capa nomor : <strong>'.$usr->nomor.'</strong>'. ' sekarang ber status : ' ;		
+				$desctiption 		= $message;		
 				$data_notifikasi 	= [
-						'title'			=> 'Progress Capa',
+						'title'			=> 'CAPA Progress Telah Diperbarui oleh ' . $oleh . ' – Mohon Verifikasi',
 						'description'	=> $desctiption,
 						'notif_link'	=> $link,
 						'notif_date'	=> date('Y-m-d H:i:s'),
@@ -345,13 +355,22 @@ class Capa_monitoring extends BE_Controller {
 
 				if(setting('email_notification')) {
 					send_mail([
-						'subject'		=> 'Progress capa nomor : '.$usr->nomor. ' dengan capa plan '. $usr->isi_capa ,
+						'subject'		=> 'CAPA Progress Telah Diperbarui oleh ' . $oleh . ' – Mohon Verifikasi',
+						// 'to'			=> 'dsuherdi@ho.otsuka.co.id',
 						'to'			=> $usr->email,
 						'cc'			=> $cc_email,
 						'nama_user'		=> $usr->nama,
 						'description'	=> $desctiption,
 						'description2'	=> 'Silakan cek dan update progress di link berikut :',
-						'detail' => 	$data,
+						'detail' => 	get_data('tbl_capa_progress a',[
+										'select' => 'a.*, c.audit_area, c.finding',
+										'join' => ['tbl_capa b on a.id_capa = b.id type LEFT',
+												   'tbl_finding_records c on a.id_finding = c.id type LEFT',
+												  ],
+										'where' => [
+											'a.id' => $res_capa['id']
+										],
+										])->row_array(),
 						'url'			=> $link
 					]);
 				}
