@@ -17,7 +17,7 @@
 			tr();
 				th('checkbox','text-center','width="30" data-content="id"');
 				th(lang('aktivitas'),'','data-content="aktivitas" data-table="tbl_aktivitas"');
-				th(lang('sub_aktivitas'),'','data-content="sub_aktivitas" data-table="tbl_sub_aktivitas"');
+				th(lang('audit_area'),'','data-content="sub_aktivitas" data-table="tbl_sub_aktivitas"');
 				th(lang('internal_control'),'','data-content="internal_control"');
 				th(lang('location_control'),'','data-content="location_control"');
 				th(lang('no_pnp'),'','data-content="no_pnp"');
@@ -35,7 +35,7 @@ modal_open('modal-form','','modal-xl','data-openCallback="formOpen"');
 		form_open(base_url('risk_management/control_register/save'),'post','form');
 			col_init(3,9);
 			input('hidden','id','id');
-			input('hidden','id_sub_aktivitas','id_sub_aktivitas');
+			input('','id_sub_aktivitas','id_sub_aktivitas');
 			?>
 			<div class="form-group row">
 				<label class="col-form-label col-sm-3 required" for="id_aktivitas"><?php echo lang('aktivitas'); ?></label>

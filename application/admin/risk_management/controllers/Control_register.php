@@ -40,8 +40,10 @@ class Control_register extends BE_Controller {
 
 	function save() {
 		$data = post();
+		$data['is_active'] = 1;
 		$data_a['id'] = $data['id_aktivitas'];
 		$data_a['aktivitas'] = $data['aktivitas_id_data'];
+
 		$data_a['is_active'] = $data['is_active'];
 
 		$id_control = post('id_control');
@@ -57,6 +59,7 @@ class Control_register extends BE_Controller {
 		if(!empty($ctrl_existing)) {
 			$response = save_data('tbl_aktivitas',$data_a,post(':validation'));
 			if($response['status'] == 'success') {
+
 				$sub = save_data('tbl_sub_aktivitas',[
 					'id' => $data['id_sub_aktivitas'],
 					'id_aktivitas' => $response['id'],
