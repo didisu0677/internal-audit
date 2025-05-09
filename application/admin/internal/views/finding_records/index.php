@@ -154,10 +154,10 @@ modal_open('modal-form','Finding','modal-xl','data-openCallback="formOpen1"');
 
 				<label class="col-form-label col-sm-3" for="lampiran"><?php echo lang('lampiran'); ?></label>
 				<div class="col-sm-6">
-					<input type="text" name="file_finding[]" id="file_finding <?php echo $i; ?>"  data-validation="" data-action="<?php echo base_url('upload/file/datetime'); ?>" data-token="<?php echo encode_id([user('id'),(time() + 900)]); ?>" autocomplete="off" class="form-control input-file" value="" placeholder="<?php echo lang('maksimal'); ?> 5MB">
+					<input type="text" name="file_finding[]" id="file_finding<?php echo $i; ?>"  data-validation="" data-action="<?php echo base_url('upload/file/datetime'); ?>" data-token="<?php echo encode_id([user('id'),(time() + 900)]); ?>" autocomplete="off" class="form-control input-file" value="" placeholder="<?php echo lang('maksimal'); ?> 5MB">
 				</div>
 				<div class="input-group-append">
-					<button class="btn btn-secondary btn-file" type="button"><?php echo lang('download'); ?></button>
+					<button class="btn btn-secondary btn-file" id="btn_download0" type="button"><?php echo lang('download'); ?></button>
 				</div>
 			</div>
 
@@ -551,6 +551,7 @@ function formOpen() {
 function formOpen1() {	
 	CKEDITOR.instances['isi_finding'+0].setReadOnly(false);
 	var response = response_edit;
+	console.log(response)
 	$('#additional-file').html('');
 	$('#additional-finding').html('');
 
@@ -582,10 +583,12 @@ function formOpen1() {
 					CKEDITOR.instances['isi_finding'+x].setData(decodeEntities(v.finding));
 				// var konten = '<a href ="'+base_url+'assets/uploads/rekanan/'+response.id_vendor+'/'+v.file+'" target="_blank"><i class="fa-download"></i></a>';
 				
-				// $('#file'+ x).val(v.file) ;
+				$('#file_finding0').val(v.filename);
+				let btn_download = $('#btn_download0');
+				btn_download.wrap('<a href="'+base_url+'assets/uploads/finding_records/'+v.filename+'" download></a>');
 
 			} else {
-				addFinding(v.id,v.bobot_finding,v.file,'',v.finding);
+				addFinding(v.id,v.bobot_finding,v.filename,'',v.finding);
 			}
 
 			setTimeout(function(){
@@ -781,7 +784,7 @@ function addFinding(id_finding_records,bobot_finding,file,lampiran, isi_finding)
 				+ '</div>'
 
 			+ '<div class="input-group-append">'
-			+ '<button class="btn btn-secondary btn-file" type="button"><?php echo lang('download'); ?></button>'
+			+ '<a download href="<?= base_url('assets/uploads/finding_records/') ?>'+_file+'"><button class="btn btn-secondary btn-file" type="button"><?php echo lang('download'); ?></button></a>'
 			+ '</div>'
 			+ '</div>'
 
@@ -836,7 +839,7 @@ function addFinding(id_finding_records,bobot_finding,file,lampiran, isi_finding)
 
 	if(_isi_finding) $('#isi_finding' + idy).val(_isi_finding);
 	if(_lampiran) $('#lampiran' + idy).val(_lampiran);
-	if(_file) $('#file' + idy).val(_file);
+	if(_file) $('#file_finding' + idy).val(_file);
 	if(_isi_finding) {
 		$('#isi_finding' + idy).val(_isi_finding);
 		CKEDITOR.instances['isi_finding'+idy].setData(decodeEntities(_isi_finding));

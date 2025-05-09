@@ -122,7 +122,7 @@
 										<div class="form-group row">
 											<label class="col-form-label col-sm-3" for="evidence_base"><?php echo lang('evidence_base'); ?></label>        
 											<div class="col-sm-9">
-												<input type="text" name="evidence_base" id="evidence_base"  data-validation="" data-action="<?php echo base_url('upload/file/datetime'); ?>" data-token="<?php echo encode_id([user('id'),(time() + 900)]); ?>" autocomplete="off" class="form-control input-file" value="" placeholder="<?php echo lang('maksimal'); ?> 5MB">
+												<input type="text" name="evidence_base-progress-1" id="evidence_base"  data-validation="" data-action="<?php echo base_url('upload/file/datetime'); ?>" data-token="<?php echo encode_id([user('id'),(time() + 900)]); ?>" autocomplete="off" class="form-control input-file" value="" placeholder="<?php echo lang('maksimal'); ?> 5MB">
 											</div>
 										</div>
 										<?php
@@ -167,7 +167,7 @@
 										<div class="form-group row">
 											<label class="col-form-label col-sm-3" for="evidence_base"><?php echo lang('evidence_base'); ?> 22</label>        
 											<div class="col-sm-9">
-												<input type="text" name="evidence_base" id="evidence_base"  data-validation="" data-action="<?php echo base_url('upload/file/datetime'); ?>" data-token="<?php echo encode_id([user('id'),(time() + 900)]); ?>" autocomplete="off" class="form-control input-file" value="" placeholder="<?php echo lang('maksimal'); ?> 5MB">
+												<input type="text" name="evidence_base-progress-2" id="evidence_base"  data-validation="" data-action="<?php echo base_url('upload/file/datetime'); ?>" data-token="<?php echo encode_id([user('id'),(time() + 900)]); ?>" autocomplete="off" class="form-control input-file" value="" placeholder="<?php echo lang('maksimal'); ?> 5MB">
 											</div>
 										</div>
 
@@ -209,7 +209,7 @@
 										<div class="form-group row">
 											<label class="col-form-label col-sm-3" for="evidence_base"><?php echo lang('evidence_base'); ?></label>        
 											<div class="col-sm-9">
-												<input type="text" name="evidence_base" id="evidence_base"  data-validation="" data-action="<?php echo base_url('upload/file/datetime'); ?>" data-token="<?php echo encode_id([user('id'),(time() + 900)]); ?>" autocomplete="off" class="form-control input-file" value="" placeholder="<?php echo lang('maksimal'); ?> 5MB">
+												<input type="text" name="evidence_base-progress-3" id="evidence_base"  data-validation="" data-action="<?php echo base_url('upload/file/datetime'); ?>" data-token="<?php echo encode_id([user('id'),(time() + 900)]); ?>" autocomplete="off" class="form-control input-file" value="" placeholder="<?php echo lang('maksimal'); ?> 5MB">
 											</div>
 										</div>
 
@@ -326,6 +326,7 @@ function formOpen() {
 	$('#add_date1').parent().hide();
 
 	var response = response_edit;
+	console.log(response)
 	var activeTabId = $('#myTab .nav-link.active').attr('id');  
     $('#activeTab').val(activeTabId);
 	if(typeof response.id != 'undefined') {
@@ -355,6 +356,9 @@ function formOpen() {
 		let commentField1 = '';
 		let commentField2 = '';
 		let commentField3 = '';
+		let evidence_base1 = '';
+		let evidence_base2 = '';
+		let evidence_base3 = '';
 		let tanggal1
 		let tanggal2
 		let tanggal3
@@ -365,6 +369,7 @@ function formOpen() {
 			if (v.no_progress == 1) {
 				progressField1 = v.progress;
 				commentField1 = v.comment;
+				evidence_base1 = v.evidence;
 				if(v.tanggal != '0000-00-00'){
 					tanggal1 = dayjs(v.tanggal).format('DD/MM/YYYY'); 
 				}else{
@@ -373,6 +378,7 @@ function formOpen() {
 			} else if (v.no_progress == 2) {
 				progressField2 = v.progress;
 				commentField2 = v.comment;
+				evidence_base2 = v.evidence;
 				if(v.tanggal2 != '0000-00-00'){
 					tanggal2 = dayjs(v.tanggal).format('DD/MM/YYYY'); 
 				}else{
@@ -381,6 +387,7 @@ function formOpen() {
 			} else if (v.no_progress == 3) {
 				progressField3 = v.progress;
 				commentField3 = v.comment;
+				evidence_base3 = v.evidence;
 				if(v.tanggal != '0000-00-00'){
 					tanggal3 = dayjs(v.tanggal).format('DD/MM/YYYY'); 
 				}else{
@@ -392,11 +399,32 @@ function formOpen() {
 			$("#keterangan_progress_1").val(progressField1);
 			$("#keterangan_progress_2").val(progressField2);
 			$("#keterangan_progress_3").val(progressField3);
+			
+
+			let btn1 = `<a class='btn btn-secondary' href=${base_url + 'assets/uploads/capa_progress/' + evidence_base1} download>Download</a>`;
+			let btn2 = `<a class='btn btn-secondary' href=${base_url + 'assets/uploads/capa_progress/' + evidence_base2} download>Download</a>`;
+			let btn3 = `<a class='btn btn-secondary' href=${base_url + 'assets/uploads/capa_progress/' + evidence_base3} download>Download</a>`;
+
+			$('[name="evidence_base-progress-1"]').val(evidence_base1);
+			$('[name="evidence_base-progress-2"]').val(evidence_base2);
+			$('[name="evidence_base-progress-3"]').val(evidence_base3);
+
+			if(evidence_base1 != ''){
+				$('[name="evidence_base-progress-1"]').after(btn1);
+			}
+			
+			if(evidence_base2 != ''){
+				$('[name="evidence_base-progress-2"]').after(btn2);
+			}
+			
+			if(evidence_base3 != ''){
+				$('[name="evidence_base-progress-3"]').after(btn3);
+			}
 
 			$("#comment_progress_1").val(commentField1);
 			$("#comment_progress_2").val(commentField2);
 			$("#comment_progress_3").val(commentField3);
-
+			
 			$("#tanggal1").val(tanggal1);
 			$("#tanggal2").val(tanggal2);
 			$("#tanggal3").val(tanggal3);

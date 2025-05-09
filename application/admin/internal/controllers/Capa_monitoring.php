@@ -265,7 +265,20 @@ class Capa_monitoring extends BE_Controller {
 			}else{
 				$data_progress['id'] = $cek->id;
 			} 
-	
+
+			$file = post('evidence_base-'.$data['activeTab']);
+			if(!empty($file)){
+				if(!is_dir(FCPATH . "assets/uploads/capa_progress/")){
+					$oldmask = umask(0);
+					mkdir(FCPATH . "assets/uploads/capa_progress/",0777);
+					umask($oldmask);
+				}
+
+				if(@copy($file, FCPATH . 'assets/uploads/capa_progress/'.basename($file))) {
+					$filename	= basename($file);
+				}
+			}
+			$data_progress['evidence'] = $filename ?? '';
 			$res_capa = save_data('tbl_capa_progress',$data_progress);
 
 			$cek_status_finding = get_data('tbl_capa',[
