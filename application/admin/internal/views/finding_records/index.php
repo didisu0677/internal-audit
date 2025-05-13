@@ -551,7 +551,7 @@ function formOpen() {
 function formOpen1() {	
 	CKEDITOR.instances['isi_finding'+0].setReadOnly(false);
 	var response = response_edit;
-	// console.log(response)
+	console.log(response)
 	$('#additional-file').html('');
 	$('#additional-finding').html('');
 
@@ -596,7 +596,7 @@ function formOpen1() {
 			},300);
 		});
 
-		// view_auditee(response.auditee);
+		view_auditee(response.auditee);
 
 	} else {
 		view_combo();
