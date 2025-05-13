@@ -204,7 +204,7 @@ class Finding_records extends BE_Controller {
 		
 		$data['detail'] = get_data('tbl_finding_records fr',[
 			'select' => 'fr.*, frf.filename',
-			'join' => 'tbl_finding_record_files frf on fr.id = frf.id_finding_record',
+			'join' => 'tbl_finding_record_files frf on fr.id = frf.id_finding_record type left',
 			'where' => [
 				// 'id_m_finding' => $x['id_m_finding']
 				'id_section_department' => $data['id_section_department'],
@@ -214,7 +214,6 @@ class Finding_records extends BE_Controller {
 				'DATE_FORMAT(create_at, "%d-%m-%Y %H:%i") =' => date('d-m-Y H:i', strtotime($data['create_at']))
 			]
 		])->result();
-		
 
 		$cb_schedule  = get_data('tbl_schedule_audit a',[
 			'select' => 'a.*,b.nama_institusi',
