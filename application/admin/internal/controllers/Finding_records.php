@@ -214,7 +214,6 @@ class Finding_records extends BE_Controller {
 				'DATE_FORMAT(create_at, "%d-%m-%Y %H:%i") =' => date('d-m-Y H:i', strtotime($data['create_at']))
 			]
 		])->result();
-		
 
 		$cb_schedule  = get_data('tbl_schedule_audit a',[
 			'select' => 'a.*,b.nama_institusi',
