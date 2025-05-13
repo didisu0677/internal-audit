@@ -525,7 +525,7 @@ class Finding_records extends BE_Controller {
 		$dateline_capa = post('due_date') ;
 		$pic_capa = post('pic_capa') ;
 		$id_capa = post('id_capa');
-
+		$file = post('file');
 
 		// $schedule  = get_data('tbl_schedule_audit', 'nomor', $data['periode_audit'])->row();
 		// $auditor   = get_data('tbl_m_auditor','id',$data['auditor'])->row();
@@ -533,17 +533,28 @@ class Finding_records extends BE_Controller {
 		// if($schedule) {
 		// 	$data['id_institusi_audit'] = $schedule->id_institusi_audit;
 		// }
-
+		$filename = [];
+		if(isset($file) && !empty($file) && $file != '') {
+			if(!is_dir(FCPATH . "assets/uploads/capa_plan/")){
+				$oldmask = umask(0);
+				mkdir(FCPATH . "assets/uploads/capa_plan/",0777);
+				umask($oldmask);
+			}
+		}
 
 		foreach($isi_capa as $i => $v) {
 			$data['id'] = $id_capa[$i];
 			$data['isi_capa'] = $v ;
 			$data['dateline_capa'] = $dateline_capa[$i];
 			$data['pic_capa'] = $pic_capa[$i];
-
-
-	
 			$data['id_status_capa'] = 1;
+			
+			if($file[$i]) {						
+				if(@copy($file[$i], FCPATH . 'assets/uploads/capa_plan/'.basename($file[$i]))) {
+					$filename[$i]	= basename($file[$i]);
+				}
+			}
+			$data['evidence'] = $filename[$i];
 
 			$response_capa = save_data('tbl_capa',$data,post(':validation'));
 
@@ -634,7 +645,6 @@ class Finding_records extends BE_Controller {
 
 		render($response_capa,'json');
 	}
-
 	function delete() {
 		$response = destroy_data('tbl_finding_records','id',post('id'));
 		if($response['status'] == 'success') {
