@@ -319,9 +319,10 @@ class Finding_records extends BE_Controller {
 
 	function add_capa() {
 		$data = get_data('tbl_finding_records a',[
-			'select' => 'a.*,b.section_name as department, c.nama as nama_auditee',
+			'select' => 'a.*,b.section_name as department, c.nama as nama_auditee, d.filename',
 			'join'   =>  ['tbl_m_audit_section b on a.id_department_auditee = b.id',
 						  'tbl_auditee c on a.auditee = c.id',
+						  'tbl_finding_record_files d on a.id = id_finding_record type LEFT'
 						 ],
 			'where' => [
 				'a.id' => post('id')

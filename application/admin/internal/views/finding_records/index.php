@@ -218,10 +218,10 @@ modal_open('modal-capa','CAPA Plan','modal-xl','data-openCallback="formOpen"');
 						<div class="form-group row">
 								<label class="col-form-label col-sm-2" for="lampiran<?php echo $i; ?>"><?php echo lang('lampiran'); ?></label>
 								<div class="col-sm-9">
-									<input type="text" name="file[]" id="file<?php echo $i; ?>" data-validation="" data-action="<?php echo base_url('upload/file/datetime'); ?>" data-token="<?php echo encode_id([user('id'),(time() + 900)]); ?>" autocomplete="off" class="form-control input-file" value="" placeholder="<?php echo lang('maksimal'); ?> 5MB">
+									<input type="text" name="file_temuan" id="file_temuan" data-validation="" data-action=" data-token="<?php echo encode_id([user('id'),(time() + 900)]); ?>" autocomplete="off" class="form-control input-file" value="" placeholder="<?php echo lang('maksimal'); ?> 5MB" readonly>
 								</div>
 								<div class="input-group-append">
-									<button class="btn btn-secondary btn-file" type="button"><?php echo lang('download'); ?></button>
+									<button class="btn btn-secondary btn-file-temuan" id ="btn-file-temuan" type="button"><?php echo lang('download'); ?></button>
 								</div>
 						</div>
 						<?php
@@ -354,6 +354,11 @@ $(document).on('click','.btn-capa',function(){
 			$('#nama_auditee').val(response.nama_auditee);
 			$('#site').val(response.site_auditee);
 			$('#area_auditee').val(response.audit_area);
+
+			$('#file_temuan').val(response.filename);
+			let btn_file_temuan = $('#btn-file-temuan');
+			btn_file_temuan.wrap('<a href="'+base_url+'assets/uploads/finding_records/'+response.filename+'" download></a>');
+
 
 			$('#username').html('<option value=""></option>');
 			$.each(response.user,function(k,v){
