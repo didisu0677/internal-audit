@@ -204,7 +204,7 @@ class Finding_records extends BE_Controller {
 		
 		$data['detail'] = get_data('tbl_finding_records fr',[
 			'select' => 'fr.*, frf.filename',
-			'join' => 'tbl_finding_record_files frf on fr.id = frf.id_finding_record type left',
+			'join' => 'tbl_finding_record_files frf on fr.id = frf.id_finding_record type LEFT',
 			'where' => [
 				// 'id_m_finding' => $x['id_m_finding']
 				'id_section_department' => $data['id_section_department'],

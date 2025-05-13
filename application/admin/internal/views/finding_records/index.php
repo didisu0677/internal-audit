@@ -596,7 +596,7 @@ function formOpen1() {
 			},300);
 		});
 
-		view_auditee(response.auditee);
+		// view_auditee(response.auditee);
 
 	} else {
 		view_combo();
