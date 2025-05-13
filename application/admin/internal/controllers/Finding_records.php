@@ -145,7 +145,7 @@ class Finding_records extends BE_Controller {
 
 			$dept = get_data('tbl_detail_auditee a',[
 				'select' => 'a.nip,a.id_department,a.id_section',
-				'join' => 'tbl_user b on a.nip = b.username',
+				'join' => 'tbl_user b on a.nip = b.username type LEFT',
 				'where' => [
 					'a.nip' => user('username') 
 				]
@@ -435,7 +435,7 @@ class Finding_records extends BE_Controller {
 				if($response_f['status'] == 'success'){
 					$attachment = [
 						'id_finding_record' => $response_f['id'],
-						'filename' => $filename[$k],
+						'filename' => $filename[$k] ?? '',
 					];
 					insert_data('tbl_finding_record_files', $attachment);	
 				}
