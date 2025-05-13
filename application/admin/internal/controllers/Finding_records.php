@@ -202,7 +202,9 @@ class Finding_records extends BE_Controller {
 			// $data['auditor'] = $data['id_auditor'];
 
 		
-		$data['detail'] = get_data('tbl_finding_records',[
+		$data['detail'] = get_data('tbl_finding_records fr',[
+			'select' => 'fr.*, frf.filename',
+			'join' => 'tbl_finding_record_files frf on fr.id = frf.id_finding_record',
 			'where' => [
 				// 'id_m_finding' => $x['id_m_finding']
 				'id_section_department' => $data['id_section_department'],
@@ -383,6 +385,7 @@ class Finding_records extends BE_Controller {
 		}
 
 		$data['id_auditor'] = $data['auditor'];
+		$file 				= post('file_finding');
 
 		$response 	= save_data('tbl_m_finding',$data,post(':validation'));
 
@@ -420,14 +423,23 @@ class Finding_records extends BE_Controller {
 						}
 					}
 				}
-
+				
 				$data['bobot_finding'] = $bobot_finding[$k];
 				$data['id_m_finding'] = post('id');
 				$data['id'] = $id_finding_records[$k];
 				$data['finding'] = $isi_finding[$k];
 
 				$response_f = save_data('tbl_finding_records',$data,post(':validation'));
-
+				
+				// insert attachment file to database tbl_finding_record_files
+				if($response_f['status'] == 'success'){
+					$attachment = [
+						'id_finding_record' => $response_f['id'],
+						'filename' => $filename[$k],
+					];
+					insert_data('tbl_finding_record_files', $attachment);	
+				}
+				
 				/// kirim email dan notifikasi
 				$usr 	= get_data('tbl_auditee a',[
 					'select' => 'a.*,b.id as id_user',
