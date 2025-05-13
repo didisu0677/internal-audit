@@ -1,0 +1,24 @@
+{
+    "field": {
+        "id": "primary_key",
+        "internal_control": "text",
+        "location_control": "varchar",
+        "no_pnp": "varchar",
+        "jenis_pnp": "varchar",
+        "penerbit_pnp": "varchar",
+        "tanggal_pnp": "date",
+        "is_active": "boolean"
+    },
+    "label": {
+        "id": "Id",
+        "internal_control": "Internal Control",
+        "location_control": "Location Control",
+        "no_pnp": "No Pnp",
+        "jenis_pnp": "Jenis Pnp",
+        "penerbit_pnp": "Penerbit Pnp",
+        "tanggal_pnp": "Tanggal Pnp",
+        "is_active": "Aktif"
+    },
+    "validation": [],
+    "alias": []
+}
