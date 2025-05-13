@@ -2,11 +2,19 @@
     "field": {
         "id": "primary_key",
         "risk": "text",
+        "keterangan": "varchar",
+        "score_dampak": "int",
+        "score_kemungkinan": "int",
+        "bobot": "varchar",
         "is_active": "boolean"
     },
     "label": {
         "id": "Id",
         "risk": "Risk",
+        "keterangan": "Keterangan",
+        "score_dampak": "Score Dampak",
+        "score_kemungkinan": "Score Kemungkinan",
+        "bobot": "Bobot",
         "is_active": "Aktif"
     },
     "validation": [],

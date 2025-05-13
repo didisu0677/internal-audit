@@ -508,7 +508,16 @@
     "id_group_section": "Id Group Section",
     "number_reminder": "Number Reminder",
     "nottification": "Nottification",
-    "days_nottification" : "Days Nottification",
-    "audit_section" : "Audit Section",
-    "risk" : "Risk"
+    "days_nottification": "Days Nottification",
+    "audit_section": "Audit Section",
+    "risk": "Risk",
+    "score_dampak": "Score Dampak",
+    "score_kemungkinan": "Score Kemungkinan",
+    "bobot": "Bobot",
+    "internal_control": "Internal Control",
+    "location_control": "Location Control",
+    "no_pnp": "No Pnp",
+    "jenis_pnp": "Jenis Pnp",
+    "penerbit_pnp": "Penerbit Pnp",
+    "tanggal_pnp": "Tanggal Pnp"
 }
