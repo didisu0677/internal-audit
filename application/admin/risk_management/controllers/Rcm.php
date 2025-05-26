@@ -334,11 +334,14 @@ class Rcm extends BE_Controller {
 	}
 
 	function delete() {
-		$cek = get_data('tbl_m_aktivitas','id',post('id'));
+		$cek = get_data('tbl_m_aktivitas','id',post('id'))->row();
 		$response = destroy_data('tbl_m_aktivitas','id_rk',$cek->id_rk);
 		if($response['status']= 'success') {
-			delete_data('tbl_risk_control','id',$cek->id_rk);
-			delete_data('tbl_annual_audit_plan','id_m_aktivitas',$cek->id);
+			$rk = get_data('tbl_risk_control','id',$cek->id_rk)->row();
+			if($rk) delete_data('tbl_risk_control','id',$cek->id_rk);
+
+			$annual = get_data('tbl_annual_audit_plan','id_m_aktivitas',$cek->id)->row();
+			if($annual) delete_data('tbl_annual_audit_plan','id_m_aktivitas',$cek->id);
 		}
 		render($response,'json');
 	}
