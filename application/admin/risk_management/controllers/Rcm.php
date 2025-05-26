@@ -320,7 +320,7 @@ class Rcm extends BE_Controller {
 
 						foreach($id_risk as $i => $v) {
 							$r = get_data('tbl_risk_register','id',$v)->row();
-							$ann = save_data('tbl_annual_audit_plan',['id'=> 0,'id_risk'=>$v,'id_m_aktivitas'=>$response_m['id'],'bobot'=>$r->bobot,'is_active'=>1]);
+							$ann = save_data('tbl_annual_audit_plan',['id'=> 0,'id_risk'=>$v,'id_m_aktivitas'=>$response_m['id'],'bobot'=>$bobot_risk[$i],'is_active'=>1]);
 
 						}
 					}
