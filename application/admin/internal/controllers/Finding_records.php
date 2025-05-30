@@ -554,7 +554,7 @@ class Finding_records extends BE_Controller {
 					$filename[$i]	= basename($file[$i]);
 				}
 			}
-			$data['evidence'] = $filename[$i];
+			$data['evidence'] = $filename[$i] ?? '';
 
 			$response_capa = save_data('tbl_capa',$data,post(':validation'));
 
