@@ -92,6 +92,16 @@
 				</div>
 
 				<div class="form-group row">
+						<label class="col-form-label col-sm-3" for="evidence_base"><?php echo lang('evidence_base'); ?></label>
+						<div class="col-sm-6">
+							<input type="text" name="file_capa" id="file_capa" data-validation="" data-action=" data-token="<?php echo encode_id([user('id'),(time() + 900)]); ?>" autocomplete="off" class="form-control input-file" value="" placeholder="<?php echo lang('maksimal'); ?> 5MB" readonly>
+						</div>
+						<div class="input-group-append">
+							<button class="btn btn-secondary btn-file-capa" id ="btn-file-capa" type="button"><?php echo lang('download'); ?></button>
+						</div>
+				</div>
+
+				<div class="form-group row">
 					<label class="col-form-label col-sm-3" for="keterangan_progress"><?php echo (lang('keterangan_progress')) ; ?></label>        
 					<div class="col-sm-9">
 						<div class="card">
@@ -333,6 +343,12 @@ function formOpen() {
 		CKEDITOR.instances['isi_capa'].setReadOnly(true);
 		CKEDITOR.instances['isi_capa'].setData(decodeEntities(response.isi_capa));
 		$('#id_progress').val(0);
+		$('#file_capa').val(response.evidence);
+
+		let btn_file_capa = $('#btn-file-capa');
+		if(response.evidence) {
+			btn_file_capa.wrap('<a href="'+base_url+'assets/uploads/capa_plan/'+response.evidence+'" download></a>');
+		}
 
 		$("#progress-1, #progress-2, #progress-3").hide();  
 
