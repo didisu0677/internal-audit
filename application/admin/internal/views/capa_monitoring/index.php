@@ -94,7 +94,7 @@
 				<div class="form-group row">
 						<label class="col-form-label col-sm-3" for="evidence_base"><?php echo lang('evidence_base'); ?></label>
 						<div class="col-sm-6">
-							<input type="text" name="file_capa" id="file_capa" data-validation="" data-action=" data-token="<?php echo encode_id([user('id'),(time() + 900)]); ?>" autocomplete="off" class="form-control input-file" value="" placeholder="<?php echo lang('maksimal'); ?> 5MB" readonly>
+							<input type="text" name="file_capa" id="file_capa" data-validation="" data-action=" data-token="<?php echo encode_id([user('id'),(time() + 900)]); ?>" autocomplete="off" class="form-control" value="" placeholder="<?php echo lang('maksimal'); ?> 5MB" readonly>
 						</div>
 						<div class="input-group-append">
 							<button class="btn btn-secondary btn-file-capa" id ="btn-file-capa" type="button"><?php echo lang('download'); ?></button>
