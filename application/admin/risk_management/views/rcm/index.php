@@ -45,7 +45,7 @@
 								th(lang('department'),'','class="text-center align-middle headcol"');
 								th(lang('section'),'','class="text-center align-middle headcol"');
 								th(lang('aktivitas'),'','class="text-center align-middle headcol"');
-								th(lang('sub_aktivitas'),'','class="text-center align-middle headcol"');
+								th(lang('audit_area'),'','class="text-center align-middle headcol"');
 								th(lang('risk'),'','class="text-center align-middle headcol"');
 								th(lang('internal_control'),'','class="text-center align-middle headcol"');
 								th(lang('keterangan'),'','class="text-center align-middle headcol"');
