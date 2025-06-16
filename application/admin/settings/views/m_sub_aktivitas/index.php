@@ -16,7 +16,7 @@
 		thead();
 			tr();
 				th('checkbox','text-center','width="30" data-content="id"');
-				th(lang('id_aktivitas'),'','data-content="id_aktivitas"');
+				th(lang('aktivitas'),'','data-content="aktivitas" data-table="tbl_aktivitas"');
 				th(lang('sub_aktivitas'),'','data-content="sub_aktivitas"');
 				th(lang('aktif').'?','text-center','data-content="is_active" data-type="boolean"');
 				th('&nbsp;','','width="30" data-content="action_button"');
@@ -29,7 +29,7 @@ modal_open('modal-form');
 		form_open(base_url('settings/m_sub_aktivitas/save'),'post','form');
 			col_init(3,9);
 			input('hidden','id','id');
-			input('text',lang('id_aktivitas'),'id_aktivitas');
+			select2(lang('aktivitas'),'id_aktivitas','required',$aktivitas,'id','aktivitas');
 			input('text',lang('sub_aktivitas'),'sub_aktivitas');
 			toggle(lang('aktif').'?','is_active');
 			form_button(lang('simpan'),lang('batal'));

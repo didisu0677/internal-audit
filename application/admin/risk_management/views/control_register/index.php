@@ -35,7 +35,7 @@ modal_open('modal-form','','modal-xl','data-openCallback="formOpen"');
 		form_open(base_url('risk_management/control_register/save'),'post','form');
 			col_init(3,9);
 			input('hidden','id','id');
-			input('','id_sub_aktivitas','id_sub_aktivitas');
+			input('hidden','id_sub_aktivitas','id_sub_aktivitas');
 			?>
 			<div class="form-group row">
 				<label class="col-form-label col-sm-3 required" for="id_aktivitas"><?php echo lang('aktivitas'); ?></label>

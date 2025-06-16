@@ -63,7 +63,8 @@ class Control_register extends BE_Controller {
 				$sub = save_data('tbl_sub_aktivitas',[
 					'id' => $data['id_sub_aktivitas'],
 					'id_aktivitas' => $response['id'],
-					'sub_aktivitas' => $data['audit_area']
+					'sub_aktivitas' => $data['audit_area'],
+					'is_active' => 1
 				]);
 			}
 			

@@ -7,7 +7,8 @@ class M_sub_aktivitas extends BE_Controller {
 	}
 
 	function index() {
-		render();
+		$data['aktivitas']   = get_data('tbl_aktivitas','is_active = 1')->result_array();
+		render($data);
 	}
 
 	function data() {
