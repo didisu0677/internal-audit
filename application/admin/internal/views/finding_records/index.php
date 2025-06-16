@@ -128,6 +128,7 @@ modal_open('modal-form','Finding','modal-xl','data-openCallback="formOpen1"');
 				select2(lang('site_auditee'),'site_auditee','required|infinity',['Head Office (HO)','Factory']);
 				select2(lang('section'),'id_section_department','required',$department,'id','section_name');
 				input('text',lang('audit_area'),'audit_area');
+				select2(lang('aktivitas'),'id_sub_aktivitas','required', $aktivitas, 'id','sub_aktivitas');
 			card_close();
 
 			card_open(lang('finding'),'mb-2');?>
@@ -144,7 +145,19 @@ modal_open('modal-form','Finding','modal-xl','data-openCallback="formOpen1"');
 						<option value="Minor">Minor</option>
 						<option value="Improvement">Improvement</option>
 					</select>		
-			</div>
+				</div>
+							</div>
+
+			<div class="form-group row">
+				<label class="col-form-label col-sm-3" for="status_finding_control"><?php echo lang('status_finding_control'); ?></label>
+				<div class="col-sm-9">
+				<select class="select2" name="status_finding_control" id="status_finding_control" required>
+						<option value=""></option>
+						<option value="1">Design control tidak ada</option>
+						<option value="2">Design control tidak efektif</option>
+						<option value="3">Implementasi control tidak sesuai</option>
+					</select>		
+				</div>
 			</div>	
 
 			<?php

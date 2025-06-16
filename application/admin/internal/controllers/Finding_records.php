@@ -66,6 +66,12 @@ class Finding_records extends BE_Controller {
 			])->result();
 		}
 
+		$data['aktivitas'] = get_data('tbl_sub_aktivitas a',[
+			'select' => 'a.id, CONCAT(b.aktivitas," - ", a.sub_aktivitas) as sub_aktivitas',
+			'join'  => 'tbl_aktivitas b on a.id_aktivitas = b.id type LEFT',
+		])->result_array();
+
+
 		if(user('id_group') != AUDITEE){
 
 			$data['user']	= get_data('tbl_user',[

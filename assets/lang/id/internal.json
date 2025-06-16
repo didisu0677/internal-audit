@@ -71,5 +71,6 @@
     "keterangan" : "Keterangan",
     "location" : "Lokasi",
     "internal_control" : "Internal Kontrol",
-    "location_control" : "Lokasi Kontrol"
+    "location_control" : "Lokasi Kontrol",
+    "status_finding_control" : "Status Finding Control"
 }
