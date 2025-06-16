@@ -519,5 +519,7 @@
     "no_pnp": "No Pnp",
     "jenis_pnp": "Jenis Pnp",
     "penerbit_pnp": "Penerbit Pnp",
-    "tanggal_pnp": "Tanggal Pnp"
+    "tanggal_pnp": "Tanggal Pnp",
+    "type_aktivitas": "Type Aktivitas",
+    "id_aktivitas": "Id Aktivitas"
 }

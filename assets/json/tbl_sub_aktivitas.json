@@ -1,0 +1,16 @@
+{
+    "field": {
+        "id": "primary_key",
+        "id_aktivitas": "int",
+        "sub_aktivitas": "varchar",
+        "is_active": "boolean"
+    },
+    "label": {
+        "id": "Id",
+        "id_aktivitas": "Id Aktivitas",
+        "sub_aktivitas": "Sub Aktivitas",
+        "is_active": "Aktif"
+    },
+    "validation": [],
+    "alias": []
+}
