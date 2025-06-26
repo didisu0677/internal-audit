@@ -88,7 +88,7 @@ class Login extends BE_Controller {
                         if($user->id_group == GROUP_SALES_MARKETING){
                             $response['redirect']   = base_url('budget_sales');
                         }else{
-                            $response['redirect']   = base_url('internal');
+                            $response['redirect']   = base_url('dashboard');
                         }
                     }
                     $failed_login = false;
