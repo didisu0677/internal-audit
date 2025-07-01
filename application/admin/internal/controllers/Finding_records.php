@@ -169,7 +169,8 @@ class Finding_records extends BE_Controller {
 		$config['join'][] = 'tbl_auditee ON tbl_auditee.id = tbl_finding_records.auditee TYPE LEFT';
 		$config['button'][]	= button_serverside('btn-default','btn-capa',['far fa-copy',lang('capa_plan'),true],'act-dokumen',['status_finding'=>0]);
 		if(user('id_group') != AUDITEE) {
-	        $config['button'][]	= button_serverside('btn-warning','btn-input',['fa-edit',lang('ubah'),true],'edit',['status_finding'=>0]);
+	        // $config['button'][]	= button_serverside('btn-warning','btn-input',['fa-edit',lang('ubah'),true],'edit',['status_finding'=>0]);
+	        $config['button'][]	= button_serverside('btn-warning','btn-input',['fa-edit',lang('ubah'),true],'edit');
 		}
 		if(user('id_group') != AUDITEE) {
 	        $config['button'][]	= button_serverside('btn-danger','btn-delete',['fa-trash-alt',lang('hapus'),true],'delete',['status_finding'=>0]);
