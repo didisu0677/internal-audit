@@ -24,7 +24,7 @@ class Dashboard extends BE_Controller {
 			'year(tgl_mulai_audit)' => $year
 		];
 		$user_group = user('id_group');
-		if(!in_array($user_group, ['1', '41'])){
+		if($user_group == USER_GROUP_USER){
 			$where['id_section_department'] = $section ?: '';
 		}
 		
@@ -33,19 +33,22 @@ class Dashboard extends BE_Controller {
 			'where' => $where,
 			'group_by' => 'status_finding_control'
 		])->result_array();
-
+	
 		$status_label = [
 			'0' => 'Undefined',
 			'1' => 'Tidak ada',
 			'2' => 'Tidak efektif',
 			'3' => 'Tidak sesuai'
 		];
+
+		$total = array_sum(array_column($data_finding, 'jumlah'));
 		$data = [];
 		if($data_finding){
 			foreach($data_finding as $row){
 				$data[] = [
 					'label' => $status_label[$row['status_finding_control']],
-					'jumlah' => $row['jumlah'] 
+					'jumlah' => $row['jumlah'],
+					'persentase' => $total ? round($row['jumlah'] / $total * 100, 1) : 0
 				];
 			}
 		}
@@ -65,7 +68,7 @@ class Dashboard extends BE_Controller {
 			'year(tgl_mulai_audit)' => $year
 		];
 		$is_admin = 0; // 1 True, 0 False
-		if(in_array($user_group, ['1', '41'])){ // 1 = dev, 41 = Internal Audit
+		if($user_group != USER_GROUP_USER){ // 1 = dev, 41 = Internal Audit
 			$data_section = get_data('tbl_m_audit_section',[
 				'where' => [
 					'level4 !=' => '0',
@@ -118,7 +121,7 @@ class Dashboard extends BE_Controller {
 			'year(tgl_mulai_audit)' => $year
 		];
 		$user_group = user('id_group');
-		if(!in_array($user_group, ['1', '41'])){
+		if($user_group == USER_GROUP_USER){
 			$where['id_section_department'] = $section ?: '';
 		}
 		
@@ -143,9 +146,15 @@ class Dashboard extends BE_Controller {
 			}
 		}
 
+		$total = array_sum(array_values($counter));
+		$values = array_values($counter);
+		foreach($values as $v){
+			$persentase = $total ? round($v / $total * 100, 1) : 0;
+			$result['persentase'][] = $persentase; 
+		}
+		
 		$result['label'] = array_keys($counter);
 		$result['data'] = array_values($counter);
-
 		render($result, 'json');
 	}
 
@@ -162,7 +171,7 @@ class Dashboard extends BE_Controller {
 			'year(tgl_mulai_audit)' => $year
 		];
 		$is_admin = 0; // 1 True, 0 False
-		if(in_array($user_group, ['1', '41'])){ // 1 = dev, 41 = Internal Audit
+		if($user_group != USER_GROUP_USER){ // 1 = dev, 41 = Internal Audit
 			$data_section = get_data('tbl_m_audit_section',[
 				'where' => [
 					'level4 !=' => '0',

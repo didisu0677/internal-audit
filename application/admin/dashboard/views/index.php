@@ -37,7 +37,7 @@
         </div>
     </div>
     <div class="row mt-3">
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="card shadow-sm">
                 <div class="card-body">
                     <div id="no_data"></div>
@@ -45,7 +45,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-9">
+        <div class="col-md-8">
             <div class="card shadow-sm">
                 <div class="card-header bg-white text-center">
                     <h5 class="font-weight-bolder mb-0">Status Finding Control All Department</h5>
@@ -65,14 +65,14 @@
         </div>
     </div>
     <div class="row mt-3">
-        <div class="col-md-3">
+        <div class="col-md-4">
             <div class="card shadow-sm">
                 <div class="card-body">
                     <canvas id="risk_control" style="margin:auto;"></canvas>
                 </div>
             </div>
         </div>
-        <div class="col-md-9">
+        <div class="col-md-8">
             <div class="card shadow-sm">
                 <div class="card-header bg-white text-center">
                     <h5 class="font-weight-bolder mb-0">Monitoring Risk All Department</h5>
@@ -97,9 +97,9 @@
                 <table class="table table-bordered table-sm text-center" id="finding_capa">
                     <thead class="thead-dark">
                         <tr>
-                            <th rowspan="2">Site</th>
-                            <th rowspan="2">Dept</th>
-                            <th rowspan="2">Aktivitas</th>
+                            <th rowspan="2" style="width: 10%;">Site</th>
+                            <th rowspan="2" style="width: 10%;">Dept</th>
+                            <th rowspan="2" style="width: 10%;">Aktivitas</th>
                             <th colspan="3">Finding Progress</th>
                             <th colspan="6">CAPA Progress</th>
                         </tr>
@@ -122,7 +122,9 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+
 <script>
     let findingControlPie = null;
     let findingControlBar = null;
@@ -143,9 +145,7 @@
     });
     
     $(document).on('change', '#year', function(){
-        // get_finding_control_chart();
-        // get_finding_control_dept_chart();
-
+      
         $('#page_loading').show();
         $.when(
             get_finding_control_chart(),
@@ -168,8 +168,8 @@
             },
             success: function(res) {
                 let labels = res.map(data => data.label);
-                let datas = res.map(data => parseInt(data.jumlah)); // pastikan angka
-
+                let datas = res.map(data => parseInt(data.jumlah)); 
+                let persentase = res.map(data => data.persentase);
                 // Cek apakah ada data yang nilainya bukan 0
                 let hasData = datas.some(val => val > 0);
                 
@@ -182,17 +182,36 @@
                     }
                     findingControlPie = new Chart(ctx, {
                         type: 'doughnut',
+                        plugins: [ChartDataLabels], 
                         data: {
                             labels: labels,
                             datasets: [{
                                 label: 'Finding Control',
                                 data: datas,
-                                borderWidth: 3
+                                borderWidth: 3,
+                                backgroundColor: ['#6da4f5','#E53935','#F9A825', '#4CAF50'], // tiga warna
+                                borderColor    : '#fff',
+                                borderWidth    : 2
                             }]
                         },
                         options: {
                             responsive: true,
+                            maintainAspectRatio: false,
                             plugins: {
+                                datalabels: {
+                                    font: { weight:'bold', size:12 },
+                                    color:'#fff',
+                                    // ambil persen dari array di atas
+                                    formatter: (_, ctx) => persentase[ctx.dataIndex] + '%'
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: (ctx) => {
+                                        const i   = ctx.dataIndex;
+                                        return `${labels[i]} : ${datas[i]}  (${persentase[i]}%)`;
+                                        }
+                                    }
+                                },
                                 legend: {
                                     position: 'bottom'
                                 },
@@ -232,9 +251,11 @@
                 });
 
                 // Loop untuk mengisi jumlah temuan ke dept yang sesuai
+
+                let total_data = 0;
                 datas.forEach(item => {
+                    total_data += parseInt(item.jumlah); 
                     let targetDept = dept.find(d => d.parent_id == item.parent_id);
-                    
                     if(is_admin){
                         targetDept = dept.find(d => d.id == item.parent_id);
                     }
@@ -255,9 +276,11 @@
                 let data2 = dept.map(d => d.sfc_2);
                 let data3 = dept.map(d => d.sfc_3);
 
+                const totalPerDept = data1.map((_, i) => data1[i] + data2[i] + data3[i]);
+
                 // Atur lebar canvas dinamis
                 let canvas = document.getElementById('finding_control_dept');
-                canvas.width = labels.length * 350;
+                canvas.width = labels.length * 100;
 
                 let ctx = $('#finding_control_dept');
                 
@@ -267,29 +290,67 @@
 
                 findingControlBar = new Chart(ctx, {
                     type: 'bar',
+                    plugins: [ChartDataLabels], 
                     data: {
                         labels: labels,
                         datasets: [
                         {
                             label: 'Tidak Ada',
                             data: data1,
-                            barThickness: 50
+                            barThickness: 50,
+                            backgroundColor: '#E53935', 
+                            borderColor    : '#fff',
+                            borderWidth    : 1
                         },
                         {
                             label: 'Tidak Sesuai',
                             data: data2,
-                            barThickness: 50
+                            barThickness: 50,
+                            backgroundColor: '#4CAF50', 
+                            borderColor    : '#fff',
+                            borderWidth    : 1
                         },
                         {
                             label: 'Tidak Efektif',
                             data: data3,
-                            barThickness: 50
+                            barThickness: 50,
+                            backgroundColor: '#F9A825', 
+                            borderColor    : '#fff',
+                            borderWidth    : 1
                         },
                     ]
                     },
                     options: {
                         responsive: false,
                         plugins: {
+                            // formatter global berlaku utk semua dataset
+                            datalabels: {
+                                anchor: 'center',
+                                align : 'center',
+                                color: '#fff',
+                                font  : { weight:'bold', size:12 },
+                                display: (ctx) => {                     // hanya tampil kalau > 0 %
+                                    const v = ctx.dataset.data[ctx.dataIndex];
+                                    const tot = totalPerDept[ctx.dataIndex];
+                                    return tot && v > 0;
+                                },
+                                formatter: (value, ctx) => {
+                                    const tot = totalPerDept[ctx.dataIndex];
+                                    const pct = tot ? value / tot * 100 : 0;
+                                    return pct ? pct.toFixed(1) + '%' : '';
+                                }
+                            },
+                            legend:{ position:'top' },
+                            tooltip:{
+                                callbacks:{
+                                label:(ctx)=>{
+                                    const i   = ctx.dataIndex;
+                                    const tot = totalPerDept[i];
+                                    const pct = tot ? (ctx.raw/tot*100).toFixed(1) : 0;
+                                    return `${ctx.dataset.label} : ${ctx.raw} (${pct}%)`;
+                                }
+                                }
+                            },
                             legend: { position: 'top' }
                         },
                         scales: {
@@ -298,7 +359,11 @@
                                 ticks: {
                                     autoSkip: false,
                                     maxRotation: 0,
-                                    minRotation: 0
+                                    minRotation: 0,
+                                    callback(value){
+                                        const lbl = this.getLabelForValue(value);
+                                        return lbl.split(/[\s-]+/);
+                                    }
                                 }
                             },
                             y: {
@@ -323,6 +388,7 @@
             success: function(res) {
                 let labels = res.label;
                 let datas = res.data;
+                let persentase = res.persentase;
                 if (riskControlPie !== null) {
                     riskControlPie.destroy();
                 }
@@ -330,17 +396,37 @@
                 let ctx = $('#risk_control');
                 riskControlPie = new Chart(ctx, {
                     type: 'doughnut',
+                    plugins: [ChartDataLabels], 
                     data: {
                         labels: labels,
                         datasets: [{
                             label: 'Risk Control',
                             data: datas,
-                            borderWidth: 3
+                            borderWidth: 3,
+                            backgroundColor: ['#4CAF50','#E53935', '#F9A825', '#1E88E5', '#8E24AA'],
+                            borderColor    : '#fff',
+                            borderWidth    : 1
                         }]
                     },
                     options: {
                         responsive: true,
                         plugins: {
+                            datalabels: {
+                                font: { weight:'bold', size:14 },
+                                color: '#fff',
+                                // ambil persen dari array di atas
+                                display: (ctx) => persentase[ctx.dataIndex] > 0,   // muncul hanya kalau > 0
+                                formatter: (_, ctx) => persentase[ctx.dataIndex] + '%'
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => {
+                                        const i   = ctx.dataIndex;
+                                        if (persentase[i] === 0) return ''; // hilangkan baris tooltip 0 %
+                                        return `${labels[i]} : ${datas[i]} (${persentase[i]}%)`;
+                                    }
+                                }
+                            },
                             legend: {
                                 position: 'bottom'
                             },
@@ -406,10 +492,11 @@
                 let data_major = dept.map(d => d.status_major);
                 let data_moderate = dept.map(d => d.status_moderate);
                 let data_minor = dept.map(d => d.status_minor);
-
+                const totalPerDept   = labels.map((_, i) =>
+                    data_improve[i] + data_crit[i] + data_major[i] + data_moderate[i] + data_minor[i]);
                 // Atur lebar canvas dinamis
                 let canvas = document.getElementById('risk_control_bar');
-                canvas.width = labels.length * 350;
+                canvas.width = labels.length * 100;
 
                 let ctx = $('#risk_control_bar');
                 
@@ -419,40 +506,80 @@
 
                 riskControlBar = new Chart(ctx, {
                     type: 'bar',
+                    plugins: [ChartDataLabels], 
                     data: {
                         labels: labels,
                         datasets: [
                         {
                             label: 'Improvement',
                             data: data_improve,
-                            barThickness: 50
+                            barThickness: 50,
+                            backgroundColor: '#4CAF50',
+                            borderColor    : '#fff',
+                            borderWidth    : 1
                         },
                         {
                             label: 'Critical',
                             data: data_crit,
-                            barThickness: 50
+                            barThickness: 50,
+                            backgroundColor: '#E53935',
+                            borderColor    : '#fff',
+                            borderWidth    : 1
                         },
                         {
                             label: 'Major',
                             data: data_major,
-                            barThickness: 50
+                            barThickness: 50,
+                            backgroundColor: '#F9A825',
+                            borderColor    : '#fff',
+                            borderWidth    : 1
                         },
-                                                {
+                        {
                             label: 'Moderate',
                             data: data_moderate,
-                            barThickness: 50
+                            barThickness: 50,
+                            backgroundColor: '#1E88E5',
+                            borderColor    : '#fff',
+                            borderWidth    : 1
                         },
-                                                {
+                        {
                             label: 'Minor',
                             data: data_minor,
-                            barThickness: 50
+                            barThickness: 50,
+                            backgroundColor: '#8E24AA',
+                            borderColor    : '#fff',
+                            borderWidth    : 1
                         },
                     ]
                     },
                     options: {
                         responsive: false,
                         plugins: {
-                            legend: { position: 'top' }
+                            legend: { position: 'top' },
+                            datalabels: {
+                                anchor:'center',
+                                align :'center',
+                                color: '#fff',
+                                font  :{ weight:'bold', size:12 },
+                                display: ctx => {          // sembunyikan kalau 0 %
+                                    const v   = ctx.dataset.data[ctx.dataIndex];
+                                    return v > 0;
+                                },
+                                formatter: (value, ctx) => {
+                                    const tot = totalPerDept[ctx.dataIndex];
+                                    return tot ? (value / tot * 100).toFixed(1) + '%' : '';
+                                }
+                            },
+                            tooltip:{
+                                callbacks:{
+                                    label: (ctx) => {
+                                    const i   = ctx.dataIndex;
+                                    const tot = totalPerDept[i];
+                                    const pct = tot ? (ctx.raw / tot * 100).toFixed(1) : 0;
+                                    return `${ctx.dataset.label}: ${ctx.raw} (${pct}%)`;
+                                    }
+                                }
+                            }
                         },
                         scales: {
                             x: {
@@ -460,7 +587,11 @@
                                 ticks: {
                                     autoSkip: false,
                                     maxRotation: 0,
-                                    minRotation: 0
+                                    minRotation: 0,
+                                    callback(value){
+                                        const lbl = this.getLabelForValue(value);
+                                        return lbl.split(/[\s-]+/);
+                                    }
                                 }
                             },
                             y: {

@@ -102,3 +102,5 @@ define('MPD', 37);
 define('ADMIN',10);
 define('AUDITEE',38);
 
+define('USER_GROUP_USER', 38);
+
