@@ -131,6 +131,21 @@
     let riskControlPie = null;
     let riskControlBar = null;
 
+    const COLOR_MAP = {
+        'Tidak ada'      : '#E53935', 
+        'Tidak sesuai'   : '#4CAF50', 
+        'Tidak efektif'  : '#F9A825',
+        'Improvement'    : '#1E88E5', 
+        'Critical'       : '#D32F2F', 
+        'Major'          : '#FB8C00', 
+        'Moderate'       : '#FBC02D', 
+        'Minor'          : '#43A047'
+    };
+
+    function getColor(label, fallback='#BDBDBD'){
+        return COLOR_MAP[label] ?? fallback;
+    }
+
     $(document).ready(function() {
         $('#page_loading').show();
         $.when(
@@ -172,7 +187,6 @@
                 let persentase = res.map(data => data.persentase);
                 // Cek apakah ada data yang nilainya bukan 0
                 let hasData = datas.some(val => val > 0);
-                
                 if (hasData) {
                     $('#no_data').empty(); 
                     let ctx = $('#finding_control');
@@ -189,7 +203,7 @@
                                 label: 'Finding Control',
                                 data: datas,
                                 borderWidth: 3,
-                                backgroundColor: ['#6da4f5','#E53935','#F9A825', '#4CAF50'], // tiga warna
+                                backgroundColor: labels.map(l => getColor(l)), 
                                 borderColor    : '#fff',
                                 borderWidth    : 2
                             }]
@@ -287,7 +301,7 @@
                 if (findingControlBar !== null) {
                     findingControlBar.destroy();
                 }
-
+                
                 findingControlBar = new Chart(ctx, {
                     type: 'bar',
                     plugins: [ChartDataLabels], 
@@ -298,23 +312,23 @@
                             label: 'Tidak Ada',
                             data: data1,
                             barThickness: 50,
-                            backgroundColor: '#E53935', 
-                            borderColor    : '#fff',
-                            borderWidth    : 1
-                        },
-                        {
-                            label: 'Tidak Sesuai',
-                            data: data2,
-                            barThickness: 50,
-                            backgroundColor: '#4CAF50', 
+                            backgroundColor: getColor('Tidak ada'),
                             borderColor    : '#fff',
                             borderWidth    : 1
                         },
                         {
                             label: 'Tidak Efektif',
+                            data: data2,
+                            barThickness: 50,
+                            backgroundColor: getColor('Tidak efektif'), 
+                            borderColor    : '#fff',
+                            borderWidth    : 1
+                        },
+                        {
+                            label: 'Tidak Sesuai',
                             data: data3,
                             barThickness: 50,
-                            backgroundColor: '#F9A825', 
+                            backgroundColor: getColor('Tidak sesuai'), 
                             borderColor    : '#fff',
                             borderWidth    : 1
                         },
@@ -392,7 +406,6 @@
                 if (riskControlPie !== null) {
                     riskControlPie.destroy();
                 }
-
                 let ctx = $('#risk_control');
                 riskControlPie = new Chart(ctx, {
                     type: 'doughnut',
@@ -403,7 +416,7 @@
                             label: 'Risk Control',
                             data: datas,
                             borderWidth: 3,
-                            backgroundColor: ['#4CAF50','#E53935', '#F9A825', '#1E88E5', '#8E24AA'],
+                            backgroundColor: labels.map(l => getColor(l)),
                             borderColor    : '#fff',
                             borderWidth    : 1
                         }]
@@ -514,7 +527,7 @@
                             label: 'Improvement',
                             data: data_improve,
                             barThickness: 50,
-                            backgroundColor: '#4CAF50',
+                            backgroundColor: getColor('Improvement'),
                             borderColor    : '#fff',
                             borderWidth    : 1
                         },
@@ -522,7 +535,7 @@
                             label: 'Critical',
                             data: data_crit,
                             barThickness: 50,
-                            backgroundColor: '#E53935',
+                            backgroundColor: getColor('Critical'),
                             borderColor    : '#fff',
                             borderWidth    : 1
                         },
@@ -530,7 +543,7 @@
                             label: 'Major',
                             data: data_major,
                             barThickness: 50,
-                            backgroundColor: '#F9A825',
+                            backgroundColor: getColor('Major'),
                             borderColor    : '#fff',
                             borderWidth    : 1
                         },
@@ -538,7 +551,7 @@
                             label: 'Moderate',
                             data: data_moderate,
                             barThickness: 50,
-                            backgroundColor: '#1E88E5',
+                            backgroundColor: getColor('Moderate'),
                             borderColor    : '#fff',
                             borderWidth    : 1
                         },
@@ -546,7 +559,7 @@
                             label: 'Minor',
                             data: data_minor,
                             barThickness: 50,
-                            backgroundColor: '#8E24AA',
+                            backgroundColor: getColor('Minor'),
                             borderColor    : '#fff',
                             borderWidth    : 1
                         },
@@ -615,7 +628,6 @@
                 year:year
             },
             success: function(res){
-                console.log(res);
                 let html = '';
 
                 $.each(res, function(i,v){
