@@ -42,18 +42,18 @@ class Help_section extends BE_Controller {
 			mkdir($destinationDir, 0777, true); // create recursively
 		}
 
-		if (file_exists($tempPath)) {
-			rename($tempPath, $newPath);
-			$data['file_attachment'] = $newPath; // update path in data if needed
-		} else {
-			$response = [
-				'message' => "File not found: $tempPath",
-				'status' => 'error'
-			];
+		// if (file_exists($tempPath)) {
+		// 	rename($tempPath, $newPath);
+		// 	$data['file_attachment'] = $newPath; // update path in data if needed
+		// } else {
+		// 	$response = [
+		// 		'message' => "File not found: $tempPath",
+		// 		'status' => 'error'
+		// 	];
 
-			render($response,'json');
-			return;
-		}
+		// 	render($response,'json');
+		// 	return;
+		// }
 
 		$response = save_data('tbl_help',$data,post(':validation'));
 		render($response,'json');
