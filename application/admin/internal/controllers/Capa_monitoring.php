@@ -105,16 +105,18 @@ class Capa_monitoring extends BE_Controller {
 
 		//
 		$arr            = [
-			'select'    => 'a.*,b.id_section_department,b.periode_audit, b.nama_auditor, b.finding,b.bobot_finding, d.nama as pic, e.status as status_capa', 
-			'join'      =>  ['tbl_finding_records b on a.id_finding = b.id type LEFT',
-							 'tbl_user d on a.pic_capa = d.username type LEFT',
-							 'tbl_status_capa e on a.id_status_capa = e.id type LEFT'
-							],
+			'select'    => 'a.*,b.id_section_department,b.periode_audit, b.nama_auditor, b.finding,b.bobot_finding, d.nama as pic, e.status as status_capa, s.urutan', 
+			'join'      =>  [
+				'tbl_finding_records b on a.id_finding = b.id type LEFT',
+				'tbl_user d on a.pic_capa = d.username type LEFT',
+				'tbl_status_capa e on a.id_status_capa = e.id type LEFT',
+				'tbl_m_audit_section s on b.id_department_auditee = s.id type LEFT'
+				],
 				'where' => [
 					'a.is_active'   => 0,  
-					],
+				],
+				'order_by' => 's.urutan'
 		];
-
 
 		$data['capa'] = get_data('tbl_capa a',$arr)->result();
 
@@ -138,6 +140,7 @@ class Capa_monitoring extends BE_Controller {
 		}
 
 		$data['finding'] = get_data('tbl_finding_records a',$arr1)->result();
+		
 		render($data,'layout:false');
 
 	}

@@ -43,7 +43,7 @@ class Rcm extends BE_Controller {
 				'a.is_active => 1',
 			],
 		])->result_array();
-
+		
 		// debug($data['option']);die;
 
 		render($data);
@@ -59,11 +59,15 @@ class Rcm extends BE_Controller {
 
 	function data($tahun = "", $tipe = 'table') {
         $arr            = [
-	        'select'	=> 'a.*,b.aktivitas',
-			'join'		=> 'tbl_aktivitas b on a.id_aktivitas = b.id type LEFT',
+	        'select'	=> 'a.*,b.aktivitas, c.urutan',
+			'join'		=> [
+				'tbl_aktivitas b on a.id_aktivitas = b.id type LEFT',
+				'tbl_m_audit_section c on a.id_department = c.id type left'
+			],
 	        'where'     => [
 	            'a.is_active' => 1,
 	        ],
+			'order_by' => 'c.urutan'
 	    ];
 
 
@@ -100,7 +104,6 @@ class Rcm extends BE_Controller {
 
         $data['section'] = get_data('tbl_m_audit_section','is_active',1)->result_array(); 
 
-	
         $response	= array(
             'table'		=> $this->load->view('risk_management/rcm/table',$data,true),
         );

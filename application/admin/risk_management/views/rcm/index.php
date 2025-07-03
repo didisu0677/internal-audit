@@ -1,3 +1,8 @@
+<style>
+	table[data-fixed="true"] > thead {
+    visibility: hidden;   /* atau display:none; kalau lebar sudah diset via JS */
+}
+</style>
 <div class="content-header page-data">
 	<div class="main-container position-relative">
 		<div class="header-info">
@@ -29,19 +34,18 @@
 	</div>
 
 <div class="content-body mt-6">
-
 	<div class="main-container mt-2">
 		<div class="row">
 			<form id="form-control" action="<?php echo base_url('risk_management/rcm/save_perubahan'); ?>" data-callback="reload" method="post" data-submit="ajax">
-
 				<div class="card-body">
 					<div class="table-responsive tab-pane fade active show height-window">
 					<?php
-					table_open('table table-bordered table-app table-hover table-1');
+					table_open('table table-bordered table-app table-hover table-1', true);
+					// table_open('table table-app table-bordered table-striped table-hover table-1',true,'','');
 						thead();
 							tr();
 								th(lang('location'),'','class="text-center align-middle headcol"');
-								th(lang('divisi'),'','class="text-center align-middle headcol"');
+								th(	lang('divisi'),'','class="text-center align-middle headcol"');
 								th(lang('department'),'','class="text-center align-middle headcol"');
 								th(lang('section'),'','class="text-center align-middle headcol"');
 								th(lang('aktivitas'),'','class="text-center align-middle headcol"');

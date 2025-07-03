@@ -1,3 +1,8 @@
+<style>
+	table[data-fixed="true"] > thead {
+    visibility: hidden;   /* atau display:none; kalau lebar sudah diset via JS */
+}
+</style>
 <div class="content-header page-data">
 	<div class="main-container position-relative">
 		<div class="header-info">
@@ -29,19 +34,19 @@
 				<div class="card-body">
 					<div class="table-responsive tab-pane fade active show height-window" id="result">
 					<?php
-					table_open('table table-bordered table-app table-hover table-1');
+					table_open('table table-bordered table-app table-hover table-1',true);
 						thead();
 							tr();
-								th(lang('location'),'','class="text-center align-middle headcol"');
-								th(lang('divisi'),'','class="text-center align-middle headcol"');
-								th(lang('department'),'','class="text-center align-middle headcol"');
-								th(lang('section'),'','class="text-center align-middle headcol"');
-								th(lang('aktivitas'),'','class="text-center align-middle headcol"');
-								th(lang('sub_aktivitas'),'','class="text-center align-middle headcol"');
-								th(lang('risk'),'','class="text-center align-middle headcol"');
-								th(lang('keterangan'),'','class="text-center align-middle headcol"');
-								th(lang('bobot'),'','class="text-center align-middle headcol"');
-								th(lang('internal_control'),'','class="text-center align-middle headcol"');
+								th(lang('location'),'','class="text-center align-middle"');
+								th(lang('divisi'),'','class="text-center align-middle"');
+								th(lang('department'),'','class="text-center align-middle"');
+								th(lang('section'),'','class="text-center align-middle"');
+								th(lang('aktivitas'),'','class="text-center align-middle"');
+								th(lang('sub_aktivitas'),'','class="text-center align-middle"');
+								th(lang('risk'),'','class="text-center align-middle"');
+								th(lang('keterangan'),'','class="text-center align-middle"');
+								th(lang('bobot'),'','class="text-center align-middle"');
+								th(lang('internal_control'),'','class="text-center align-middle"');
 						tbody();
 					table_close();
 					?>
