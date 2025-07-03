@@ -1,3 +1,8 @@
+<style>
+	table[data-fixed="true"] > thead {
+    visibility: hidden;   /* atau display:none; kalau lebar sudah diset via JS */
+}
+</style>
 <div class="content-header page-data">
 	<div class="main-container position-relative">
 		<div class="header-info">
@@ -32,7 +37,7 @@
 				<div class="card-body">
 					<div class="table-responsive tab-pane fade active show height-window" id="result">
 					<?php
-					table_open('table table-bordered table-app table-hover table-1');
+					table_open('table table-bordered table-app table-hover table-1', true);
 						thead();
 							tr();
 								th(lang('location'),'','class="text-center align-middle headcol"');

@@ -23,14 +23,17 @@ class Audit_universe extends BE_Controller {
 		$arr            = [
 	        'select'	=> 'a.*,b.id_aktivitas,b.id_sub_aktivitas,b.aktivitas,b.sub_aktivitas,b.company,
 							b.location,b.divisi,b.department,b.section,b.aktivitas,b.sub_aktivitas,
-							c.risk, c.keterangan, c.bobot, d.internal_control,d.location_control',
-			'join'		=> ['tbl_m_aktivitas b on a.id_m_aktivitas = b.id type LEFT',
-							'tbl_risk_register c on a.id_risk = c.id type LEFT',
-							'tbl_internal_control d on b.id_aktivitas = d.id_aktivitas and b.id_sub_aktivitas = d.id_sub_aktivitas type LEFT'
-						   ],
+							c.risk, c.keterangan, c.bobot, d.internal_control,d.location_control, s.urutan',
+			'join'		=> [
+				'tbl_m_aktivitas b on a.id_m_aktivitas = b.id type LEFT',
+				'tbl_risk_register c on a.id_risk = c.id type LEFT',
+				'tbl_internal_control d on b.id_aktivitas = d.id_aktivitas and b.id_sub_aktivitas = d.id_sub_aktivitas type LEFT',
+				'tbl_m_audit_section s on b.id_department = s.id type left'
+				],
 	        'where'     => [
 	            'a.is_active' => 1,
 	        ],
+			'order_by' => 's.urutan'
 	    ];
 
 	    $data['grup']= get_data('tbl_annual_audit_plan a',$arr)->result();
