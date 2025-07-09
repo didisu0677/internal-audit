@@ -103,7 +103,7 @@ class Control_register extends BE_Controller {
 					$res_vc[] = $res_vc1['id'];
 				}
 
-				delete_data('tbl_internal_control',['id not' => $res_vc, 'id_aktivitas' => $response['id'], 'id_internal_control' => $int['id']]);
+				delete_data('tbl_internal_control',['id not' => $res_vc, 'id_aktivitas' => $response['id'], 'id_internal_control not' => $id_m_control]);
 			}
 
 

@@ -144,8 +144,8 @@ modal_close();
 				+ '<input type="text" autocomplete="off" class="form-control ctrl_existing" name="ctrl_existing[]" id = "ctrl_existing'+index1+'" value ="" aria-label="" data-validation=""/></td>';
 					konten += '<td class="text-center"><button type="button" class="btn btn-success btn-icon-only browse-ctrl" id="browse-ctrl" data-id=""><i class="fa-list"></i></button></a></td>';
 					konten += '<td width="150"><input type="text" autocomplete="off" class="form-control ctrl_location" name="ctrl_location[]" id = "ctrl_location'+index1+'" value ="" aria-label="" data-validation=""/></td>';
-					konten += '<td><input type="text" autocomplete="off" class="form-control no_pnp" name="no_pnp[]" id = "no_pnp'+index1+'" value ="" aria-label="" data-validation=""/></td>';
-					konten += '<td width="250"><input type="text" autocomplete="off" class="form-control jenis_pnp" name="jenis_pnp[]" id = "jenis_pnp'+index1+'" value ="" aria-label="" data-validation=""/></td>';
+					konten += '<td width="150"><input type="text" autocomplete="off" class="form-control no_pnp" name="no_pnp[]" id = "no_pnp'+index1+'" value ="" aria-label="" data-validation=""/></td>';
+					konten += '<td width="100"><input type="text" autocomplete="off" class="form-control jenis_pnp" name="jenis_pnp[]" id = "jenis_pnp'+index1+'" value ="" aria-label="" data-validation=""/></td>';
 					konten += '<td><input type="text" autocomplete="off" class="form-control penerbit" name="penerbit[]" id = "penerbit'+index1+'" value ="" aria-label="" data-validation=""/></td>';	
 					konten += '<td><input type="date" autocomplete="off" class="form-control tgl_pnp" name="tgl_pnp[]" id = "tgl_pnp'+index1+'" value ="" aria-label="" data-validation=""/></td>'			
 			+ '</tr>';
