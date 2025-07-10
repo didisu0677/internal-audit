@@ -49,9 +49,18 @@ modal_open('modal-form','','modal-xl','data-openCallback="formOpen"');
 					</div>
 				</div>
 			</div>
-			<?php
-			input('text',lang('audit_area'),'audit_area','required',);
-			?>
+			<div class="form-group row">
+				<label class="col-form-label col-sm-3 required" for="id_sub_aktivitas"><?php echo lang('sub_aktivitas'); ?></label>
+				<div class="col-sm-9">
+					<div class="input-group">
+						<input type="hidden" name="id_audit_area" id="id_audit_area">
+						<input type="text" id="audit_area" name="audit_area" class="form-control" autocomplete="off" data-validation="required">
+						<div class="input-group-append">
+							<button type="button" class="btn btn-success btn-icon-only" id="browse-sub"><i class="fa-list"></i></button>
+						</div>
+					</div>
+				</div>
+			</div>
 			<div class="card">
 				<div class="card-header">Control Register</div>
 				<div class="card-body">
@@ -154,10 +163,29 @@ modal_close();
 	}
 
 	$(document).on('click','.btn-removecontrol',function(){
-		$(this).closest('tr').remove();
+		
+	    let row = $(this).closest('tr');
+		let id_m_control = row.find('.id_m_control').val();
+		let id_aktivitas = $('#id_aktivitas').val();
+		let id_sub_aktivitas = $('#id_sub_aktivitas').val();
+
+		$.ajax({
+			url: base_url + 'risk_management/control_register/delete_internal_control',
+			type: 'post',
+			data: {
+				id_aktivitas:id_aktivitas, id_sub_aktivitas:id_sub_aktivitas, id_m_control:id_m_control
+			},
+			success: function(res){
+				row.remove();
+				cAlert.open(res.message, res.status);
+			}
+		})
+
 	});
 
 	var wi, timer;
+	
+	let popup = null;
 	$('#id_aktivitas').click(function(){
 		alert('x')
 		$('#browse-req').trigger('click');
@@ -167,6 +195,14 @@ modal_close();
 			wi = popupWindow(base_url + 'risk_management/control_register/browse_req/', '_blank', window, ($(window).width() * 0.8), ($(window).height() * 0.8));
 			timer = setInterval(checkChild, 500);
 		} else wi.focus();
+	});
+
+	$('#browse-sub').click(function(){
+		if(popup == null || popup.closed) {
+			popup = popupWindow(base_url + 'risk_management/control_register/browse_sub/', '_blank', window, ($(window).width() * 0.8), ($(window).height() * 0.8));
+		} else{
+			popup.focus();
+		}
 	});
 
 	$(document).on('click', '.browse-ctrl', function(){

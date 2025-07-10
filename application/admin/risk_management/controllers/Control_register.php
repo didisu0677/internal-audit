@@ -101,9 +101,7 @@ class Control_register extends BE_Controller {
 
 					$res_vc1 = save_data('tbl_internal_control',$data_c);
 					$res_vc[] = $res_vc1['id'];
-				}
-
-				delete_data('tbl_internal_control',['id not' => $res_vc, 'id_aktivitas' => $response['id'], 'id_internal_control not' => $id_m_control]);
+				}				
 			}
 
 
@@ -115,6 +113,31 @@ class Control_register extends BE_Controller {
 		}
 
 		render($response,'json');
+	}
+
+	function delete_internal_control(){
+		$id_aktivitas = post('id_aktivitas');
+		$id_sub_aktivitas = post('id_sub_aktivitas');
+		$id_m_control = post('id_m_control');
+
+		$resp =  delete_data('tbl_internal_control', [
+			'id_aktivitas' => $id_aktivitas,
+			'id_sub_aktivitas' => $id_sub_aktivitas,
+			'id_internal_control' => $id_m_control
+		]);
+
+		if($resp){
+			render([
+				'status' => 'success',
+				'message' => 'Berhasil Menghapus Data!'
+			],'json');
+		}else{
+			render([
+				'status' => 'error',
+				'message' => 'Gagal!'
+			],'json');
+		}
+
 	}
 
 	function delete() {
@@ -190,7 +213,24 @@ class Control_register extends BE_Controller {
 		render($data);
 	}
 
+	function browse_sub() {
+		$data['layout']	= 'browse';
+		// $data['id'] = $id;
+		render($data);
+	}
+
 	function data_aktivitas() {
+		$config 					= [
+			'access_edit'			=> false,
+			'access_view'			=> false,
+			'access_delete'			=> false,
+		];
+		$config['button'][] 	= button_serverside('btn-success','btn-act-choose',['fa-check',lang('pilih'),true],'btn-act-choose');
+		$data = data_serverside($config);
+		render($data,'json');
+	}
+
+	function data_sub_aktivitas() {
 		$config 					= [
 			'access_edit'			=> false,
 			'access_view'			=> false,
@@ -211,6 +251,27 @@ class Control_register extends BE_Controller {
 			'id_aktivitas'		=> $cs['id'],
 			'aktivitas'		=> $cs['aktivitas'],
 		],'json');
+	}
+
+	function add_sub_aktivitas(){
+		// $id_cs = post('cs');
+		$id = post('id');
+		$data_sub_aktivitas = get_data('tbl_sub_aktivitas', 'id', $id)->row_array();
+		if(!$data_sub_aktivitas){
+			$resp = [
+				'status' => 'info',
+				'message' => 'Data tidak ada!',
+			];
+		}else{
+			$resp = [
+				'status' => 'success',
+				'message' => lang('data_berhasil_diperbaharui'),
+				'id_sub_aktivitas' => $data_sub_aktivitas['id'],
+				'sub_aktivitas'	=> $data_sub_aktivitas['sub_aktivitas']
+			];
+		}
+		render($resp,'json');
+
 	}
 
 	function data_control() {
