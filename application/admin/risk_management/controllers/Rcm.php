@@ -59,9 +59,10 @@ class Rcm extends BE_Controller {
 
 	function data($tahun = "", $tipe = 'table') {
         $arr            = [
-	        'select'	=> 'a.*,b.aktivitas, c.urutan',
+	        'select'	=> 'a.*,b.aktivitas, c.urutan, s.sub_aktivitas as sub_aktivitas_name',
 			'join'		=> [
 				'tbl_aktivitas b on a.id_aktivitas = b.id type LEFT',
+				'tbl_sub_aktivitas s on a.id = s.id_aktivitas type LEFT',
 				'tbl_m_audit_section c on a.id_department = c.id type left'
 			],
 	        'where'     => [

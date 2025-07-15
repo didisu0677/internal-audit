@@ -8,7 +8,7 @@
 			<td ><?php echo $m0->section; ?></td>
 			<td ><?php echo $m0->aktivitas; ?></td>
 
-			<td style="width:1px; white-space: nowrap;"><?php echo $m0->sub_aktivitas; ?></td>
+			<td style="width:1px; white-space: nowrap;"><?php echo $m0->sub_aktivitas_name; ?></td>
 			<td>
 			<select class="select2 filter infinity" style="width: 350px;" multiple data-width="200" name="risk[<?php echo $m0->id; ?>][]" disabled> 
 
