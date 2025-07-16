@@ -89,12 +89,13 @@ class Rcm extends BE_Controller {
 			])->result_array();
 
 
-			$data['int_control'][$g->id] = get_data('tbl_internal_control',[
-				'select' => 'id_internal_control as id,internal_control',
+			$data['int_control'][$g->id] = get_data('tbl_internal_control a',[
+				'select' => 'a.id_internal_control as id,b.internal_control',
+				'join' => 'tbl_m_internal_control b on a.id_internal_control = b.id',
 				'where' => [
-					'is_active' => 1,
-					'id_aktivitas' => $g->id_aktivitas,
-					'id_sub_aktivitas' => $g->id_sub_aktivitas,
+					'a.is_active' => 1,
+					'a.id_aktivitas' => $g->id_aktivitas,
+					'a.id_sub_aktivitas' => $g->id_sub_aktivitas,
 				]
 			])->result_array();
 
