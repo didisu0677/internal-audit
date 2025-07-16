@@ -11,7 +11,12 @@ class Control_register extends BE_Controller {
 	}
 
 	function data() {
-		$data = data_serverside();
+		$conf = [
+			'join' => [
+				'tbl_m_internal_control b on tbl_internal_control.id_internal_control = b.id type LEFT',
+			]
+			];
+		$data = data_serverside($conf);
 		render($data,'json');
 	}
 

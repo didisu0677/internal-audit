@@ -18,7 +18,7 @@
 				th('checkbox','text-center','width="30" data-content="id"');
 				th(lang('aktivitas'),'','data-content="aktivitas" data-table="tbl_aktivitas"');
 				th(lang('audit_area'),'','data-content="sub_aktivitas" data-table="tbl_sub_aktivitas"');
-				th(lang('internal_control'),'','data-content="internal_control"');
+				th(lang('internal_control'),'','data-content="internal_control" data-table="tbl_m_internal_control"');
 				th(lang('location_control'),'','data-content="location_control"');
 				th(lang('no_pnp'),'','data-content="no_pnp"');
 				th(lang('jenis_pnp'),'','data-content="jenis_pnp"');
