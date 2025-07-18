@@ -157,6 +157,86 @@ class Rcm extends BE_Controller {
 		render($data,'json');
 	}
 
+	// function save(){
+	// 	$data = post();
+	// 	$id_risk = post('id_risk');
+    //     $risiko = post('risk');
+	// 	$id_section = post('id_section');
+
+    //     $aktivitas = post('id_aktivitas');
+
+    //     $keterangan = post('keterangan');
+    //     $score_dampak = post('score_dampak');
+    //     $score_kemungkinan = post('score_kemungkinan');
+    //     $bobot_risk = post('bobot_risk');
+
+	// 	$id_risk1 = [];
+		
+	// 	if(empty($id_risk)) {
+	// 		$response = [
+	// 			'status' => 'info',
+	// 			'message' => 'Risk cannot be empty'
+	// 		];
+
+	// 		render($response,'json');
+	// 		return;
+	// 	}
+
+	// 	$cek_section = get_data('tbl_m_audit_section','id',$id_section)->row();
+	// 	if(empty($cek_section) || $cek_section->level5== 0) {
+	// 		$response = [
+	// 			'status' => 'info',
+	// 			'message' => 'section department cannot be empty'
+	// 		];
+
+	// 		render($response,'json');
+	// 		return;
+	// 	}
+
+	// 	// save data Risk Register
+	// 	foreach($id_risk as $r1 => $vr) {
+	// 		$data_r = [
+	// 			'id'	=> $id_risk[$r1],
+	// 			'risk'  =>$risiko[$r1],
+	// 			'keterangan' => $keterangan[$r1],
+	// 			'score_dampak' => $score_dampak[$r1],
+	// 			'score_kemungkinan' => $score_kemungkinan[$r1],
+	// 			'bobot' => $bobot_risk[$r1],
+	// 			'is_active'=>1
+	// 		];
+	// 		$risk = save_data('tbl_risk_register', $data_r);
+	// 		$id_risk1[] = $risk['id'];
+	// 	}
+		
+	// 	// save data Risk Control
+	// 	$data_rk = 			[
+	// 		'id' => $data['id_rk'],
+	// 		'id_section' => json_encode($id_section),
+	// 		'id_sub_aktivitas' => json_encode($aktivitas),
+	// 		'id_risk' => json_encode($id_risk1),
+	// 		'is_active' => 1,
+	// 	];
+
+	// 	$id_risk_control = save_data('tbl_risk_control',$data_rk);
+	// 	foreach($aktivitas as $a => $va){
+	// 		foreach ($id_risk1 as $i => $v) {
+	// 			delete_data('tbl_annual_audit_plan','id_risk',$v);
+	// 			$data_annual= [
+	// 				'id_risk' => $id_risk_control['id'],
+	// 				'id_m_aktivitas' => $aktivitas[$a],
+	// 				'bobot' => $bobot_risk[$i],
+	// 				'is_active' => 1,
+	// 			];
+	// 			insert_data('tbl_annual_audit_plan',$data_annual);
+	// 		}
+	// 	}
+		
+	// 	render([
+	// 		'status' => 'success',
+	// 		'message' => 'Data berhasil disimpan'
+	// 	], 'json');
+	// }
+
 	function save() {
 		$data = post();
 		$id_section = post('id_section');
@@ -182,6 +262,7 @@ class Rcm extends BE_Controller {
 			'id_risk' => json_encode($id_risk),
 			'is_active' => 1,
 		];
+		
 
 		$cek_section = get_data('tbl_m_audit_section','id',$id_section)->row();
 		if(empty($cek_section) || $cek_section->level5== 0) {
@@ -322,10 +403,10 @@ class Rcm extends BE_Controller {
 
 					if($response_m['status'] == 'success') {
 						delete_data('tbl_annual_audit_plan','id_m_aktivitas',$response_m['id']);
-
+						
 						foreach($id_risk as $i => $v) {
 							$r = get_data('tbl_risk_register','id',$v)->row();
-							$ann = save_data('tbl_annual_audit_plan',['id'=> 0,'id_risk'=>$v,'id_m_aktivitas'=>$response_m['id'],'bobot'=>$bobot_risk[$i],'is_active'=>1]);
+							$ann = save_data('tbl_annual_audit_plan',['id'=> 0,'id_risk'=>$v ?: $response['id'],'id_m_aktivitas'=>$response_m['id'],'bobot'=>$bobot_risk[$i],'is_active'=>1]);
 
 						}
 					}
