@@ -44,7 +44,7 @@
 				th(lang('auditee'),'','data-content="nama" data-table="tbl_auditee"');
 				th(lang('site_auditee'),'','data-content="site_auditee"');
 				th(lang('section'),'','data-content="section_name" data-table="tbl_m_audit_section tbl_section_department"');
-				th(lang('audit_area'),'','data-content="audit_area"');
+				th(lang('audit_area'),'','data-content="sub_aktivitas" data-table="sa"');
 				th(lang('finding_description') . ' description','','data-content="finding"');
 				th(lang('bobot'),'','data-content="bobot_finding"');
 				// th(lang('bobot_finding'),'','data-content="bobot_finding"');
@@ -127,8 +127,8 @@ modal_open('modal-form','Finding','modal-xl','data-openCallback="formOpen1"');
 				select2(lang('auditee'),'auditee','required');
 				select2(lang('site_auditee'),'site_auditee','required|infinity',['Head Office (HO)','Factory']);
 				select2(lang('section'),'id_section_department','required',$department,'id','section_name');
-				input('text',lang('audit_area'),'audit_area');
-				select2(lang('aktivitas'),'id_sub_aktivitas','required', $aktivitas, 'id','sub_aktivitas');
+				// input('text',lang('audit_area'),'audit_area');
+				select2('Audit Area','id_sub_aktivitas','required', $aktivitas, 'id','sub_aktivitas');
 			card_close();
 
 			card_open(lang('finding'),'mb-2');?>
