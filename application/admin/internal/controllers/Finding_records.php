@@ -190,6 +190,9 @@ class Finding_records extends BE_Controller {
 			$config['where']['year(tgl_mulai_audit)']	= $tahun;	
 		}
 
+		$config['sort_by'] = 'sa.sub_aktivitas';
+		$config['sort'] = 'asc';
+
 		$data = data_serverside($config);
 		render($data,'json');
 	}
