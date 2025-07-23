@@ -68,7 +68,7 @@ class Rcm extends BE_Controller {
 	        'where'     => [
 	            'a.is_active' => 1,
 	        ],
-			'order_by' => 'c.urutan, sub_aktivitas_name',
+			'order_by' => 'c.urutan, a.aktivitas, sub_aktivitas_name',
 	    ];
 
 
