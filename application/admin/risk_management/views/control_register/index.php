@@ -50,7 +50,7 @@ modal_open('modal-form','','modal-xl','data-openCallback="formOpen"');
 				</div>
 			</div>
 			<div class="form-group row">
-				<label class="col-form-label col-sm-3 required" for="id_sub_aktivitas"><?php echo lang('sub_aktivitas'); ?></label>
+				<label class="col-form-label col-sm-3 required" for="id_sub_aktivitas"><?= 'Audit Area'?></label>
 				<div class="col-sm-9">
 					<div class="input-group">
 						<input type="hidden" name="id_audit_area" id="id_audit_area">
