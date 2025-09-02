@@ -1,8 +1,3 @@
-<style>
-	table[data-fixed="true"] > thead {
-    visibility: hidden;   /* atau display:none; kalau lebar sudah diset via JS */
-}
-</style>
 <div class="content-header page-data">
 	<div class="main-container position-relative">
 		<div class="header-info">
@@ -11,17 +6,7 @@
 		</div>
 		
 		<div class="float-right">   		
-    		<?php 
-
-			$arr = [
-				['btn-export','Export Data','fa-upload'],
-			];
-			echo access_button('',$arr); 
-		
-		
-			// echo access_button('',$arr); 
-
-			?>
+    		
     		</div>
 			<div class="clearfix"></div>
 			
@@ -32,191 +17,94 @@
 
 	<div class="main-container mt-2">
 		<div class="row">
-			<form id="form-control" action="<?php echo base_url('internal/annual_audit_plan/save_perubahan'); ?>" data-callback="reload" method="post" data-submit="ajax">
-
-				<div class="card-body">
-					<div class="table-responsive tab-pane fade active show height-window" id="result">
-					<?php
-					table_open('table table-bordered table-app table-hover table-1', true);
-						thead();
-							tr();
-								th(lang('location'),'','class="text-center align-middle headcol"');
-								th(lang('divisi'),'','class="text-center align-middle headcol"');
-								th(lang('department'),'','class="text-center align-middle headcol"');
-								th(lang('section'),'','class="text-center align-middle headcol"');
-								th(lang('aktivitas'),'','class="text-center align-middle headcol"');
-								th(lang('sub_aktivitas'),'','class="text-center align-middle headcol"');
-								th(lang('risk'),'','class="text-center align-middle headcol"');
-								th(lang('keterangan'),'','class="text-center align-middle headcol"');
-								th(lang('bobot'),'','class="text-center align-middle headcol"');
-								th(lang('internal_control'),'','class="text-center align-middle headcol"');
-								th(lang('location_control'),'','class="text-center align-middle headcol"');
-						tbody();
-					table_close();
-					?>
-					</div>
+			<div class="card-body m-3">
+				<div class="table-responsive tab-pane fade active show height-window" id="result">
+					<table class="table table-bordered table-hover" id="example">
+						<thead class="text-center">
+							<tr>
+								<th width="10%">Department</th>
+								<th width="10%">Aktivitas</th>
+								<th width="10%">Audit Area</th>
+								<th width="25%">Resiko</th>
+								<th>Objektif</th>
+								<th width="5%">Durasi</th>
+								<th width="5%">Start Date Est</th>
+								<th width="5%">End Date Est</th>
+								<th width="5%">Expense Est</th>
+								<th width="5%"></th>
+							</tr>
+						</thead>
+						<tbody>
+							<?php 
+							$currentYear = null;
+							foreach($data as $val): 
+								$year = date('Y', strtotime($val['start_date']));
+								if ($year !== $currentYear): 
+									$currentYear = $year; ?>
+									<tr>
+										<th colspan="10" class="bg-light">
+											<a class="d-block w-100" data-toggle="collapse" href="#collapse<?=$currentYear?>">
+												<?= $currentYear ?>
+											</a>
+										</th>
+									</tr>
+								<?php endif ?>
+								<tr class="collapse" id="collapse<?=$currentYear?>">
+			 						<td><?= $val['department'] ?></td>
+			 						<td><?= $val['aktivitas'] ?></td>
+			 						<td><?= $val['sub_aktivitas'] ?></td>
+			 						<td>
+										<?php foreach($val['risk'] as $risk) : ?>
+			 								<p class="bg-light" style="border-radius: 10px; padding:10px"><?=$risk['risk']?></p>
+										<?php endforeach ?>
+ 									</td>
+									<td><?=$val['objektif']?></td>
+									<td><?=$val['durasi'] ? $val['durasi'].' Hari' : '' ?> </td>
+									<td style="white-space: nowrap;"><?= $val['start_date']?></td>
+									<td style="white-space: nowrap;"><?=$val['end_date']?></td>
+									<td style="white-space: nowrap;">Rp. <?=number_format($val['expense_est'],0)?></td>
+									<td class="text-center"><button class="btn btn-warning btn-icon-only btn-edit" type="button" data-id="<?=$val['id']?>"><i class="fa-edit"></i></button></td>
+			 					</tr>
+								<?php endforeach;?>
+						</tbody>
+					</table>
 				</div>
-				
-			</form>
+			</div>
 	    </div>
 	</div>
-
-	
-	<div class="overlay-wrap hidden">
-		<div class="overlay-shadow"></div>
-		<div class="overlay-content">
-			<div class="spinner"></div>
-			<p class="text-center">Please wait ... </p>
-		</div>
-	</div>
-	
 </div>
-<?php
+	<?php
+	modal_open('mEdit', 'Edit');
+		modal_body();
+			col_init(3,9);
+			form_open(base_url('internal/annual_audit_plan/save'), 'post', 'form');
+				input('hidden', 'id_plan', 'id_plan');
+				input('hidden', 'start_date', 'start_date');
+				input('number', 'Durasi', 'durasi', 'required');
+				input('number', 'Expense Est', 'expense', 'required');
+				textarea('Objektif', 'objektif', 'required');
+			form_button('Simpan', 'Batal');
+		modal_close();
+	?>
 
-?>
 <script type="text/javascript">
+	$(document).on('click', '.btn-edit', function(){
+		let id = $(this).data('id');
 
-var index1 = 0;
-$(document).ready(function () {
-	getData();
-	var index1 = 0;
-	$('#form')[0].reset();
-});	
+		$.ajax({
+			url: base_url + 'internal/annual_audit_plan/getData',
+			type: 'post',
+			data: {id:id},
+			dataType: 'json',
+			success: function(res){
+				$('#id_plan').val(res.id);
+				$('#start_date').val(res.start_date);
+				$('#durasi').val(res.durasi);
+				$('#expense').val(res.expense_est);
+				$('#objektif').val(res.objektif);
 
-
-function getData() {
-	// cLoader.open(lang.memuat_data + '...');
-	$('.overlay-wrap').removeClass('hidden');
-	var page = base_url + 'internal/annual_audit_plan/data';
-		page 	+= '/'+$('#filter_tahun').val();
-
-
-	$.ajax({
-		url 	: page,
-		data 	: {},
-		type	: 'get',
-		dataType: 'json',
-		success	: function(response) {
-			$('.table-1 tbody').html(response.table);
-			$('#parent_id').html(response.option);
-			$('#id_rk').val(response.id_rk);
-			cLoader.close();
-			cek_autocode();
-			fixedTable();
-			var item_act	= {};
-			if($('.table-1 tbody .btn-input').length > 0) {
-				item_act["sep2"] 		= "---------";
-				item_act['edit'] 		= {name : lang.ubah, icon : "edit"};					
-			}
-			if($('.table-app tbody .btn-input').length > 0) {
-				item_act['delete'] 		= {name : lang.hapus, icon : "delete"};					
-			}
-
-			var act_count = 0;
-			for (var c in item_act) {
-				act_count = act_count + 1;
-			}
-			if(act_count > 0) {
-				$.contextMenu({
-					selector: '.table-1 tbody tr', 
-					callback: function(key, options) {
-						if($(this).find('[data-key="'+key+'"]').length > 0) {
-							if(typeof $(this).find('[data-key="'+key+'"]').attr('href') != 'undefined') {
-								window.location = $(this).find('[data-key="'+key+'"]').attr('href');
-							} else {
-								$(this).find('[data-key="'+key+'"]').trigger('click');
-							}
-						} 
-					},
-					items: item_act
-				});
-			}
-			$('.overlay-wrap').addClass('hidden')
-			$('.select2').select2()
-			$('.select2-search__field').attr('style', 'width:100%')
-		}
-	});
-}
-
-$(function(){
-	getData();
-});
-
-function formOpen() {
-	is_edit = true;
-	var index1 = 0;
-	var response = response_edit;
-	$('#result tbody').html('');
-	$('#result2 tbody').html('')
-	$('#result3 tbody').html('')
-	if(typeof response.id != 'undefined') {
-		$('total_score').val(response.total_score);
-		$('score_dampak').val(response.score_dampak);
-		$('score_kemungkinan').val(response.score_kemungkinan);
-		$.each(response.detail,function(k,v){
-			add_sub_aktivitas();
-			var f = $('#result tbody tr').last();
-			f.find('.sub_aktivitas').val(v.sub_aktivitas);
-			f.find('.id_sub_aktivitas').val(v.id);
-		});
-
-		$.each(response.risk,function(k,v){
-			add_itemrisk();
-			var f = $('#result2 tbody tr').last();
-			f.find('.id_risk').val(v.id);
-			f.find('.risk').val(v.risk);
-			f.find('.keterangan').val(v.keterangan);
-			f.find('.dampak').val(v.dampak);
-			f.find('.score_dampak').val(v.score_dampak);
-			f.find('.kemungkinan').val(v.kemungkinan);
-			f.find('.score_kemungkinan').val(v.score_kemungkinan);
-			f.find('.total_score').val(v.total_score);
-			f.find('.bobot_risk').val(v.bobot);
-		});
-
-		$.each(response.ctrl_item,function(k,v){
-			add_itemcontrol();
-			var f = $('#result3 tbody tr').last();
-			f.find('.id_control').val(v.id);
-			f.find('.ctrl_existing').val(v.internal_control);
-			f.find('.ctrl_location').val(v.location_control);
-			f.find('.no_pnp').val(v.no_pnp);
-			f.find('.jenis_pnp').val(v.jenis_pnp);
-			f.find('.penerbit').val(v.penerbit_pnp);
-			f.find('.tgl_pnp').val(v.tanggal_pnp);
-		});
-	} 
-	is_edit = false;
-}
-
-$(document).on('click', '.btn-export', function() {
-	var currentdate = new Date();
-	var datetime = currentdate.getDate() + "/" +
-		(currentdate.getMonth() + 1) + "/" +
-		currentdate.getFullYear() + " @ " +
-		currentdate.getHours() + ":" +
-		currentdate.getMinutes() + ":" +
-		currentdate.getSeconds();
-
-	var table = '';
-	table += '<table>'; // Add border style here
-
-	// Add table rows
-	table += '<tr><td colspan="1">PT Otsuka Indonesia</td></tr>';
-	table += '<tr><td colspan="1">' +' Annual Audit Plan </td></tr>';
-	table += '<tr><td colspan="1"> Print date </td><td>: ' + datetime + '</td></tr>';
-	table += '</table><br><br>';
-
-	// Add content body
-	table += $(result).html();
-
-	var target = table;
-	// window.open('data:application/vnd.ms-excel,' + encodeURIComponent(target));
-
-	htmlToExcel(target)
-	
-	// $('.bg-grey-1,.bg-grey-2.bg-grey-2-1,.bg-grey-2-2,.bg-grey-3').each(function(){
-	// 	$(this).removeAttr('bgcolor');
-	// });
-});
+				$('#mEdit').modal('show');
+			} 
+		})
+	})
 </script>

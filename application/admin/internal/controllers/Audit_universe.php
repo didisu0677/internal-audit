@@ -7,8 +7,61 @@ class Audit_universe extends BE_Controller {
 	}
 
 	function index() {
+		$data = get_data('tbl_audit_universe u', [
+			'select' => 'u.*, s.description, s3.section_name as divisi, s4.section_name as department, s.section_name, a.aktivitas, sa.sub_aktivitas, rc.id_risk, s4.urutan',
+			'join' => [
+				'tbl_rcm rcm on u.id_rcm = rcm.id',
+				'tbl_risk_control rc on rcm.id_risk_control = rc.id',
+				'tbl_sub_aktivitas sa on rcm.id_sub_aktivitas = sa.id',
+				'tbl_aktivitas a on sa.id_aktivitas = a.id',
+				'tbl_m_audit_section s on rcm.id_section = s.id',
+				'tbl_m_audit_section s3 on s.level3 = s3.id',
+				'tbl_m_audit_section s4 on s.level4 = s4.id',
+			],
+			'order_by' => 's4.urutan',
+			'sort' => 'asc',
+		])->result_array();
+		// debug(last_query());
+		foreach($data as $i => $row){
+			$id_risk = json_decode($row['id_risk']);
+			$data_risk = get_data('tbl_risk_register a',[
+				'join' => [
+					'tbl_bobot_status_audit b on a.bobot = b.id'
+				],
+				'where' =>[
+					'a.id' => $id_risk
+				]
+			])->result_array();
+			foreach($data_risk as $v){
+				$data[$i]['risk'][] = $v;
+			}
+		}
+		
+		render(['data'=> $data]);
+	}
+	function data_table() {
+		// $conf	= [
+		// 	'join'		=> [
+		// 		'tbl_m_aktivitas b on tbl_annual_audit_plan.id_m_aktivitas = b.id type LEFT',
+		// 		'tbl_risk_register c on tbl_annual_audit_plan.id_risk = c.id type LEFT',
+		// 		'tbl_internal_control d on b.id_aktivitas = d.id_aktivitas and b.id_sub_aktivitas = d.id_sub_aktivitas type LEFT',
+		// 		'tbl_m_audit_section s on b.id_department = s.id type left'
+		// 		],
+	    //     'where'     => [
+	    //         'tbl_annual_audit_plan.is_active' => 1,
+	    //     ],
+		// 	'order_by' => 's.urutan'
+	    // ];
 
-		render();
+		$conf = [
+			'join' => [
+				'tbl_rcm rcm on tbl_audit_universe.id_rcm = rcmd.id',
+				'tbl_risk_control rc on rcm.id_risk_control = rc.id',
+				'tbl_m_audit_section s on rcm.id_section = s.id'
+			]
+		];
+		$data = data_serverside($conf);
+		render($data,'json');
 	}
 
 	function data($tahun = "", $tipe = 'table') {
@@ -95,4 +148,56 @@ class Audit_universe extends BE_Controller {
 		$this->simpleexcel->export();
 	}
 
+	function set_initial_audit(){
+		$data = post();
+		
+		update_data('tbl_audit_universe', ['initial_audit' => $data['initial_audit']], 'id', $data['id_universe']);
+		
+		$audit_plan = get_data('tbl_annual_audit_plan ap', [
+			'select' => 'ap.*, rc.id_risk',
+			'join' => [
+				'tbl_audit_universe u on ap.id_universe = u.id',
+				'tbl_rcm r on u.id_rcm = r.id',
+				'tbl_risk_control rc on r.id_risk_control = rc.id',
+			],
+			'where' => [
+				'ap.id_universe' => $data['id_universe']
+			]
+		])->row_array();
+		
+		if($audit_plan){
+			$id_risk = json_decode($audit_plan['id_risk'], true);
+			
+			foreach($id_risk as $id){
+				$risk = get_data('tbl_risk_register a',[
+					'select' => 'a.*, b.id as id_bobot, b.status_audit, b.description',
+					'join' => [
+						'tbl_bobot_status_audit b on a.bobot = b.id'
+					],
+					'where' => [
+						'a.id' => $id
+					]
+				])->row_array();
+				$start_date = null;
+				if($risk['status_audit'] == 'Tahunan'){ // moderate & major
+					$start_date = date('Y-m-d', strtotime('+1 years', strtotime($data['initial_audit'])));
+				}elseif($risk['status_audit'] == '2 Tahun'){
+					$start_date = date('Y-m-d', strtotime('+2 years', strtotime($data['initial_audit'])));	
+				}else{
+					continue;
+				}
+
+				$data_audit_plan = [
+					'id' => $audit_plan['id'] ?? 0,
+					'id_universe' => $data['id_universe'],
+					'start_date' => $start_date,
+				];
+				$resp = save_data('tbl_annual_audit_plan', $data_audit_plan);
+			}
+		}
+		render([
+			'status' => 'success',
+			'message' => 'Success'
+		], 'json');		
+	}
 }

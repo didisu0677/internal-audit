@@ -43,7 +43,12 @@ class Rcm extends BE_Controller {
 				'a.is_active => 1',
 			],
 		])->result_array();
-		
+
+		$data['filter'] = get_data('tbl_m_aktivitas a',[
+			'select' => 'distinct a.department, a.id_department, a.department, a.location',
+			'sort_by' => 'a.department, a.location',
+			'sort' => 'asc'
+		])->result_array();
 		// debug($data['option']);die;
 
 		render($data);
@@ -57,66 +62,111 @@ class Rcm extends BE_Controller {
 	// 	render($data,'json');
 	// }
 
-	function data($tahun = "", $tipe = 'table') {
-        $arr            = [
-	        'select'	=> 'a.*,b.aktivitas, c.urutan, s.sub_aktivitas as sub_aktivitas_name',
-			'join'		=> [
-				'tbl_aktivitas b on a.id_aktivitas = b.id type LEFT',
-				'tbl_sub_aktivitas s on a.id_sub_aktivitas = s.id type left',
-				'tbl_m_audit_section c on a.id_department = c.id type left'
+	function data() {
+		$risk_list = [];
+		$control_list = [];
+		$keterangan = [];
+
+		$grup = get_data('tbl_rcm a', [
+			'select' => '
+				a.*,
+				b2.section_name as location,
+				b3.section_name as divisi,
+				b4.section_name as department,
+				b5.section_name as section,
+				c.id_aktivitas, c.sub_aktivitas,
+				e.aktivitas,
+			',
+			'join' => [
+				'tbl_m_audit_section b on a.id_section = b.id type LEFT',
+				'tbl_m_audit_section b1 on b.level1 = b1.id type LEFT',
+				'tbl_m_audit_section b2 on b.level2 = b2.id type LEFT',
+				'tbl_m_audit_section b3 on b.level3 = b3.id type LEFT',
+				'tbl_m_audit_section b4 on b.level4 = b4.id type LEFT',
+				'tbl_m_audit_section b5 on b.level5 = b5.id type LEFT',
+				'tbl_sub_aktivitas c on a.id_sub_aktivitas = c.id type LEFT',
+				'tbl_aktivitas e on c.id_aktivitas = e.id type LEFT',
+				'tbl_risk_control d on a.id_risk_control = d.id type LEFT',
 			],
-	        'where'     => [
-	            'a.is_active' => 1,
-	        ],
-			'order_by' => 'c.urutan, a.aktivitas, sub_aktivitas_name',
-	    ];
+			'order_by' => 'b4.urutan, department, e.aktivitas, c.sub_aktivitas',
+		])->result_array();
 
+		foreach($grup as $val){
+			$risk_control = get_data('tbl_risk_control','id', $val['id_risk_control'])->row_array();
+			$id_risk = [];
+			if (isset($risk_control['id_risk']) && $risk_control['id_risk']) {
+				$id_risk = json_decode($risk_control['id_risk'], true);
+			}
+			if (!is_array($id_risk)) {
+				$id_risk = $id_risk ? [$id_risk] : [];
+			}
 
-        // $tahun = get('tahun');
-	    $data['grup']= get_data('tbl_m_aktivitas a',$arr)->result();
+			$risk = [];
+			if (!empty($id_risk)) {
+				$risk = get_data('tbl_risk_register a', [
+					'select' => 'concat(a.risk," - ", b.bobot) as risk, a.keterangan',
+					'join' => [
+						'tbl_bobot_status_audit b on a.bobot = b.id'
+					],
+					'where' => [
+						'a.id' => $id_risk
+					],
+				])->result_array();
+			}
 
-		$data['risk'] = [];
-		foreach($data['grup'] as $g) {
-			$rk = get_data('tbl_risk_control', 'id', $g->id_rk)->row();
-			$id_r = json_decode($rk->id_risk);
+			foreach($risk as $r) {
+				if (!isset($risk_list[$val['id_risk_control']])) $risk_list[$val['id_risk_control']] = [];
+				if (!isset($keterangan[$val['id_risk_control']])) $keterangan[$val['id_risk_control']] = [];
+				$risk_list[$val['id_risk_control']][] = $r['risk'];
+				$keterangan[$val['id_risk_control']][] = $r['keterangan'];
+			}
 
-			// debug($rk);die;
-			$data['risk'][$g->id_rk] = get_data('tbl_risk_register',[
-				'select' => 'CONCAT(risk," - ", bobot) as risk, keterangan',
-				'where' => [
-					'id' => $id_r
-				],
-			])->result_array();
-
-
-			$data['int_control'][$g->id] = get_data('tbl_internal_control a',[
+			$control = get_data('tbl_internal_control a', [
 				'select' => 'a.id_internal_control as id,b.internal_control',
 				'join' => 'tbl_m_internal_control b on a.id_internal_control = b.id',
 				'where' => [
 					'a.is_active' => 1,
-					'a.id_aktivitas' => $g->id_aktivitas,
-					'a.id_sub_aktivitas' => $g->id_sub_aktivitas,
+					'a.id_aktivitas' => $val['id_aktivitas'],
+					'a.id_sub_aktivitas' => $val['id_sub_aktivitas'],
 				]
 			])->result_array();
 
+			foreach($control as $v1) {
+				if (!isset($control_list[$val['id']])) $control_list[$val['id']] = [];
+				$control_list[$val['id']][] = $v1['internal_control'];
+			}
+		}
 
-		} 
+		$rows = [];
+		foreach($grup as $m0) {
+			$rows[] = [
+				'location'       => $m0['location'],
+				'divisi'         => $m0['divisi'],
+				'department'     => $m0['department'],
+				'section'        => $m0['section'],
+				'aktivitas'      => $m0['aktivitas'],
+				'sub_aktivitas'  => $m0['sub_aktivitas'],
+				'risk'           => isset($risk_list[$m0['id_risk_control']]) ? $this->bg_array($risk_list[$m0['id_risk_control']]) : '',
+				'internal_control' => isset($control_list[$m0['id']]) ? $this->bg_array($control_list[$m0['id']]) : '',
+				'keterangan'     => isset($keterangan[$m0['id_risk_control']]) ? $this->bg_array($keterangan[$m0['id_risk_control']]) : '',
+				'aksi'           => '<button class="btn btn-warning btn-sm btn-input btn-icon-only" data-key="edit" data-id="'.$m0['id'].'"><i class="fa-edit"></i> </button><button class="btn btn-danger btn-sm btn-delete btn-icon-only" data-key="delete" data-id="'.$m0['id'].'"><i class="fa-trash-alt"></i> </button>'
+			];
+		}
+		render(['data' => $rows],'json');
+	}
 
-		// debug($data['risk']);die;
-
-        $data['section'] = get_data('tbl_m_audit_section','is_active',1)->result_array(); 
-
-        $response	= array(
-            'table'		=> $this->load->view('risk_management/rcm/table',$data,true),
-        );
-
-	    render($response,'json');
+	function bg_array($arr){
+		$html = [];
+		foreach($arr as $v){
+			$html[] = '<p class="bg-light" style="border-radius: 10px; padding:10px">'.$v.'</p>';
+		}
+    	return implode("", $html);
 	}
 
 	function get_data() {
-		$data = get_data('tbl_m_aktivitas a',[
-			'select' => 'a.id, a.id_rk, b.id_section,b.id_sub_aktivitas, b.id_risk',
-			'join'   => 'tbl_risk_control b on a.id_rk = b.id type LEFT',
+		$data = get_data('tbl_rcm a',[
+			'select' => 'a.id, a.id_risk_control, b.id_section,b.id_sub_aktivitas, b.id_risk',
+			'join'   => 'tbl_risk_control b on a.id_risk_control = b.id type LEFT',
 			'where' => [
 				'a.id' => post('id'),
 			]
@@ -143,7 +193,7 @@ class Rcm extends BE_Controller {
 			],
 			'sort_by' => 'id',
 			])->result_array();
-
+	
 		
 		// $data['ctrl_item'] = get_data('tbl_internal_control',[
 		// 	'where' => [
@@ -157,87 +207,141 @@ class Rcm extends BE_Controller {
 		render($data,'json');
 	}
 
-	// function save(){
-	// 	$data = post();
-	// 	$id_risk = post('id_risk');
-    //     $risiko = post('risk');
-	// 	$id_section = post('id_section');
+	function save(){
+		$data = post();
+		$id_risk = post('id_risk');
+        $risiko = post('risk');
+		$id_section = post('id_section');
 
-    //     $aktivitas = post('id_aktivitas');
+        $aktivitas = post('id_aktivitas');
 
-    //     $keterangan = post('keterangan');
-    //     $score_dampak = post('score_dampak');
-    //     $score_kemungkinan = post('score_kemungkinan');
-    //     $bobot_risk = post('bobot_risk');
-
-	// 	$id_risk1 = [];
+        $keterangan = post('keterangan');
+        $score_dampak = post('score_dampak');
+        $score_kemungkinan = post('score_kemungkinan');
+        $bobot_risk = post('bobot_risk');
 		
-	// 	if(empty($id_risk)) {
-	// 		$response = [
-	// 			'status' => 'info',
-	// 			'message' => 'Risk cannot be empty'
-	// 		];
+		$new_data = false;
+		if($data['id'] == '0'){
+			$new_data = true;
+		}
 
-	// 		render($response,'json');
-	// 		return;
-	// 	}
+		if(empty($id_risk)) {
+			$response = [
+				'status' => 'info',
+				'message' => 'Risk cannot be empty'
+			];
 
-	// 	$cek_section = get_data('tbl_m_audit_section','id',$id_section)->row();
-	// 	if(empty($cek_section) || $cek_section->level5== 0) {
-	// 		$response = [
-	// 			'status' => 'info',
-	// 			'message' => 'section department cannot be empty'
-	// 		];
+			render($response,'json');
+			return;
+		}
 
-	// 		render($response,'json');
-	// 		return;
-	// 	}
+		$cek_section = get_data('tbl_m_audit_section','id',$id_section)->row();
+		if(empty($cek_section) || $cek_section->level5== 0) {
+			$response = [
+				'status' => 'info',
+				'message' => 'section department cannot be empty'
+			];
 
-	// 	// save data Risk Register
-	// 	foreach($id_risk as $r1 => $vr) {
-	// 		$data_r = [
-	// 			'id'	=> $id_risk[$r1],
-	// 			'risk'  =>$risiko[$r1],
-	// 			'keterangan' => $keterangan[$r1],
-	// 			'score_dampak' => $score_dampak[$r1],
-	// 			'score_kemungkinan' => $score_kemungkinan[$r1],
-	// 			'bobot' => $bobot_risk[$r1],
-	// 			'is_active'=>1
-	// 		];
-	// 		$risk = save_data('tbl_risk_register', $data_r);
-	// 		$id_risk1[] = $risk['id'];
-	// 	}
+			render($response,'json');
+			return;
+		}
+
+		// save data Risk Register
+		foreach($id_risk as $r1 => $vr) {
+			$data_r = [
+				'id'	=> $id_risk[$r1],
+				'risk'  =>$risiko[$r1],
+				'keterangan' => $keterangan[$r1],
+				'score_dampak' => $score_dampak[$r1],
+				'score_kemungkinan' => $score_kemungkinan[$r1],
+				'bobot' => $bobot_risk[$r1],
+				'is_active'=>1
+			];
+			$risk = save_data('tbl_risk_register', $data_r);
+			$id_risk1[] = $risk['id'];
+		}
 		
-	// 	// save data Risk Control
-	// 	$data_rk = 			[
-	// 		'id' => $data['id_rk'],
-	// 		'id_section' => json_encode($id_section),
-	// 		'id_sub_aktivitas' => json_encode($aktivitas),
-	// 		'id_risk' => json_encode($id_risk1),
-	// 		'is_active' => 1,
-	// 	];
-
-	// 	$id_risk_control = save_data('tbl_risk_control',$data_rk);
-	// 	foreach($aktivitas as $a => $va){
-	// 		foreach ($id_risk1 as $i => $v) {
-	// 			delete_data('tbl_annual_audit_plan','id_risk',$v);
-	// 			$data_annual= [
-	// 				'id_risk' => $id_risk_control['id'],
-	// 				'id_m_aktivitas' => $aktivitas[$a],
-	// 				'bobot' => $bobot_risk[$i],
-	// 				'is_active' => 1,
-	// 			];
-	// 			insert_data('tbl_annual_audit_plan',$data_annual);
-	// 		}
-	// 	}
+		// save data Risk Control
+		$data_rk = 	[
+			'id' => $new_data == true ? 0 : $data['id_rk'],
+			'id_section' => json_encode($id_section),
+			'id_sub_aktivitas' => json_encode($aktivitas),
+			'id_risk' => json_encode($id_risk1),
+			'is_active' => 1,
+		];
 		
-	// 	render([
-	// 		'status' => 'success',
-	// 		'message' => 'Data berhasil disimpan'
-	// 	], 'json');
-	// }
+		$id_risk_control = save_data('tbl_risk_control',$data_rk);
+		
+		// Ambil data RCM lama untuk update / hapus
+		$existing_rcms = get_data('tbl_rcm', [
+			'where' => ['id_risk_control' => $id_risk_control['id']]
+		])->result();
+		
+		$existing_map = []; // [section][sub_aktivitas] = id_rcm
+		foreach ($existing_rcms as $rcm) {
+			$existing_map[$rcm->id_section][$rcm->id_sub_aktivitas] = $rcm->id;
+		}
 
-	function save() {
+		$new_keys = [];
+		foreach ($id_section as $sec) {
+			foreach ($aktivitas as $sub_aktivitas) {
+				$new_keys[] = [$sec, $sub_aktivitas];
+
+				$id_rcm = isset($existing_map[$sec][$sub_aktivitas]) ? $existing_map[$sec][$sub_aktivitas] : 0;
+				$data_rcm = [
+					'id'                => $id_rcm,
+					'id_section'        => $sec,
+					'id_sub_aktivitas'  => $sub_aktivitas,
+					'id_risk_control'   => $id_risk_control['id'],
+				];
+				$data_save = save_data('tbl_rcm', $data_rcm);
+
+				$universe = get_data('tbl_audit_universe', 'id_rcm', $data_save['id'])->row_array();
+				
+				$data_universe = [
+					'id' => $universe['id'] ?? 0,
+					'id_rcm' => $data_save['id'],
+				];
+				$id_universe = save_data('tbl_audit_universe', $data_universe);
+
+				$audit_plan = get_data('tbl_annual_audit_plan', 'id_universe', $id_universe['id'])->row_array();
+				$data_audit_plan = [
+					'id' => $audit_plan['id'] ?? 0,
+					'id_universe' => $id_universe['id'],
+				];
+				save_data('tbl_annual_audit_plan', $data_audit_plan);
+			}
+		}
+
+		// Hapus RCM lama yang tidak dipakai lagi
+		foreach ($existing_map as $sec => $subs) {
+			foreach ($subs as $sub => $id_rcm) {
+				if (!in_array([$sec, $sub], $new_keys)) {
+					delete_data('tbl_rcm', 'id', $id_rcm);
+					delete_data('tbl_audit_universe', 'id_rcm', $id_rcm);
+					$audit = get_data('tbl_audit_universe a', [
+						'select' => 'b.id as id_audit',
+						'join' => [
+							'tbl_annual_audit_plan b on a.id = b.id_universe'
+						],
+						'where' => [
+							'a.id_rcm' => $id_rcm
+						] 
+					])->row_array();
+					if($audit){
+						delete_data('tbl_annual_audit_plan', 'id', $audit['id_audit']);
+					}
+				}
+			}
+		}
+		
+		render([
+			'status' => 'success',
+			'message' => 'Data berhasil disimpan'
+		], 'json');
+	}
+
+	function savessssss() {
 		$data = post();
 		$id_section = post('id_section');
 
@@ -253,16 +357,19 @@ class Rcm extends BE_Controller {
 		$bobot_risk = post('bobot_risk');
 
 		$data['id_section'] = json_encode($id_section);
+		
+		$new_data = false;
+		if($data['id'] == '0'){
+			$new_data = true;
+		}
 
-
-		$data_rk = 			[
-			'id' => $data['id_rk'],
+		$data_rk = [
+			'id' => $new_data == true ? 0 : $data['id_rk'],
 			'id_section' => json_encode($id_section),
 			'id_sub_aktivitas' => json_encode($aktivitas),
 			'id_risk' => json_encode($id_risk),
 			'is_active' => 1,
 		];
-		
 
 		$cek_section = get_data('tbl_m_audit_section','id',$id_section)->row();
 		if(empty($cek_section) || $cek_section->level5== 0) {
@@ -274,7 +381,6 @@ class Rcm extends BE_Controller {
 			render($response,'json');
 			die;
 		}
-
 
 
 		$response = save_data('tbl_risk_control',$data_rk);
@@ -420,16 +526,19 @@ class Rcm extends BE_Controller {
 	}
 
 	function delete() {
-		$cek = get_data('tbl_m_aktivitas','id',post('id'))->row();
-		$response = destroy_data('tbl_m_aktivitas','id_rk',$cek->id_rk);
-		if($response['status']= 'success') {
-			$rk = get_data('tbl_risk_control','id',$cek->id_rk)->row();
-			if($rk) delete_data('tbl_risk_control','id',$cek->id_rk);
+		$cek = get_data('tbl_rcm','id',post('id'))->row();
+		delete_data('tbl_rcm','id',$cek->id);
+		// if($response['status']= 'success') {
+		// 	$rk = get_data('tbl_risk_control','id',$cek->id_risk_control)->row();
+		// 	if($rk) delete_data('tbl_risk_control','id',$cek->id_risk_control);
 
-			$annual = get_data('tbl_annual_audit_plan','id_m_aktivitas',$cek->id)->row();
-			if($annual) delete_data('tbl_annual_audit_plan','id_m_aktivitas',$cek->id);
-		}
-		render($response,'json');
+		// 	// $annual = get_data('tbl_annual_audit_plan','id_m_aktivitas',$cek->id)->row();
+		// 	// if($annual) delete_data('tbl_annual_audit_plan','id_m_aktivitas',$cek->id);
+		// }
+		render([
+			'status' => 'success',
+			'message' => lang('data_berhasil_dihapus')
+		],'json');
 	}
 
 	function template() {
@@ -504,7 +613,6 @@ class Rcm extends BE_Controller {
 		
 		$id = post('id');
 		$cs = get_data('tbl_risk_register', 'id', $id)->row_array();
-		
 		$response = [
 			'status' => 'ok',
 			'message'	=> lang('data_berhasil_diperbaharui'),
@@ -523,13 +631,12 @@ class Rcm extends BE_Controller {
 
 	function get_bobot($type='echo') {
 
-	    $data 		 = '<option value=""></option>';
-		$data       .= '<option value="Critical">Critical</option>';
-		$data       .= '<option value="Major">Major</option>';
-		$data       .= '<option value="Moderate">Moderate</option>';
-		$data       .= '<option value="Minor">Minor</option>';
-		$data       .= '<option value="Improvement">Improvement</option>v';
-	    
+		$bobot = get_data('tbl_bobot_status_audit')->result_array();
+	    $data  = '<option value=""></option>';
+		foreach($bobot as $val){
+			$data .= '<option value="'.$val['id'].'">'.$val['bobot'].'</option>';
+		}
+
 	    if($type == 'echo') echo $data;
 	    else return $data;
 	    

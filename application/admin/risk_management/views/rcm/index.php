@@ -2,7 +2,16 @@
 	table[data-fixed="true"] > thead {
     visibility: hidden;   /* atau display:none; kalau lebar sudah diset via JS */
 }
+.dataTables_wrapper .dataTables_filter {
+		float: right;
+		text-align: right;
+	}
+	.dataTables_wrapper .dataTables_paginate {
+		float: right;
+		text-align: right;
+	}
 </style>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
 <div class="content-header page-data">
 	<div class="main-container position-relative">
 		<div class="header-info">
@@ -10,7 +19,16 @@
 			<?php echo breadcrumb(); ?>
 		</div>
 		
-		<div class="float-right">   		
+		
+		<div class="float-right"> 
+			<!-- <label class=""><?php echo lang('department'); ?> &nbsp</label>					
+			<select class = "select2 infinity custom-select" style="width: 300px;" id="department">
+				<option value="ALL">ALL Department</option>
+				<?php foreach($filter as $d){ ?>
+				<option value="<?= $d['id_department']; ?>"><?= $d['location'].' | '.$d['department'] ?></option>
+				<?php } ?>
+			</select> -->
+  		
     		<?php 
 				echo access_button('delete,active,inactive,export,import'); 
 			// echo '<button class="btn btn-success btn-save" href="javascript:;" ><i class="fa-save"></i> Save</button>';
@@ -36,32 +54,28 @@
 <div class="content-body mt-6">
 	<div class="main-container mt-2">
 		<div class="row">
-			<form id="form-control" action="<?php echo base_url('risk_management/rcm/save_perubahan'); ?>" data-callback="reload" method="post" data-submit="ajax">
-				<div class="card-body">
-					<div class="table-responsive tab-pane fade active show height-window">
-					<?php
-					table_open('table table-bordered table-app table-hover table-1', true);
-					// table_open('table table-app table-bordered table-striped table-hover table-1',true,'','');
-						thead();
-							tr();
-								th(lang('location'),'','class="text-center align-middle headcol"');
-								th(	lang('divisi'),'','class="text-center align-middle headcol"');
-								th(lang('department'),'','class="text-center align-middle headcol"');
-								th(lang('section'),'','class="text-center align-middle headcol"');
-								th(lang('aktivitas'),'','class="text-center align-middle headcol"');
-								th(lang('audit_area'),'','class="text-center align-middle headcol"');
-								th(lang('risk'),'','class="text-center align-middle headcol"');
-								th(lang('internal_control'),'','class="text-center align-middle headcol"');
-								th(lang('keterangan'),'','class="text-center align-middle headcol"');
-								// th(lang('bobot'),'','class="text-center align-middle headcol"');
-								th('&nbsp;','','width="30"');
-						tbody();
-					table_close();
-					?>
-					</div>
+			<div class="card-body">
+				<div class="table-responsive">
+					<table id="example" class="table table-bordered table-hover table-sm">
+						<thead class="text-center">
+							<tr>
+								<th><?='Lokasi' ?></th>
+								<th><?php echo lang('divisi'); ?></th>
+								<th><?php echo lang('department'); ?></th>
+								<th><?php echo lang('section'); ?></th>
+								<th><?php echo lang('aktivitas'); ?></th>
+								<th><?= 'Audit Area'?></th>
+								<th><?= 'Risk' ?></th>
+								<th><?php echo lang('internal_control'); ?></th>
+								<th><?= 'Keterangan'?></th>
+								<th style="width:5%"><?php echo lang('aksi'); ?></th>
+							</tr>
+						</thead>
+						<tbody>
+						</tbody>
+					</table>
 				</div>
-				
-			</form>
+			</div>
 	    </div>
 	</div>
 
@@ -120,7 +134,33 @@ modal_close();
 
 
 ?>
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
 <script type="text/javascript">
+
+function getData(){
+    $('#example').DataTable({
+        destroy: true, // kalau dipanggil ulang tidak error
+        processing: true,
+        ajax: {
+            url: base_url + 'risk_management/rcm/data',
+            type: 'POST',
+            dataSrc: 'data' // sesuai key dari PHP render(['data'=>...])
+        },
+        columns: [
+            { data: 'location' },
+            { data: 'divisi' },
+            { data: 'department' },
+            { data: 'section' },
+            { data: 'aktivitas' },
+            { data: 'sub_aktivitas' },
+			{ data: 'risk' },
+			{ data: 'internal_control' },
+			{ data: 'keterangan' },
+            { data: 'aksi' }
+        ]
+    });
+}
 
 var index1 = 0;
 $(document).ready(function () {
@@ -129,64 +169,6 @@ $(document).ready(function () {
 	$('#form')[0].reset();
 });	
 
-
-function getData() {
-	// cLoader.open(lang.memuat_data + '...');
-	$('.overlay-wrap').removeClass('hidden');
-	var page = base_url + 'risk_management/rcm/data';
-		page 	+= '/'+$('#filter_tahun').val();
-
-
-	$.ajax({
-		url 	: page,
-		data 	: {},
-		type	: 'get',
-		dataType: 'json',
-		success	: function(response) {
-			$('.table-1 tbody').html(response.table);
-			$('#parent_id').html(response.option);
-			$('#id_rk').val(response.id_rk);
-			cLoader.close();
-			cek_autocode();
-			fixedTable();
-			var item_act	= {};
-			if($('.table-1 tbody .btn-input').length > 0) {
-				item_act["sep2"] 		= "---------";
-				item_act['edit'] 		= {name : lang.ubah, icon : "edit"};					
-			}
-			if($('.table-app tbody .btn-input').length > 0) {
-				item_act['delete'] 		= {name : lang.hapus, icon : "delete"};					
-			}
-
-			var act_count = 0;
-			for (var c in item_act) {
-				act_count = act_count + 1;
-			}
-			if(act_count > 0) {
-				$.contextMenu({
-					selector: '.table-1 tbody tr', 
-					callback: function(key, options) {
-						if($(this).find('[data-key="'+key+'"]').length > 0) {
-							if(typeof $(this).find('[data-key="'+key+'"]').attr('href') != 'undefined') {
-								window.location = $(this).find('[data-key="'+key+'"]').attr('href');
-							} else {
-								$(this).find('[data-key="'+key+'"]').trigger('click');
-							}
-						} 
-					},
-					items: item_act
-				});
-			}
-			$('.overlay-wrap').addClass('hidden')
-			$('.select2').select2()
-			$('.select2-search__field').attr('style', 'width:100%')
-		}
-	});
-}
-
-$(function(){
-	getData();
-});
 
 // $(document).on('click','.btn-save',function(){
 // 	$('#form-control').submit();
@@ -198,6 +180,7 @@ function formOpen() {
 	var index1 = 0;
 	get_bobot();
 	var response = response_edit;
+	$('#id_rk').val(response.id_risk_control);
 	$('#result tbody').html('');
 	$('#result2 tbody').html('')
 	$('#result3 tbody').html('')
