@@ -2267,3 +2267,8 @@ function getCostCenterByUser($idUser = "", $tahun = ""){
         return array_column($data, 'cost_centre');
     }
 }
+
+function get_active_auditee(){
+    $data = get_data('tbl_auditee', 'is_active', 1)->result_array();
+    return $data ?: [];
+}
