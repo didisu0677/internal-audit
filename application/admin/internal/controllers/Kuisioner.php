@@ -66,7 +66,15 @@ class Kuisioner extends BE_Controller {
 		$resp = [];
 		
 		foreach($auditee as $val){
-			$data = get_data('tbl_auditee', 'id', $val)->row_array();
+			$data = get_data('tbl_auditee a', [
+				'select' => 'a.id, u.id as id_user, u.*',
+				'join' => [
+					'tbl_user u on a.nip = u.kode'
+				],
+				'where' => [
+					'a.id' => $val
+				]
+			])->row_array();
 			
 			$dataInsert = [
 				'id_auditee'     => $val,
@@ -74,7 +82,18 @@ class Kuisioner extends BE_Controller {
 				'status'	     => '0'
 			];
 
-			insert_data('tbl_kuisioner_respon', $dataInsert);
+			$id_kuisioner = insert_data('tbl_kuisioner_respon', $dataInsert);
+
+			$data_mytask = [
+				'id_user' => $data['id_user'] ?? 0,
+				'type' => 'questioner',
+				'id_transaction' => $id_kuisioner,
+				'title' => 'Pengisian Kuisioner Setelah Audit',
+				'description' => 'Pengisian kuisioner ini bertujuan untuk memperoleh umpan balik setelah pelaksanaan audit.',
+				'status' => 'pending'
+			];
+			insert_data('tbl_mytask', $data_mytask);
+
 			$nomor = base64_encode($periode);
 
 			$status = send_mail([
@@ -86,7 +105,7 @@ class Kuisioner extends BE_Controller {
 			]);
 
 			if($status['status'] !== 'success'){
-				$status['nip'] = $data['nip'];
+				$status['nip'] = $data['kode'];
 				$status['status'] = 'failed';
 			}
 			$resp[] = $status;

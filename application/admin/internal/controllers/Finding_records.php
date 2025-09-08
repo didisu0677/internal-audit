@@ -503,7 +503,26 @@ class Finding_records extends BE_Controller {
 							'id_transaksi'	=> post('id')
 						];
 						insert_data('tbl_notifikasi',$data_notifikasi);	
-
+					
+					$data_mytask = get_data('tbl_mytask', [
+						'where' => [
+							'id_user'		=> $usr->id_user,
+							'type'			=> 'finding',
+							'id_transaction'=> $response_f['id'],
+						]
+					])->row_array();
+					$sub_aktivitas = get_data('tbl_sub_aktivitas','id',$data['id_sub_aktivitas'])->row_array();
+					$mytask = [
+						'id'			=> $data_mytask['id'] ?? 0,
+						'id_user'		=> $usr->id_user,
+						'type'			=> 'finding',
+						'id_transaction'=> $response_f['id'],
+						'title'			=> 'Finding Internal Audit',
+						'description'	=> 'Terdapat finding yang harus ditindaklanjuti pada audit area '.$sub_aktivitas['sub_aktivitas'],
+						'status'		=> 'pending',
+					];
+					save_data('tbl_mytask',$mytask);
+					
 					if(setting('email_notification')) {
 						send_mail([
 							'subject'		=> 'Notifikasi Temuan Audit – Mohon Tindak Lanjut CAPA Plan',
@@ -578,8 +597,36 @@ class Finding_records extends BE_Controller {
 			
 			if($id_capa[$i] != 0) 
 			delete_data('tbl_capa',['nomor not' =>$nomor, 'id_finding' =>$data['id_finding'], 'nomor !=' => '']);
-		}
+		
+			$data_mytask = get_data('tbl_mytask', [
+				'where' => [
+					'id_user'		=> $pic_capa[$i],
+					'type'			=> 'capa',
+					'id_transaction'=> $response_capa['id'],
+				]
+			])->row_array();
+			$sub_aktivitas = get_data('tbl_sub_aktivitas a',[
+				'join' => [
+					'tbl_finding_records b on a.id = b.id_sub_aktivitas type LEFT',
+				],
+				'where' => [
+					'b.id' => $data['id_finding'],
+				]
+			])->row_array();
 
+			$user = get_data('tbl_user','kode',$pic_capa[$i])->row_array();
+			$mytask = [
+				'id'			=> $data_mytask['id'] ?? 0,
+				'id_user'		=> $user['id'],
+				'type'			=> 'capa',
+				'id_transaction'=> $response_capa['id'],
+				'title'			=> 'CAPA Plan Telah Diinput',
+                'description' 	=> "Terdapat CAPA yang perlu diperbarui progressnya pada audit area " . $sub_aktivitas['sub_aktivitas'],
+				'status'		=> 'pending',
+			];
+			save_data('tbl_mytask',$mytask);
+		}
+		
 		if($response_capa['status'] == 'success') {
 			/// kirim email dan notifikasi
 			$usr 	= get_data('tbl_finding_records a',[
