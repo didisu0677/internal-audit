@@ -528,8 +528,6 @@
         let datas = res.data;  // data temuan
         let dept = res.dept;   // data dept/section
 
-        let labels = res.labels;
-
         // Inisialisasi nilai sfc_* ke 0 untuk setiap dept
         dept.forEach(d => {
           d.sfc_1 = 0;
@@ -553,9 +551,15 @@
           }
         });
 
-        dept.sort((a, b) => b.sfc_1 + b.sfc_2 + b.sfc_3 - (a.sfc_1 + a.sfc_2 + a.sfc_3));
+        // Urutkan dept berdasarkan total temuan (descending)
+        dept.sort((a, b) => {
+          let totalA = a.sfc_1 + a.sfc_2 + a.sfc_3;
+          let totalB = b.sfc_1 + b.sfc_2 + b.sfc_3;
+          return totalB - totalA;
+        });
 
-        // Ambil label dan data untuk chart
+        // Ambil labels dan data dari hasil sort
+        let labels = dept.map(d => d.section_name); // sesuaikan field label
         let data1 = dept.map(d => d.sfc_1);
         let data2 = dept.map(d => d.sfc_2);
         let data3 = dept.map(d => d.sfc_3);
@@ -674,7 +678,6 @@
         console.log(res);
         let datas = res.data;  // data temuan
         let dept = res.dept;   // data dept/section
-        let labels = res.labels;
 
         // Inisialisasi nilai jumlah untuk setiap dept
         dept.forEach(d => {
@@ -703,16 +706,21 @@
           }
         });
 
-        dept.sort((a, b) => (b.status_critical + b.status_major + b.status_moderate + b.status_minor + b.status_improve) -
-          (a.status_critical + a.status_major + a.status_moderate + a.status_minor + a.status_improve));
+         // Urutkan dept berdasarkan total temuan (descending)
+        dept.sort((a, b) => {
+          let totalA = a.status_critical + a.status_major + a.status_moderate + a.status_minor + a.status_improve;
+          let totalB = b.status_critical + b.status_major + b.status_moderate + b.status_minor + b.status_improve;
+          return totalB - totalA;
+        });
 
-        // Ambil label dan data untuk chart
-        // let labels = dept.map(d => d.section_name || `Dept ${d.id}`);
-        let data_improve = dept.map(d => d.status_improve);
-        let data_crit = dept.map(d => d.status_critical);
-        let data_major = dept.map(d => d.status_major);
+        // Ambil labels dan data dari hasil sort
+        let labels = dept.map(d => d.section_name);
+        let data_improve  = dept.map(d => d.status_improve);
+        let data_crit     = dept.map(d => d.status_critical);
+        let data_major    = dept.map(d => d.status_major);
         let data_moderate = dept.map(d => d.status_moderate);
-        let data_minor = dept.map(d => d.status_minor);
+        let data_minor    = dept.map(d => d.status_minor);
+
         const totalPerDept = labels.map((_, i) =>
           data_improve[i] + data_crit[i] + data_major[i] + data_moderate[i] + data_minor[i]);
         // Atur lebar canvas dinamis
