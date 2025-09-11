@@ -20,12 +20,11 @@
 				<?php } ?>
 			</select>
 
-			
-			
 			<?php 
 			if(user('id_group')!=AUDITEE)
 			echo access_button('delete,active,inactive,export,import'); 
 			?>
+			<input type="hidden" value="<?= $id_transaction; ?>" id="id_transaction">
 		</div>
 		<div class="clearfix"></div>
 	</div>
@@ -534,12 +533,22 @@ var idx = 777;
 var idy = 999;
 
 $(document).ready(function() {
-	var url = base_url + 'internal/finding_records/data/' ;
-		url 	+= '/'+$('#filter_tahun').val();
-		url 	+= '/'+$('#department').val() ;
-	$('[data-serverside]').attr('data-serverside',url);
-	refreshData();
-});	
+    let id_trans = $('#id_transaction').val();
+    let url = base_url + 'internal/finding_records/data/';
+	
+    if (id_trans != '') {
+        // param 1 & 2 kosong, param 3 isi id_trans
+        url += '?id='+id_trans;   // pakai double slash biar param kosong
+    } else {
+        // pakai tahun & department
+        url += $('#filter_tahun').val();
+        url += '/'+$('#department').val();
+    }
+
+    $('[data-serverside]').attr('data-serverside', url);
+    refreshData();
+});
+
 
 $('#department').change(function(){
 	var url = base_url + 'internal/finding_records/data/' ;

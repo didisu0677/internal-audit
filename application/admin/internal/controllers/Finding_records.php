@@ -6,6 +6,8 @@ class Finding_records extends BE_Controller {
 	}
 
 	function index() {
+		$id = get('id');
+		$data['id_transaction'] = decode_id($id)[0] ?? '';
 		$data['auditor'] = get_data('tbl_m_auditor','is_active',1)->result_array();
 		// $data['auditee'] = get_data('tbl_auditee','is_active',1)->result_array();
 
@@ -119,6 +121,8 @@ class Finding_records extends BE_Controller {
 	}
 
 	function data($tahun="",$department="") {
+		
+		$id_transaction = get('id');
 
 		$config	= [];		
 
@@ -190,10 +194,16 @@ class Finding_records extends BE_Controller {
 			$config['where']['year(tgl_mulai_audit)']	= $tahun;	
 		}
 
+		if(!empty($id_transaction)){
+			unset($config['where']);
+			$config['where']['tbl_finding_records.id'] = $id_transaction;
+		}
+
 		$config['sort_by'] = 'sa.sub_aktivitas';
 		$config['sort'] = 'asc';
 
 		$data = data_serverside($config);
+		
 		render($data,'json');
 	}
 

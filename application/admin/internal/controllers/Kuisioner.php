@@ -24,9 +24,11 @@ class Kuisioner extends BE_Controller {
 		render($data);
 	}
 
-	function entry($token = null){
+	function entry($id = null){
 		
-		$nomor = base64_decode($token);
+		$id = decode_id($id)[0];
+		$nomor = get_data('tbl_kuisioner_respon', 'id', $id)->row_array()['periode_audit'] ?? '';
+		// $nomor = base64_decode($token);
 		
 		// $data['data'] = get_data('tbl_finding_records fr',[
 		// 	'select' => 'a.nama, ad.section_name as department, fr.nama_auditor, fr.periode_audit',
@@ -94,13 +96,13 @@ class Kuisioner extends BE_Controller {
 			];
 			insert_data('tbl_mytask', $data_mytask);
 
-			$nomor = base64_encode($periode);
+			$id = encode_id($id_kuisioner);
 
 			$status = send_mail([
 				'subject'		=> 'Permintaan Pengisian Kuisioner Setelah Audit',
 				'to'			=> $data['email'],
 				'nama_user'		=> $data['nama'],
-				'url'			=> base_url('internal/kuisioner/entry/'.$nomor),
+				'url'			=> base_url('internal/kuisioner/entry/'.$id),
 				'view'			=> 'internal/kuisioner/mailer_send_kuisioner'
 			]);
 
@@ -155,9 +157,10 @@ class Kuisioner extends BE_Controller {
 		for($i=1;$i<=10;$i++){
 			$respon[] = $data['question'.$i];
 		}
-
+		$ratarata = floatval(array_sum($respon) / count($respon));
 		$dataUpdate = [
 			'respon' => json_encode($respon),
+			'nilai_akhir' => $ratarata,
 			'komentar' => $data['komentar'],
 			'status' => '1',
 			'submitted_at' => date('Y-m-d H:i:s')
