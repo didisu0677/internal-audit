@@ -7,24 +7,67 @@ class Dashboard extends BE_Controller {
 	}
 
 	function index() {
+		
+		$mytask = get_data('tbl_mytask', [
+			'where' =>[
+				'id_user' => user('id'),
+				'status' => 'pending' 
+			]
+		])->result_array();
+		
 		$year = get_data('tbl_finding_records', [
 			'select' => 'min(year(tgl_mulai_audit)) as min_year',
 		])->row_array();
-		
-		render(['year' => $year]);
+
+		$data = [
+			'year' => $year['min_year'] ?: date('Y'),
+			'mytask' => $mytask
+		];
+		render($data);
 	}
 
-	function get_data_finding_control(){
+	function get_finding_record_capa(){
+		$year = post('year') ?: date('Y');
+		$finding = [];
+		$capa = [];
+		
+		$auditee = get_data('tbl_auditee', 'id_user', user('id'))->row_array();
+		if($auditee){
+			$finding = get_data('tbl_finding_records fr', [
+				'select' => 'fr.*',
+				'join' => [
+					'tbl_m_audit_section s on fr.id_section_department = s.id',
+				],
+				'where' => [
+					's.id' => json_decode($auditee['id_section']) ?? '',
+					'year(fr.tgl_mulai_audit)' => $year
+				]
+			])->result_array();
+
+			foreach($finding as $v){
+				$data_capa = get_data('tbl_capa', 'id_finding', $v['id'])->result_array();
+				if($data_capa){
+					$capa[] = $data_capa; 
+				}
+			}
+		}
+		$data = [
+			'finding' => count($finding),
+			'capa' => count($capa),
+		];
+
+		render($data, 'json');
+	}
+
+	function get_data_finding_pie(){
 		$nip = user('kode');
 		$auditee = get_data('tbl_detail_auditee', 'nip', $nip)->result_array();
 		$section = array_column($auditee, 'id_section');
 		
-		$year = post('year');
-		$where = [
-			'year(tgl_mulai_audit)' => $year
-		];
-		$user_group = user('id_group');
-		if($user_group == USER_GROUP_USER){
+		$year = post('year') ?? date('Y');
+		$where = ['year(tgl_mulai_audit)' => $year];
+		
+		if(user('id_group') == USER_GROUP_USER){
 			$where['id_section_department'] = $section ?: '';
 		}
 		
@@ -33,84 +76,121 @@ class Dashboard extends BE_Controller {
 			'where' => $where,
 			'group_by' => 'status_finding_control'
 		])->result_array();
-	
+
 		$status_label = [
-			'0' => 'Undefined',
-			'1' => 'Tidak ada',
-			'2' => 'Tidak efektif',
-			'3' => 'Tidak sesuai'
+			'1' => 'Implementasi tidak sesuai',
+			'2' => 'Design kurang efektif',
+			'3' => 'Design tidak ditemukan'
 		];
 
-		$total = array_sum(array_column($data_finding, 'jumlah'));
+
 		$data = [];
-		if($data_finding){
-			foreach($data_finding as $row){
-				$data[] = [
-					'label' => $status_label[$row['status_finding_control']],
-					'jumlah' => $row['jumlah'],
-					'persentase' => $total ? round($row['jumlah'] / $total * 100, 1) : 0
-				];
+		
+		foreach ($status_label as $key => $label) {
+			$jumlah = 0;
+			foreach ($data_finding as $row) {
+				if ($row['status_finding_control'] == $key) {
+					$jumlah = $row['jumlah'];
+					break;
+				}
 			}
+			$data[] = [
+				'label' => $label,
+				'jumlah' => $jumlah,
+			];
 		}
+
+		
 		render($data, 'json');
 	}
 
+	function get_finding_control_bar(){
+		$year = post('year') ?? date('Y');
+		$auditee = get_data('tbl_auditee', 'id_user', user('id'))->row_array();
+		$section = $auditee ? json_decode($auditee['id_section']) : [];
 	
-	function get_finding_control_dept(){
-		$nip = user('kode');
-		$auditee = get_data('tbl_detail_auditee', 'nip', $nip)->result_array();
-		$section = array_column($auditee, 'id_section') ?: '';
-		
-		$user_group = user('id_group');
-
-		$year = post('year');
-		$where = [
-			'year(tgl_mulai_audit)' => $year
-		];
-		$is_admin = 0; // 1 True, 0 False
-		if($user_group != USER_GROUP_USER){ // 1 = dev, 41 = Internal Audit
-			$data_section = get_data('tbl_m_audit_section',[
-				'where' => [
-					'level4 !=' => '0',
-					'level5' => '0'
-				]
-			])->result_array();
-			$is_admin = 1;
-		}else{
-			$data_section = get_data('tbl_m_audit_section', 'id', $section)->result_array();
-			$where['id_section_department'] = $section;
-		}
-
-		$dept = [];		
-		foreach($data_section as $row){
-			if($row['level3'] == '4') {  // CIBG
-				$row['section_name'] = 'CIBG '.$row['section_name'];
-			}elseif($row['level3'] == '5'){ //TMBG
-				$row['section_name'] = 'TMBG '.$row['section_name'];
-			}
-			
-			if($row['level2'] == '3'){
-				$row['section_name'] = 'Factory '.$row['section_name'];
-			}
-			$dept[] = $row;
-		}		
-
-		$data = get_data('tbl_finding_records fr',[
-			'select' => 's.section_name, s.parent_id, fr.id_section_department,fr.status_finding_control, count(*) as jumlah',
+		$dept = get_data('tbl_m_audit_section', 'id', $section)->result_array();	
+		$data = get_data('tbl_finding_records fr', [
+			'select' => 's.*, fr.id_section_department,fr.status_finding_control, count(*) as jumlah',
 			'join' => [
 				'tbl_m_audit_section s on fr.id_section_department = s.id'
 			],
-			'where' => $where,
+			'where' => [
+				'year(tgl_mulai_audit)' => $year,
+				'id_section_department' => $section ?: ''
+			],
 			'group_by' => 'id_section_department, status_finding_control'
 		])->result_array();
+
+		$dept_labels = [];
+		$labels = array_column($dept, 'section_name');
 		
+		foreach($labels as $label){
+			$part = explode('-', $label);
+			$fix = array_slice($part, 1);
+			$dept_labels[] = implode(' ', $fix);
+		}
+
 		$clean_data = [
+			'labels' => $dept_labels,
 			'dept' => $dept,
 			'data' => $data,
-			'is_admin' => $is_admin
 		];
+		
 		render($clean_data, 'json');
 	}
+	// function get_finding_control_bar(){
+	// 	$nip = user('kode');
+		
+	// 	$auditee = get_data('tbl_detail_auditee', 'nip', $nip)->result_array();
+	// 	$section = array_column($auditee, 'id_section') ?: '';
+	
+	// 	$year = post('year');
+	// 	$where = [
+	// 		'year(tgl_mulai_audit)' => $year
+	// 	];
+	
+	// 	$data_section = get_data('tbl_m_audit_section', 'id', $section)->result_array();
+	// 	$where['id_section_department'] = $section;
+	// 	$dept = [];		
+	// 	foreach($data_section as $row){
+	// 		if($row['level3'] == '4') {  // CIBG
+	// 			$row['section_name'] = 'CIBG '.$row['section_name'];
+	// 		}elseif($row['level3'] == '5'){ //TMBG
+	// 			$row['section_name'] = 'TMBG '.$row['section_name'];
+	// 		}
+			
+	// 		if($row['level2'] == '3'){
+	// 			$row['section_name'] = 'Factory '.$row['section_name'];
+	// 		}
+	// 		$dept[] = $row;
+	// 	}		
+
+	// 	$data = get_data('tbl_finding_records fr',[
+	// 		'select' => 's.section_name, s.parent_id, fr.id_section_department,fr.status_finding_control, count(*) as jumlah',
+	// 		'join' => [
+	// 			'tbl_m_audit_section s on fr.id_section_department = s.id'
+	// 		],
+	// 		'where' => $where,
+	// 		'group_by' => 'id_section_department, status_finding_control'
+	// 	])->result_array();
+		
+	// 	$dept_labels = [];
+	// 	$labels = array_column($dept, 'section_name');
+	// 	foreach($labels as $label){
+	// 		$part = explode('-', $label);
+	// 		$fix = array_slice($part, 1);
+	// 		$dept_labels[] = implode(' ', $fix);
+	// 	}
+		
+	// 	$clean_data = [
+	// 		'labels' => $dept_labels,
+	// 		'dept' => $dept,
+	// 		'data' => $data,
+	// 	];
+		
+	// 	render($clean_data, 'json');
+	// }
 	function get_data_risk_control_pie(){
 		$nip = user('kode');
 		$auditee = get_data('tbl_detail_auditee', 'nip', $nip)->result_array();
@@ -121,7 +201,7 @@ class Dashboard extends BE_Controller {
 			'year(tgl_mulai_audit)' => $year
 		];
 		$user_group = user('id_group');
-		if($user_group == USER_GROUP_USER){
+		if($user_group == AUDITEE){
 			$where['id_section_department'] = $section ?: '';
 		}
 		
@@ -170,20 +250,9 @@ class Dashboard extends BE_Controller {
 		$where = [
 			'year(tgl_mulai_audit)' => $year
 		];
-		$is_admin = 0; // 1 True, 0 False
-		if($user_group != USER_GROUP_USER){ // 1 = dev, 41 = Internal Audit
-			$data_section = get_data('tbl_m_audit_section',[
-				'where' => [
-					'level4 !=' => '0',
-					'level5' => '0'
-				]
-			])->result_array();
-			$is_admin = 1;
-		}else{
-			$data_section = get_data('tbl_m_audit_section', 'id', $section)->result_array();
-			$where['id_section_department'] = $section;
-		}
-
+		$data_section = get_data('tbl_m_audit_section', 'id', $section)->result_array();
+		$where['id_section_department'] = $section;
+		
 		$dept = [];		
 		foreach($data_section as $row){
 			if($row['level3'] == '4') {  // CIBG
@@ -206,19 +275,156 @@ class Dashboard extends BE_Controller {
 			'where' => $where,
 			// 'group_by' => 'id_section_department, status_finding_control'
 		])->result_array();
-		
+
+		$dept_labels = [];
+		$labels = array_column($dept, 'section_name');
+		foreach($labels as $label){
+			$part = explode('-', $label);
+			$fix = array_slice($part, 1);
+			$dept_labels[] = implode(' ', $fix);
+		}
+
 		$clean_data = [
+			'labels' => $dept_labels,
 			'dept' => $dept,
-			'data' => $data,
-			'is_admin' => $is_admin
+			'data' => $data
 		];
+
 		render($clean_data, 'json');
 	}
 
 	function get_data_monitoring_capa(){
-		$year = post('year');
+		$year = post('year') ?? date('Y');
+		$auditee_dept = get_data('tbl_auditee a', [
+			'join' => [
+				'tbl_user u on a.id_user = u.id type left'
+			],
+			'where' => [
+				'u.id' => user('id')
+			]
+		])->row_array()['id_department'];
+		// $auditee_section = $auditee_section ? json_decode($auditee_section['id_section']) : [];
+
 		$data = get_data('tbl_finding_records fr', [
-			'select' => 'fr.site_auditee, s.section_name, fr.status_finding, sc.id as id_status_capa, a.aktivitas',
+			'select' => 'fr.site_auditee, s.section_name as dept, a.aktivitas, fr.finding, fr.status_finding, sc.status as status_capa, c.dateline_capa as deadline_capa',
+			'join' => [
+				'tbl_capa c on fr.id = c.id_finding type left',
+				'tbl_m_audit_section s on fr.id_department_auditee = s.id',
+				'tbl_status_capa sc on c.id_status_capa = sc.id',
+				'tbl_sub_aktivitas sa on fr.id_sub_aktivitas = sa.id type left',
+				'tbl_aktivitas a on sa.id_aktivitas = a.id type left',
+				'tbl_m_audit_section dept on s.level3 = dept.id'
+			],
+			'where' => [
+				'YEAR(fr.tgl_mulai_audit)' => $year,
+				'dept.id' => $auditee_dept 
+			],
+			'order_by' => 'dept.section_name, a.aktivitas',
+			'sort' => 'ASC'
+		])->result_array();	
+	
+		render($data, 'json');
+	}
+
+	
+	function get_auditor_finding_bar(){
+		$year = post('year') ?: date('Y');
+	
+		$dept = get_data('tbl_m_audit_section', 'group_section', 'DEPARTMENT')->result_array();	
+		$id_dept = array_column($dept, 'id');
+		
+		$data = get_data('tbl_finding_records fr', [
+			'select' => 'fr.id_department_auditee,fr.status_finding_control, count(*) as jumlah',
+			'join' => [
+				'tbl_m_audit_section s on fr.id_section_department = s.id'
+			],
+			'where' => [
+				'year(tgl_mulai_audit)' => $year,
+				'id_department_auditee' => $id_dept ?: ''
+			],
+			'group_by' => 'id_department_auditee, status_finding_control'
+		])->result_array();
+
+		$department = [];		
+		foreach($dept as $row){
+			if($row['level3'] == '4') {  // CIBG
+				$row['section_name'] = 'CIBG '.$row['section_name'];
+			}elseif($row['level3'] == '5'){ //TMBG
+				$row['section_name'] = 'TMBG '.$row['section_name'];
+			}
+			
+			if($row['level2'] == '3'){
+				$row['section_name'] = 'Factory '.$row['section_name'];
+			}
+			$department[] = $row;
+		}	
+		
+		$clean_data = [
+			'labels' => array_column($department, 'section_name'),
+			'dept' => $dept,
+			'data' => $data,
+		];
+
+		render($clean_data, 'json');
+	}
+
+	function get_auditor_monitoring_bar(){
+		$year = post('year') ?: date('Y');
+		$dept = get_data('tbl_m_audit_section', 'group_section', 'DEPARTMENT')->result_array();	
+		$id_dept = array_column($dept, 'id');
+		
+		$data = get_data('tbl_finding_records fr',[
+			'select' => 's.section_name, s.parent_id, fr.id_department_auditee,fr.status_finding_control, fr.bobot_finding',
+			'join' => [
+				'tbl_m_audit_section s on fr.id_section_department = s.id'
+			],
+			'where' => [
+				'year(tgl_mulai_audit)' => $year,
+				'id_department_auditee' => $id_dept ?: ''
+			],
+		])->result_array();
+
+		$department = [];		
+		foreach($dept as $row){
+			if($row['level3'] == '4') {  // CIBG
+				$row['section_name'] = 'CIBG '.$row['section_name'];
+			}elseif($row['level3'] == '5'){ //TMBG
+				$row['section_name'] = 'TMBG '.$row['section_name'];
+			}
+			
+			if($row['level2'] == '3'){
+				$row['section_name'] = 'Factory '.$row['section_name'];
+			}
+			$department[] = $row;
+		}
+
+		$clean_data = [
+			'labels' => array_column($department, 'section_name'),
+			'dept' => $dept,
+			'data' => $data,
+		];
+
+		render($clean_data, 'json');
+	}
+
+	function get_data_questioner_gauge(){
+		$question = get_data('tbl_kuisioner_respon', 'respon !=', null)->result_array();
+		
+		$total = 0;
+		$count = count($question);
+
+		foreach($question as $v){
+			$total += $v['nilai_akhir'];
+		}
+
+		$average = $count ? $total / $count : 0;
+		render($average, 'json');
+	}
+
+	function get_auditor_monitoring_capa(){
+		$year = post('year') ?: date('Y');
+		$data = get_data('tbl_finding_records fr', [
+			'select' => 'fr.site_auditee, s.section_name, fr.status_finding, sc.id as id_status_capa, a.id as id_aktivitas, a.aktivitas',
 			'join' => [
 				'tbl_capa c on fr.id = c.id_finding type left',
 				'tbl_m_audit_section s on fr.id_department_auditee = s.id',
@@ -229,7 +435,7 @@ class Dashboard extends BE_Controller {
 			'where' => [
 				'YEAR(fr.tgl_mulai_audit)' => $year
 			],
-			'order_by' => 's.section_name',
+			'order_by' => 's.section_name, a.aktivitas',
 			'sort' => 'ASC'
 		])->result_array();
 		
@@ -237,12 +443,13 @@ class Dashboard extends BE_Controller {
 		$last_dept = null;
 		$last_site = null;
 		$last_aktivitas = null;
+
 		$counter_finding = [
 			'0' => 0, //Open
 			'1' => 0, //Delivered
 			'2' => 0  //Closed
 		];
-		
+
 		$counter_capa = [
 			'1' => 0, //Delivered
 			'2' => 0, //On-Progress
@@ -285,7 +492,7 @@ class Dashboard extends BE_Controller {
 			$last_site = $site;
 			$last_aktivitas = $aktivitas;
 		}
-
+		
 		// Tambahkan data terakhir
 		if ($last_aktivitas !== null) {
 			$clean_data[] = [
@@ -296,8 +503,6 @@ class Dashboard extends BE_Controller {
 				'aktivitas' => $last_aktivitas
 			];
 		}
-
 		render($clean_data, 'json');
 	}
-
 }
