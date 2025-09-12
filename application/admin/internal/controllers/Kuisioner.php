@@ -96,11 +96,19 @@ class Kuisioner extends BE_Controller {
 			];
 			insert_data('tbl_mytask', $data_mytask);
 
-			$id = encode_id($id_kuisioner);
+			$cc = get_data('tbl_user',[
+				'where' => [
+					'id_group' => [USER_STAFF_IA, USER_DEP_HEAD_IA]
+				]
+			])->result_array();
 
+			$audit_cc = array_column($cc, 'email');
+			$id = encode_id($id_kuisioner);
+		
 			$status = send_mail([
 				'subject'		=> 'Permintaan Pengisian Kuisioner Setelah Audit',
 				'to'			=> $data['email'],
+				'cc'			=> $audit_cc,
 				'nama_user'		=> $data['nama'],
 				'url'			=> base_url('internal/kuisioner/entry/'.$id),
 				'view'			=> 'internal/kuisioner/mailer_send_kuisioner'

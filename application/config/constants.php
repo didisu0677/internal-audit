@@ -103,4 +103,5 @@ define('ADMIN',10);
 define('AUDITEE',38);
 
 define('USER_GROUP_USER', 38);
-
+define('USER_STAFF_IA', 41);
+define('USER_DEP_HEAD_IA', 40);
