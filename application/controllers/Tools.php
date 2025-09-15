@@ -153,4 +153,51 @@ class Tools extends BE_Controller
         }
     }
 
+   function synchronize_kuisioner(){
+    $this->load->library('simpleexcel');
+    
+    // Gunakan path fisik, bukan URL
+    $file = FCPATH . 'assets/Kuesioner.xlsx';
+    
+    if (!file_exists($file)) {
+        echo "File tidak ditemukan di server: " . $file;
+        return;
+    }
+	$col = ['timestamp', 'email', 'department', 'auditee', 'q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'q9', 'q10', 'komentar'];
+	$this->simpleexcel->define_column($col);
+    $jml = $this->simpleexcel->read($file);
+    $c = 0;
+    foreach($jml as $i => $k) {
+        if($i==0) {
+            for($j = 2; $j <= $k; $j++) {
+                $data = $this->simpleexcel->parsing($i,$j);
+                $data_insert = [
+                    'id_auditee' => $this->get_auditee_id_by_email($data['email']),
+                    'periode_audit' => $data['timestamp'],
+                    'respon' => json_encode([$data['q1'], $data['q2'], $data['q3'], $data['q4'], $data['q5'], $data['q6'], $data['q7'], $data['q8'], $data['q9'], $data['q10']]),
+                    'komentar' => $data['komentar'],
+                    'status' => 1,
+                    'submitted_at' => date('Y-m-d H:i:s')
+                ];
+                $res = insert_data('tbl_kuisioner_respon', $data_insert);
+                if($res) {
+                    $c++;
+                    echo "Data ke-".$c." berhasil disimpan.<br>";
+                } else {
+                    echo "Data ke-".$c." gagal disimpan.<br>";  
+                }
+            }
+        }
+    }
+}
+
+function get_auditee_id_by_email($email)
+{
+    $user = get_data('tbl_user', 'email', $email)->row_array();
+    if ($user) {
+        $auditee = get_data('tbl_auditee', 'id_user', $user['id'])->row_array();
+        return $auditee['id'] ?? 0;
+    }
+    return 0;
+}
 }
