@@ -51,6 +51,17 @@ class Auditee extends BE_Controller {
 
 	function save() {
 		$data = post();
+		if($data['id'] == 0){
+			$old = get_data('tbl_auditee', 'nip', $data['nip'])->row_array();
+			if(!empty($old)){
+				$response = [
+					'status' => 'info',
+					'message' => 'NIP sudah terdaftar.'
+				];
+				render($response,'json');
+				return;
+			}
+		} 
 		$data['id_section'] = json_encode(post('id_section'));
 		$id_section = post('id_section');
 
