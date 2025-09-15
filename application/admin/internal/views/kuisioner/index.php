@@ -15,7 +15,7 @@
 			</div>
 		</div>
 		<div class="row mb-3">
-			<div class="col-md-5 col-lg-3 mb-4">
+			<div class="col-md-3 mb-4">
 				<div class="card shadow-sm border-0 h-100" id="card-entry">
 					<div class="card-body bg-primary text-white rounded p-4 d-flex align-items-center justify-content-between">
 						<h4 class="mb-0"><i class="fas fa-sign-in-alt fa-2x mr-3"></i> Isi Kuisioner</h4>
@@ -23,10 +23,17 @@
 				</div>
 			</div>
 			<?php if(user('id_group') != USER_GROUP_USER):?>
-			<div class="col-md-5 col-lg-3 mb-4">
+			<div class="col-md-3 mb-4">
 				<div class="card shadow-sm border-0 h-100" id="card-send">
 					<div class="card-body bg-warning text-white rounded p-4 d-flex align-items-center justify-content-between">
 						<h4 class="mb-0"><i class="fas fa-envelope fa-2x mr-3"></i> Kirim Kuisioner</h4>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-3 mb-4">
+				<div class="card shadow-sm border-0 h-100" id="card-export">
+					<div class="card-body bg-danger text-white rounded p-4 d-flex align-items-center justify-content-between">
+						<h4 class="mb-0"><i class="fas fa-envelope-open-text fa-2x mr-3"></i></i> Report Kuisioner</h4>
 					</div>
 				</div>
 			</div>
@@ -77,7 +84,7 @@
 <script>
 	$(document).ready(function(){
 		$('#card-send .card-body').css('cursor', 'pointer');
-
+		$('#card-export').css('cursor', 'pointer');
 		$('#card-entry').css('cursor', 'pointer');
 		get_list_periode();
 	})
@@ -152,6 +159,10 @@
 				}
 			}
 		})
+	});
+
+	$(document).on('click', '#card-export', function(){
+		location.href = base_url + 'internal/kuisioner/export';
 	});
 	
 	$(document).on('click', '#btn-submit', function(){

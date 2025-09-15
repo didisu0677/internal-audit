@@ -191,4 +191,58 @@ class Kuisioner extends BE_Controller {
 		}
 		render($response, 'json');
 	}
+
+	function export() {
+		ini_set('memory_limit', '-1');
+		$arr = [
+			'nip' => 'NIP',
+			'nama' => 'Nama',
+			'section_name' => 'Section',
+			'q1' => 'Q1',
+			'q2' => 'Q2',
+			'q3' => 'Q3',
+			'q4' => 'Q4',
+			'q5' => 'Q5',
+			'q6' => 'Q6',
+			'q7' => 'Q7',
+			'q8' => 'Q8',
+			'q9' => 'Q9',
+			'q10' => 'Q10',
+			'komentar' => 'Komentar',
+			'submitted_at' => 'Submitted At'
+		];
+
+		$data = get_data('tbl_kuisioner_respon',[
+			'join' => [
+				'tbl_auditee a on tbl_kuisioner_respon.id_auditee = a.id',
+				'tbl_m_audit_section s on a.id_department = s.id'
+			],
+			'where' => [
+				'tbl_kuisioner_respon.status' => '1'
+			]
+		])->result_array();
+
+		foreach ($data as &$row) {
+			// hapus bracket dulu, lalu pecah
+			$respon = trim($row['respon'], '[]');
+			$arrRespon = explode(',', $respon);
+
+			// isi ke q1..q10
+			for ($i=0; $i < 10; $i++) {
+				$row['q'.($i+1)] = isset($arrRespon[$i]) ? $arrRespon[$i] : null;
+			}
+
+			// kalau tidak mau simpan kolom respon asli
+			unset($row['respon']);
+		}
+
+		$config = [
+			'title' => 'export_kuisioner',
+			'data' => $data,
+			'header' => $arr,
+		];
+		$this->load->library('simpleexcel', $config);
+		$this->simpleexcel->export();
+	}
+
 }
