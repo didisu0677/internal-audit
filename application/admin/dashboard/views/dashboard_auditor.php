@@ -180,19 +180,12 @@
       </div>
     </div>
 
-    <!-- RISK PIE -->
     <div class="col-lg-3 col-md-6 mb-4">
       <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
         <div class="card-body text-center p-4">
-          <div class="mb-3">
-            <div class="bg-secondary rounded-circle d-inline-flex align-items-center justify-content-center"
-              style="width: 40px; height: 40px;">
-              <i class="fas fa-chart-pie text-white"></i>
-            </div>
-          </div>
-          <h6 class="font-weight-bold text-dark mb-4">RISK OVERVIEW</h6>
-          <div style="height: 200px;">
-            <canvas id="risk_pie"></canvas>
+          <!-- <h6 class="font-weight-bold text-dark mb-4">RISK OVERVIEW</h6> -->
+          <div style="height: 400px;">
+            <canvas id="question_bar"></canvas>
           </div>
         </div>
       </div>
@@ -842,7 +835,7 @@
       success: function (res) {
         const ctx = document.getElementById('question_gauge').getContext('2d');
 
-        let value = parseFloat(res);
+        let value = parseFloat(res.total_average) ;
         let max = 4.00;
 
         let gaugeColor;
@@ -908,6 +901,57 @@
               ctx.restore();
             }
           }]
+        });
+
+        const ctxBar = document.getElementById('question_bar').getContext('2d');
+        let labels = ["Hasil Audit", "Proses Audit", "Auditor"];
+        let values = [
+          parseFloat(res.hasil_audit),
+          parseFloat(res.proses_audit),
+          parseFloat(res.auditor)
+        ];
+
+        let colors = values.map(v => {
+          if (v < 2) return '#f44336';
+          else if (v < 3) return '#ff9800';
+          else return '#4caf50';
+        });
+
+        new Chart(ctxBar, {
+          type: 'bar',
+          data: {
+            labels: labels, 
+            datasets: [{
+              label: 'Rata-rata Skor',
+              data: values,
+              backgroundColor: colors,
+              borderRadius: 10,
+              barPercentage: 0.9,      // lebar bar lebih proporsional
+              categoryPercentage: 1.0  // jarak antar bar lebih lebar
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false, // isi penuh container
+            scales: {
+              y: {
+                beginAtZero: true,
+                ticks: { stepSize: 1, font: { size: 11 } },
+              },
+              x: {
+                ticks: { font: { size: 11 } }
+              }
+            },
+            plugins: {
+              legend: { display: false }
+            },
+            layout: {
+              padding: {
+                top: 5,
+                bottom: 0
+              }
+            }
+          }
         });
       }
     })

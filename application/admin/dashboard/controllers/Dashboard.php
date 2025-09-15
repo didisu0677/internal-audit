@@ -348,20 +348,20 @@ class Dashboard extends BE_Controller {
 		$department = [];		
 		foreach($dept as $row){
 			if($row['level3'] == '4') {  // CIBG
-				$row['section_name'] = 'CIBG '.$row['section_name'];
+				$row['section_name'] = $row['section_name'].' CIBG';
 			}elseif($row['level3'] == '5'){ //TMBG
-				$row['section_name'] = 'TMBG '.$row['section_name'];
+				$row['section_name'] = $row['section_name'].' TMBG';
 			}
 			
 			if($row['level2'] == '3'){
-				$row['section_name'] = 'Factory '.$row['section_name'];
+				$row['section_name'] = $row['section_name'].' Factory';
 			}
 			$department[] = $row;
 		}	
 		
 		$clean_data = [
 			'labels' => array_column($department, 'section_name'),
-			'dept' => $dept,
+			'dept' => $department,
 			'data' => $data,
 		];
 
@@ -410,16 +410,46 @@ class Dashboard extends BE_Controller {
 	function get_data_questioner_gauge(){
 		$question = get_data('tbl_kuisioner_respon', 'respon !=', null)->result_array();
 		
-		$total = 0;
-		$count = count($question);
+		$hasil_audit = 0;
+		$proses_audit = 0;
+		$auditor = 0;
+
+		$count_hasil = 0;
+		$count_proses = 0;
+		$count_auditor = 0;
 
 		foreach($question as $v){
-			$total += $v['nilai_akhir'];
+			$respon = json_decode($v['respon'], true); // hasilnya array
+
+			foreach ($respon as $idx => $val) {
+				if ($idx >= 0 && $idx <= 3) { // hasil audit
+					$hasil_audit += $val;
+					$count_hasil++;
+				} elseif ($idx >= 4 && $idx <= 5) { // proses audit
+					$proses_audit += $val;
+					$count_proses++;
+				} elseif ($idx >= 6 && $idx <= 9) { // auditor
+					$auditor += $val;
+					$count_auditor++;
+				}
+			}
 		}
 
-		$average = $count ? $total / $count : 0;
-		render($average, 'json');
+		// hitung rata-rata
+		$avg_hasil  = $count_hasil  ? $hasil_audit / $count_hasil : 0;
+		$avg_proses = $count_proses ? $proses_audit / $count_proses : 0;
+		$avg_auditor= $count_auditor? $auditor / $count_auditor : 0;
+
+		$data = [
+			'hasil_audit'  => round($avg_hasil,2),
+			'proses_audit' => round($avg_proses,2),
+			'auditor'      => round($avg_auditor,2)
+		];
+		$data['total_average'] = round(($avg_hasil + $avg_proses + $avg_auditor) / 3, 2);
+		
+		render($data, 'json');
 	}
+
 
 	function get_auditor_monitoring_capa(){
 		$year = post('year') ?: date('Y');
