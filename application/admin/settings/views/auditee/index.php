@@ -32,7 +32,8 @@ modal_open('modal-form','','modal-lg','data-openCallback="formOpen"');
 		form_open(base_url('settings/auditee/save'),'post','form');
 			col_init(3,9);
 			input('hidden','id','id');
-			input('text',lang('nip'),'nip');
+			input('hidden', 'nip', 'nip');
+			select2('User','id_user','required',get_active_user(),'id','kode - nama');
 			input('text',lang('email'),'email','email');
 			input('text',lang('nama'),'nama');
 			select2(lang('divisi'),'id_department1','required',$department,'section_code','department');
@@ -97,4 +98,38 @@ modal_close();
 		var response = response_edit;
 		$('#id_department1').val(response.section_code).trigger('change');
 	}
+
+	$(document).on('change', '#id_user', function() {
+		var userId = $(this).val();
+		if(userId) {
+			$.ajax({
+				url: base_url + 'settings/auditee/get_user_details',
+				type: 'POST',
+				data: { id: userId },
+				dataType: 'json',
+				success: function(response) {
+					console.log(response);
+					if(response) {
+						$('#nip').val(response.kode);
+						$('#email').val(response.email);
+						$('#nama').val(response.nama);
+					} else {
+						$('#nip').val('');
+						$('#email').val('');
+						$('#nama').val('');
+					}
+				},
+				error: function() {
+					$('#nip').val('');
+					$('#email').val('');
+					$('#nama').val('');
+				}
+			});
+		} else {
+			$('#email').val('');
+			$('#nama').val('');
+		}
+	});
+
+
 </script>

@@ -2272,3 +2272,8 @@ function get_active_auditee(){
     $data = get_data('tbl_auditee', 'is_active', 1)->result_array();
     return $data ?: [];
 }
+
+function get_active_user(){
+    $data = get_data('tbl_user', 'is_active', 1)->result_array();
+    return $data ?: [];
+}

@@ -200,4 +200,11 @@ class Auditee extends BE_Controller {
 		$this->simpleexcel->export();
 	}
 
+
+	function get_user_details(){
+		$id_user = post('id');
+		$user = get_data('tbl_user','id',$id_user)->row_array();
+		
+		render($user,'json');
+	}
 }
