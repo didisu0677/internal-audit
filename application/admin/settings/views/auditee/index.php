@@ -33,6 +33,7 @@ modal_open('modal-form','','modal-lg','data-openCallback="formOpen"');
 			col_init(3,9);
 			input('hidden','id','id');
 			input('hidden', 'nip', 'nip');
+			input('hidden', 'id_user', 'id_user');
 			select2('User','id_user','required',get_active_user(),'id','kode - nama');
 			input('text',lang('email'),'email','email');
 			input('text',lang('nama'),'nama');
@@ -108,18 +109,20 @@ modal_close();
 				data: { id: userId },
 				dataType: 'json',
 				success: function(response) {
-					console.log(response);
 					if(response) {
+						$('#id_user').val(response.id);
 						$('#nip').val(response.kode);
 						$('#email').val(response.email);
 						$('#nama').val(response.nama);
 					} else {
+						$('#id_user').val('');
 						$('#nip').val('');
 						$('#email').val('');
 						$('#nama').val('');
 					}
 				},
 				error: function() {
+					$('#id_user').val('');
 					$('#nip').val('');
 					$('#email').val('');
 					$('#nama').val('');
