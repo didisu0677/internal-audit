@@ -360,7 +360,7 @@ class Dashboard extends BE_Controller {
 		}	
 		
 		$clean_data = [
-			'labels' => array_column($department, 'section_name'),
+			// 'labels' => array_column($department, 'section_name'),
 			'dept' => $department,
 			'data' => $data,
 		];
@@ -387,20 +387,20 @@ class Dashboard extends BE_Controller {
 		$department = [];		
 		foreach($dept as $row){
 			if($row['level3'] == '4') {  // CIBG
-				$row['section_name'] = 'CIBG '.$row['section_name'];
+				$row['section_name'] = $row['section_name'].' CIBG';
 			}elseif($row['level3'] == '5'){ //TMBG
-				$row['section_name'] = 'TMBG '.$row['section_name'];
+				$row['section_name'] = $row['section_name'].' TMBG';
 			}
 			
 			if($row['level2'] == '3'){
-				$row['section_name'] = 'Factory '.$row['section_name'];
+				$row['section_name'] = $row['section_name'].' Factory';
 			}
 			$department[] = $row;
-		}
+		}	
 
 		$clean_data = [
-			'labels' => array_column($department, 'section_name'),
-			'dept' => $dept,
+			// 'labels' => array_column($department, 'section_name'),
+			'dept' => $department,
 			'data' => $data,
 		];
 
