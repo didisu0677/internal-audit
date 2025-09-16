@@ -8,55 +8,79 @@ class Kuisioner extends BE_Controller {
 
 	function index() {
 		$data = [];
-		$schedule = get_data('tbl_schedule_audit', [
-			'select' => 'id, nomor, deskripsi, concat(nomor, '.' " | " '.', deskripsi) as nomor_deskripsi',
+		$year = date('Y');
+		$years = [$year-1, $year];
+		
+		$kuisioner = get_data('tbl_kuisioner_respon',[
+			'select' => 'distinct periode_audit',
 		])->result_array();
 		
-		$tahun = [];
-		foreach($schedule as $val){
-			$periode = explode('/', $val['nomor']);
-			$tahun[] = end($periode);
-		}
+		// $schedule = get_data('tbl_schedule_audit', [
+		// 	'select' => 'id, nomor, deskripsi, concat(nomor, '.' " | " '.', deskripsi) as nomor_deskripsi',
+		// ])->result_array();
 		
-		rsort($tahun, SORT_NUMERIC); // sort descending 
-		$data['tahun'] = array_values(array_unique($tahun));
-		$data['data'] = $schedule;
+		// $tahun = [];
+		// foreach($schedule as $val){
+		// 	$periode = explode('/', $val['nomor']);
+		// 	$tahun[] = end($periode);
+		// }
+		
+		// rsort($tahun, SORT_NUMERIC); // sort descending 
+		$data['tahun'] = array_column($kuisioner, 'periode_audit');
+		$data['data'] = $years;
 		render($data);
 	}
 
 	function entry($id = null){
 		
 		$id = decode_id($id)[0];
-		$nomor = get_data('tbl_kuisioner_respon', 'id', $id)->row_array()['periode_audit'] ?? '';
-		// $nomor = base64_decode($token);
+
+		// $kuisioner = get_data('tbl_kuisioner_respon', 'id', $id)->row_array();
+		$kuisioner = get_data('tbl_auditee a', [
+			'select' => 'a.id as id_auditee, u.id as id_user, r.*',
+			'join' => [
+				'tbl_user u on a.nip = u.kode',
+				'tbl_kuisioner_respon r on a.id = r.id_auditee'
+			],
+			'where' => [
+				'r.id' => $id,
+				'a.id_user' => user('id')
+			]
+		])->row_array();
 		
-		// $data['data'] = get_data('tbl_finding_records fr',[
-		// 	'select' => 'a.nama, ad.section_name as department, fr.nama_auditor, fr.periode_audit',
-		// 	'join' => [
-		// 		'tbl_m_audit_section ad on fr.id_department_auditee = ad.id',
-		// 		'tbl_auditee a on fr.auditee = a.id',
-		// 		'tbl_user u on a.nip = u.kode'
-		// 	],
-		// 	'where' =>[
-		// 		'u.kode' => user('kode')
-		// 	],
-		// 	// 'group_by' => 'fr.periode_audit'
-		// ])->result_array();
-		$data['nomor'] = $nomor;
-		$data['question'] = get_data('tbl_m_kuisioner', 'is_active', '1')->result_array();
-		// debug($data);die;
+		$data = [
+			'nomor' => $kuisioner['periode_audit'] ?? '',
+			'question' => get_data('tbl_m_kuisioner', 'is_active', '1')->result_array(),
+			'status' => 'success',
+			'message' => ''
+		];
+
+		if(!empty($kuisioner) && $kuisioner['status'] == '1'){
+			$data['status'] = 'info';
+			$data['message'] = 'Anda sudah mengisi kuisioner ini.'; 
+			render($data);
+			return;
+		}
+
+		if(empty($kuisioner)){
+			$data['status'] = 'info';
+			$data['message'] = 'Anda tidak memiliki akses untuk mengisi kuisioner ini.'; 
+			render($data);
+			return;
+		}
+		
 		render($data);
 	}
 
 	function check_kuisioner(){
-		$user_nip = user('kode');
 		$data = get_data('tbl_kuisioner_respon r', [
 			'select' => 'r.*, a.nama',
 			'join' => [
-				'tbl_auditee a on r.id_auditee = a.id'
+				'tbl_auditee a on r.id_auditee = a.id',
+				'tbl_user u on a.id_user = u.id'
 			],
 			'where' => [
-				'a.nip' => $user_nip,
+				'u.id' => user('id'),
 				'r.status' => '0`'
 			]
 		])->result_array();
@@ -124,12 +148,18 @@ class Kuisioner extends BE_Controller {
 	}
 
 	function get_list_periode(){
-		$input = post();
-		$data = get_data('tbl_schedule_audit', [
+		$periode = post('tahun');
+		$data = get_data('tbl_kuisioner_respon r', [
+			'select' => 'u.kode, u.nama, r.*',
+			'join' => [
+				'tbl_auditee a on r.id_auditee = a.id',
+				'tbl_user u on a.id_user = u.id'
+			],
 			'where' => [
-				'__m' => 'nomor like "%'.$input['tahun'].'%"'
+				'r.periode_audit' => $periode
 			]
-		])->result_array();
+		])->result_array();	
+	
 		render($data, 'json');
 	}
 
@@ -176,8 +206,9 @@ class Kuisioner extends BE_Controller {
 
 		$resp = update_data('tbl_kuisioner_respon',$dataUpdate, [
 			'id_auditee' => $auditee['id'],
-			'periode_audit' => $data['nomor']
+			'periode_audit' => $data['nomor'] 
 		]);
+		
 		if($resp){
 			$response = [
 				'status' => 'success',

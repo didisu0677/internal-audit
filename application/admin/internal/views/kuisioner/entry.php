@@ -5,6 +5,7 @@
             <?php echo breadcrumb(); ?>
         </div>
         <div class="clearfix"></div>
+        <div id="kuisioner-data" data-status="<?=$status?>" data-message="<?=$message?>"></div>
     </div>
 </div>
 <div class="content-body m-3">
@@ -59,7 +60,22 @@
 </div>
 
 <script>
+    $(document).ready(function(){
+        let status = $('#kuisioner-data').data('status');
+        let message = $('#kuisioner-data').data('message');
+        
+        if(status !== 'success'){
+            cAlert.open(message, status);
+
+            //inject langsung ke tombol di cAlert
+            $(document).on('click', '.swal-button--confirm', function(){
+                window.location.href = base_url + "internal/kuisioner";
+            });
+        }
+    })
+
     function back_to_kuisioner(){
         location.href = base_url + 'internal/kuisioner';
     }
+    
 </script>

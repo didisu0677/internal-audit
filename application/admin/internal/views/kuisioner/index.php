@@ -40,29 +40,47 @@
 			<?php endif;?>
 		</div>
 		<hr>
-		<div class="row">
-			<div class="col-md-12">
-				<div class="d-flex justify-content-between align-items-center mb-2">
-					<h4 class="mb-0">Periode Audit</h4>
-					<select name="tahun" id="tahun" class="form-control select2" style="width: 10%;">
-						<?php 
-						$year = date('Y');
-						foreach($tahun as $v): ?>
-							<option value="<?=$v?>" <?= $v == $year ? 'selected' : ''?> ><?= $v?></option>
-						<?php endforeach;?>
-					</select>
+		<?php if(user('id_group') != USER_GROUP_USER):?>
+		<div class="row" id="list-periode-container">
+			<div class="col-12">
+				<div class="card shadow-sm">
+					<div class="card-header bg-light">
+						<div class="row align-items-center">
+							<div class="col-md-6">
+								<h5 class="mb-0">Status Kuisioner</h5>
+							</div>
+							<div class="col-md-3 offset-3">
+								<div class="form-group mb-0">
+									<label for="tahun" class="sr-only">Tahun</label>
+									<select name="tahun" id="tahun" class="form-control select2">
+										<?php 
+										$year = date('Y');
+										foreach($tahun as $v): ?>
+											<option value="<?=$v?>" <?= $v == $year ? 'selected' : ''?> ><?= $v?></option>
+										<?php endforeach;?>
+									</select>
+								</div>
+							</div>
+						</div>
+					</div>
+					<div class="card-body p-0">
+						<div class="list-group list-group-flush" id="list-periode">
+							<div class="list-group-item text-center text-muted py-4">
+								<i class="fas fa-spinner fa-spin mr-2"></i>Loading data...
+							</div>
+						</div>
+					</div>
 				</div>
-				<ul class="list-group" id="list-periode">
-				</ul>
 			</div>
 		</div>
+		<?php endif;?>
 	</div>
 </div>
 <?php
 	modal_open('mSendEmail', 'Send Email');
 		modal_body();
 				col_init(3, 9);
-				select2('Periode Audit', 'periode', 'required', $data, 'nomor', 'nomor_deskripsi');
+				select2('Periode Audit', 'periode', 'required', $data);
 				select2('Auditee', 'auditee[]', 'required', get_active_auditee(),'id', 'nama', '', 'multiple');
 				echo '
 					<div class="row">
@@ -93,52 +111,52 @@
 		$('#mSendEmail').modal('show');
 	});
 
-	$(document).on('click', '.btn-modal', function(){
-		let data_id = $(this).data('id');
-		$('#no').html('');
-		$('#deskripsi').html('');
-		$.ajax({
-			url: base_url + 'internal/kuisioner/get_detail_periode_audit',
-			type: 'post',
-			data:{id:data_id},
-			success: function(res){
-				let data = res.data;
-				let responden = res.responden;
-				let html = `
-						<tr>
-							<td class="font-weight-bold">Nomor</td>
-							<td>${data.nomor}</td>
-						</tr>
-						<tr>
-							<td class="font-weight-bold">Deskripsi</td>
-							<td>${data.deskripsi}</td>
-						</tr>
-						<tr>
-							<td class="font-weight-bold">Responden</td>
-						</tr>`;
-						let statusClass = '';
-						let statusValue = '';
-						$.each(responden, function(i, v){
-							if(v.status == '0'){
-								statusClass = "bg-warning";
-								statusValue = "Belum Mengisi";
-							}else{
-								statusClass = "bg-success";
-								statusValue = "Sudah Mengisi";
-							}
-							html += `
-							<tr>
-								<td>${v.nama} </td>
-								<td class="${statusClass}">${statusValue}</td>
-							</tr>`
-						})
-					$('#tbl-detail tbody').html(html);
+	// $(document).on('click', '.btn-modal', function(){
+	// 	let data_id = $(this).data('id');
+	// 	$('#no').html('');
+	// 	$('#deskripsi').html('');
+	// 	$.ajax({
+	// 		url: base_url + 'internal/kuisioner/get_detail_periode_audit',
+	// 		type: 'post',
+	// 		data:{id:data_id},
+	// 		success: function(res){
+	// 			let data = res.data;
+	// 			let responden = res.responden;
+	// 			let html = `
+	// 					<tr>
+	// 						<td class="font-weight-bold">Nomor</td>
+	// 						<td>${data.nomor}</td>
+	// 					</tr>
+	// 					<tr>
+	// 						<td class="font-weight-bold">Deskripsi</td>
+	// 						<td>${data.deskripsi}</td>
+	// 					</tr>
+	// 					<tr>
+	// 						<td class="font-weight-bold">Responden</td>
+	// 					</tr>`;
+	// 					let statusClass = '';
+	// 					let statusValue = '';
+	// 					$.each(responden, function(i, v){
+	// 						if(v.status == '0'){
+	// 							statusClass = "bg-warning";
+	// 							statusValue = "Belum Mengisi";
+	// 						}else{
+	// 							statusClass = "bg-success";
+	// 							statusValue = "Sudah Mengisi";
+	// 						}
+	// 						html += `
+	// 						<tr>
+	// 							<td>${v.nama} </td>
+	// 							<td class="${statusClass}">${statusValue}</td>
+	// 						</tr>`
+	// 					})
+	// 				$('#tbl-detail tbody').html(html);
 
-					$('#mDetail').modal('show');
-			}
-		})
+	// 				$('#mDetail').modal('show');
+	// 		}
+	// 	})
 		
-	})
+	// })
 
 	$(document).on('change', '#tahun', function(){
 		get_list_periode();
@@ -153,8 +171,8 @@
 				if(res.length == 0){
 					cAlert.open('Tidak ada kuisioner yang perlu anda isi!', 'info');
 				}else{
-					let nomor = res[0].periode_audit;
-					let token = btoa(nomor);
+					let id = res[0].id;
+					let token = encodeId(id);
 					location.href = base_url + 'internal/kuisioner/entry/'+token;
 				}
 			}
@@ -197,15 +215,45 @@
 			type: 'post',
 			data: {tahun:tahun},
 			success: function(res){
+				console.log(res);
 				let html = '';
-				$.each(res, function(i, v){
-					html += `
-						<button type="button" class="list-group-item list-group-item-action btn-modal" data-id="${v.id}" >
-							${v.nomor} | ${v.deskripsi}
-						</button>`;
-					
-					$('#list-periode').html(html);	
-				})
+				
+				if(res.length === 0) {
+					html = `
+						<div class="list-group-item text-center text-muted py-4">
+							<i class="fas fa-info-circle mr-2"></i>Tidak ada data periode untuk tahun ${tahun}
+						</div>`;
+				} else {
+					$.each(res, function(i, v){
+						let statusClass = '';
+						let statusText = '';
+						let statusIcon = '';
+						
+						if(v.status == '0'){
+							statusClass = 'badge-warning';
+							statusText = 'Belum Mengisi';
+							statusIcon = 'fas fa-clock';
+						} else {
+							statusClass = 'badge-success';
+							statusText = 'Sudah Mengisi';
+							statusIcon = 'fas fa-check-circle';
+						}
+
+						html += `
+							<div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" data-id="${v.id}">
+								<div class="d-flex align-items-center">
+									<i class="${statusIcon} mr-3 text-muted"></i>
+									<div>
+										<h6 class="mb-1">${v.nama}</h6>
+										<p class="mb-0 text-muted small">${v.kode}</p>
+										<span class="badge ${statusClass}">${statusText}</span>
+									</div>
+								</div>
+							</div>`;
+					});
+				}
+				
+				$('#list-periode').html(html);	
 			}
 		})
 	}
