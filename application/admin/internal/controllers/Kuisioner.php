@@ -163,7 +163,7 @@ class Kuisioner extends BE_Controller {
 		$auditee = get_data('tbl_auditee', 'nip', user('kode'))->row_array();
 		$respon = [];
 		for($i=1;$i<=10;$i++){
-			$respon[] = $data['question'.$i];
+			$respon[] = (int) $data['question'.$i];
 		}
 		$ratarata = floatval(array_sum($respon) / count($respon));
 		$dataUpdate = [
@@ -173,7 +173,7 @@ class Kuisioner extends BE_Controller {
 			'status' => '1',
 			'submitted_at' => date('Y-m-d H:i:s')
 		];
-		
+
 		$resp = update_data('tbl_kuisioner_respon',$dataUpdate, [
 			'id_auditee' => $auditee['id'],
 			'periode_audit' => $data['nomor']
