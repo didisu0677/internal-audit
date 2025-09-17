@@ -148,7 +148,7 @@ function getData(){
             dataSrc: 'data' // sesuai key dari PHP render(['data'=>...])
         },
         columns: [
-            { data: 'location' },
+            { data: 'location', width: '1%' },
             { data: 'divisi' },
             { data: 'department' },
             { data: 'section' },
@@ -157,7 +157,7 @@ function getData(){
 			{ data: 'risk' },
 			{ data: 'internal_control' },
 			{ data: 'keterangan' },
-            { data: 'aksi' }
+            { data: 'aksi', width: '5%'}
         ]
     });
 }
@@ -255,6 +255,7 @@ $(document).on('keyup','.score_dampak',function(){
 	const dampak = $('#score_dampak'+(index1-1)).val();
 	const kemungkinan = $('#score_kemungkinan'+(index1-1)).val();
 	const score = getScore(dampak, kemungkinan);
+	console.log(score);
 	$('#bobot_risk'+(index1-1)).val(score).trigger('change');
 });
 
@@ -262,6 +263,7 @@ $(document).on('keyup','.score_kemungkinan',function(){
 	const dampak = $('#score_dampak'+(index1-1)).val();
 	const kemungkinan = $('#score_kemungkinan'+(index1-1)).val();
 	const score = getScore(dampak, kemungkinan);
+	console.log(score);
 	$('#bobot_risk'+(index1-1)).val(score).trigger('change');
 });
 
@@ -315,42 +317,42 @@ function get_bobot() {
 }
 
 const scoreMatrix = {
-  "6,6": "Critical",
-  "6,5": "Critical",
-  "6,4": "Major",
-  "6,3": "Major",
-  "6,2": "Moderate",
-  "6,1": "Moderate",
-  "5,6": "Critical",
-  "5,5": "Major",
-  "5,4": "Major",
-  "5,3": "Moderate",
-  "5,2": "Moderate",
-  "5,1": "Minor",
-  "4,6": "Major",
-  "4,5": "Major",
-  "4,4": "Moderate",
-  "4,3": "Moderate",
-  "4,2": "Moderate",
-  "4,1": "Minor",
-  "3,6": "Major",
-  "3,5": "Moderate",
-  "3,4": "Moderate",
-  "3,3": "Moderate",
-  "3,2": "Minor",
-  "3,1": "Minor",
-  "2,6": "Moderate",
-  "2,5": "Moderate",
-  "2,4": "Moderate",
-  "2,3": "Minor",
-  "2,2": "Minor",
-  "2,1": "Minor",
-  "1,6": "Minor",
-  "1,5": "Minor",
-  "1,4": "Minor",
-  "1,3": "Minor",
-  "1,2": "Minor",
-  "1,1": "Minor",
+  "6,6": "4",
+  "6,5": "4",
+  "6,4": "3",
+  "6,3": "3",
+  "6,2": "2",
+  "6,1": "2",
+  "5,6": "4",
+  "5,5": "3",
+  "5,4": "3",
+  "5,3": "2",
+  "5,2": "2",
+  "5,1": "1",
+  "4,6": "3",
+  "4,5": "3",
+  "4,4": "2",
+  "4,3": "2",
+  "4,2": "2",
+  "4,1": "1",
+  "3,6": "3",
+  "3,5": "2",
+  "3,4": "2",
+  "3,3": "2",
+  "3,2": "1",
+  "3,1": "1",
+  "2,6": "2",
+  "2,5": "2",
+  "2,4": "2",
+  "2,3": "1",
+  "2,2": "1",
+  "2,1": "1",
+  "1,6": "1",
+  "1,5": "1",
+  "1,4": "1",
+  "1,3": "1",
+  "1,2": "1",
+  "1,1": "1",
 };
 
 function getScore(dampak, kemungkinan) {
