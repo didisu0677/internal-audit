@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="https://cdn.datatables.net/2.3.3/css/dataTables.dataTables.css">
+
 <div class="content-header">
 	<div class="main-container position-relative">
 		<div class="header-info">
@@ -11,24 +13,32 @@
 	</div>
 </div>
 <div class="content-body">
-	<?php
-	table_open('',true,base_url('risk_management/control_register/data'),'tbl_internal_control');
-		thead();
-			tr();
-				th('checkbox','text-center','width="30" data-content="id"');
-				th(lang('aktivitas'),'','data-content="aktivitas" data-table="tbl_aktivitas"');
-				th(lang('audit_area'),'','data-content="sub_aktivitas" data-table="tbl_sub_aktivitas"');
-				th(lang('internal_control'),'','data-content="internal_control" data-table="tbl_m_internal_control"');
-				th(lang('location_control'),'','data-content="location_control"');
-				th(lang('no_pnp'),'','data-content="no_pnp"');
-				th(lang('jenis_pnp'),'','data-content="jenis_pnp"');
-				th(lang('penerbit_pnp'),'','data-content="penerbit_pnp"');
-				th(lang('tanggal_pnp'),'','data-content="tanggal_pnp"');
-				th(lang('aktif').'?','text-center','data-content="is_active" data-type="boolean"');
-				th('&nbsp;','','width="30" data-content="action_button"');
-	table_close();
-	?>
+  <div class="row">
+    <div class="col-md-12 mt-3 px-5">
+      <div class="table-responsive">
+        <table id="table-data" class="table table-sm table-hover table-striped table-bordered align-middle">
+          <thead class="">
+            <tr>
+              <th><?= lang('aktivitas'); ?></th>
+              <th><?= lang('audit_area'); ?></th>
+              <th><?= lang('internal_control')?></th>
+              <th><?= lang('location_control')?></th>
+              <th><?= lang('no_pnp')?></th>
+              <th><?= lang('jenis_pnp')?></th>
+              <th><?= lang('penerbit_pnp')?></th>
+              <th><?= lang('tanggal_pnp')?></th>
+              <th><?= lang('aksi')?></th>
+            </tr>
+          </thead>
+          <tbody>
+            <!-- DataTables akan isi otomatis -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
+
 <?php 
 modal_open('modal-form','','modal-xl','data-openCallback="formOpen"');
 	modal_body();
@@ -42,7 +52,7 @@ modal_open('modal-form','','modal-xl','data-openCallback="formOpen"');
 				<div class="col-sm-9">
 					<div class="input-group">
 						<input type="hidden" name="id_aktivitas" id="id_aktivitas">
-						<input type="text" id="aktivitas_id_data" name="aktivitas_id_data" class="form-control" autocomplete="off" data-validation="required">
+						<input type="text" id="aktivitas_id_data" name="aktivitas_id_data" class="form-control">
 						<div class="input-group-append">
 							<button type="button" class="btn btn-success btn-icon-only" id="browse-req"><i class="fa-list"></i></button>
 						</div>
@@ -54,7 +64,7 @@ modal_open('modal-form','','modal-xl','data-openCallback="formOpen"');
 				<div class="col-sm-9">
 					<div class="input-group">
 						<input type="hidden" name="id_audit_area" id="id_audit_area">
-						<input type="text" id="audit_area" name="audit_area" class="form-control" autocomplete="off" data-validation="required">
+						<input type="text" id="audit_area" name="audit_area" class="form-control">
 						<div class="input-group-append">
 							<button type="button" class="btn btn-success btn-icon-only" id="browse-sub"><i class="fa-list"></i></button>
 						</div>
@@ -103,18 +113,22 @@ modal_open('modal-import',lang('impor'));
 		form_close();
 modal_close();
 ?>
+<script src="https://cdn.datatables.net/2.3.3/js/dataTables.js"> </script>
 
 <script>
 	var index1 = 0;
 	$(document).ready(function() {
 		var index1 = 0;
     	$('#form')[0].reset();
+	    $('#table-data').DataTable().ajax.reload();
+
 	});
 
 	function formOpen() {
 		$('#aktivitas_id_data').val('');
 		$('#id_aktivitas').val(0);
 		$('#aktivitas_id_data').prop('readonly', false);
+		$('#audit_area').prop('readonly', false);
 		is_edit = true;
 		var index1 = 0;
 		var response = response_edit;
@@ -143,6 +157,70 @@ modal_close();
 	$(document).on('click','.btn-add-controlitem',function(){
 		add_itemcontrol();
 	});
+
+	$('#table-data').DataTable({
+		processing: true,
+    	serverSide: false,
+		autoWidth: false,
+		ajax: {
+			url: base_url + 'risk_management/control_register/data',
+			type: 'POST',
+			data: function (d) {
+				d.year = $('#year').val();
+		},
+			dataSrc: ''
+		},
+		columns: [
+			{ data: 'aktivitas', width: '10%' },
+			{ data: 'audit_area', width: '10%', className: 'text-nowrap' },
+			{ data: 'internal_control', width: '20%' },
+			{ data: 'location_control', width: '10%' },
+			{ data: 'no_pnp', width: '5%' },
+			{ data: 'jenis_pnp', width: '5%' },
+			{ data: 'penerbit_pnp', width: '5%' },
+			{ data: 'tanggal_pnp', width: '5%' },
+			{ data: 'id', 
+				render: function(data,type,row) {
+					return `<button type="button" id="btn-edit" class="btn btn-sm btn-warning btn-icon-only" data-id="${data}"><i class="fa-pencil"></i></button>
+							<button type="button" id="btn-delete" class="btn btn-sm btn-danger btn-icon-only" data-id="${data}"><i class="fa-trash"></i></button>
+					`;
+				}, width: '1%', className: 'text-nowrap'
+			}
+		]
+	})
+
+	$(document).on('click','#btn-edit',function(){
+		let id = $(this).data('id');
+		$.ajax({
+			url: base_url + 'risk_management/control_register/get_data',
+			type: 'post',
+			data: {id:id},
+			success: function(res){
+				response_edit = res;
+				formOpen();
+				$('#modal-form').modal('show');
+			}
+		})
+	});
+	
+	let deleteId = null; 
+	$(document).on('click','#btn-delete',function(){
+		let id = $(this).data('id');
+		deleteId = id;
+		cConfirm.open('Are you sure ?', 'delete_data');
+	});
+
+	function delete_data() {
+		$.ajax({
+			url: base_url + 'risk_management/control_register/delete',
+			type: 'post',
+			data: { id: deleteId },
+			success: function (res) {
+				cAlert.open(res.message, res.status);
+				$('#table-data').DataTable().ajax.reload();
+			}
+		});
+	}
 
 	function add_itemcontrol() {
 		var konten = '<tr>'

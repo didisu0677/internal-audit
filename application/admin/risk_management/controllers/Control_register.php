@@ -11,12 +11,21 @@ class Control_register extends BE_Controller {
 	}
 
 	function data() {
-		$conf = [
+		// $conf = [
+		// 	'join' => [
+		// 		'tbl_m_internal_control b on tbl_internal_control.id_internal_control = b.id type LEFT',
+		// 	]
+		// 	];
+		// $data = data_serverside($conf);
+		$data = get_data('tbl_internal_control a',[
+			'select' => 'a.id, c.aktivitas, d.sub_aktivitas as audit_area, b.internal_control, b.location_control, b.no_pnp, b.jenis_pnp, b.penerbit_pnp, b.tanggal_pnp',
 			'join' => [
-				'tbl_m_internal_control b on tbl_internal_control.id_internal_control = b.id type LEFT',
-			]
-			];
-		$data = data_serverside($conf);
+				'tbl_m_internal_control b on a.id_internal_control = b.id',
+				'tbl_aktivitas c on a.id_aktivitas = c.id',
+				'tbl_sub_aktivitas d on a.id_sub_aktivitas = d.id',
+			],
+			'order_by' => 'c.aktivitas,d.sub_aktivitas',
+			])->result_array();
 		render($data,'json');
 	}
 
@@ -146,9 +155,9 @@ class Control_register extends BE_Controller {
 	}
 
 	function delete() {
-
+		
 		$cek = get_data('tbl_internal_control','id',post('id'))->row();
-
+		
 		$response = destroy_data('tbl_internal_control',['id_aktivitas'=>$cek->id_aktivitas,'id_sub_aktivitas'=>$cek->id_sub_aktivitas]);
 
 
