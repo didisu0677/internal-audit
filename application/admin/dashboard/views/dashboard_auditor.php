@@ -259,14 +259,14 @@
 <script>
 
   const COLOR_MAP = [
-    '#4CAF50', // Implementasi tidak sesuai 
-    '#F9A825', // Design kurang efektif 
-    '#E53935', // Design tidak ditemukan 
-    '#1976D2', // Improvement
-    '#D32F2F', // Critical 
-    '#F57C00', // Major
-    '#FBC02D', // Moderate
-    '#388E3C', // Minor
+    '#6EF3F2', // Implementasi tidak sesuai 
+    '#40BCD8', // Design kurang efektif 
+    '#2A80B9', // Design tidak ditemukan 
+    '#6B5C99', // Improvement
+    '#7B6EA8', // Critical 
+    '#5B8CCB', // Major
+    '#6ECFF6', // Moderate
+    '#6EF3F2', // Minor
   ];
   let findingControlPie = null;
   let findingControlBar = null;
@@ -924,7 +924,7 @@
             datasets: [{
               label: 'Rata-rata Skor',
               data: values,
-              backgroundColor: colors,
+              backgroundColor: '#6EF3F2',
               borderRadius: 10,
               barPercentage: 0.9,      // lebar bar lebih proporsional
               categoryPercentage: 1.0  // jarak antar bar lebih lebar
