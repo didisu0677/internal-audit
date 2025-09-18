@@ -41,7 +41,7 @@ class Tools extends BE_Controller
     function generate_mytask()
     {
         $kuisioner = get_data('tbl_kuisioner_respon r', [
-            'select' => 'r.*, u.*',
+            'select' => 'r.*, u.id as id_user, u.*',
             'join' => [
                 'tbl_auditee a on r.id_auditee = a.id',
                 'tbl_user u on a.nip = u.kode'
@@ -191,13 +191,42 @@ class Tools extends BE_Controller
     }
 }
 
-function get_auditee_id_by_email($email)
-{
-    $user = get_data('tbl_user', 'email', $email)->row_array();
-    if ($user) {
-        $auditee = get_data('tbl_auditee', 'id_user', $user['id'])->row_array();
-        return $auditee['id'] ?? 0;
+    function get_auditee_id_by_email($email){
+        $user = get_data('tbl_user', 'email', $email)->row_array();
+        if ($user) {
+            $auditee = get_data('tbl_auditee', 'id_user', $user['id'])->row_array();
+            return $auditee['id'] ?? 0;
+        }
+        return 0;
     }
-    return 0;
-}
+
+    function generate_risk_control_to_detail(){
+        $data = get_data('tbl_risk_control')->result_array();
+        foreach($data as $v){
+            $id_risks = json_decode($v['id_risk'], true);
+            foreach($id_risks as $id_risk){
+                $risk = get_data('tbl_risk_register', 'id', $id_risk)->row_array();
+                $cek = get_data('tbl_risk_control_detail', [
+                    'where' => [
+                        'id_risk_control' => $v['id'],
+                        'id_risk' => $id_risk,
+                    ]
+                ])->row_array();
+                $insert = [
+                    'id' => $cek['id'] ?? 0,
+                    'id_risk_control' => $v['id'],
+                    'id_risk' => $id_risk,
+                    'score_dampak' => $risk['score_dampak'] ?? 0,
+                    'score_kemungkinan' => $risk['score_kemungkinan'] ?? 0,
+                    'bobot' => $risk['bobot'] ?? 0,
+                ];
+                $res = save_data('tbl_risk_control_detail', $insert);
+                if($res) {
+                    echo "Detail risk control untuk risk ID ".$id_risk." berhasil disimpan.<br>";
+                } else {
+                    echo "Detail risk control untuk risk ID ".$id_risk." gagal disimpan.<br>";  
+                }   
+            }
+        }
+    }
 }
