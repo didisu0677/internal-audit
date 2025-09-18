@@ -63,97 +63,89 @@ class Rcm extends BE_Controller {
 	// }
 
 	function data() {
-		$risk_list = [];
-		$control_list = [];
-		$keterangan = [];
+	$risk_list = [];
+	$control_list = [];
+	$keterangan = [];
 
-		$grup = get_data('tbl_rcm a', [
-			'select' => '
-				a.*,
-				b2.section_name as location,
-				b3.section_name as divisi,
-				b4.section_name as department,
-				b5.section_name as section,
-				c.id_aktivitas, c.sub_aktivitas,
-				e.aktivitas,
-			',
+	$grup = get_data('tbl_rcm a', [
+		'select' => '
+			a.*,
+			b2.section_name as location,
+			b3.section_name as divisi,
+			b4.section_name as department,
+			b5.section_name as section,
+			c.id_aktivitas, c.sub_aktivitas,
+			e.aktivitas
+		',
+		'join' => [
+			'tbl_m_audit_section b on a.id_section = b.id type LEFT',
+			'tbl_m_audit_section b1 on b.level1 = b1.id type LEFT',
+			'tbl_m_audit_section b2 on b.level2 = b2.id type LEFT',
+			'tbl_m_audit_section b3 on b.level3 = b3.id type LEFT',
+			'tbl_m_audit_section b4 on b.level4 = b4.id type LEFT',
+			'tbl_m_audit_section b5 on b.level5 = b5.id type LEFT',
+			'tbl_sub_aktivitas c on a.id_sub_aktivitas = c.id type LEFT',
+			'tbl_aktivitas e on c.id_aktivitas = e.id type LEFT',
+			'tbl_risk_control d on a.id_risk_control = d.id type LEFT',
+		],
+		'order_by' => 'b4.urutan, department, e.aktivitas, c.sub_aktivitas',
+	])->result_array();
+	
+	foreach($grup as $val){
+		// ambil id_risk dari detail
+		$risk_control = get_data('tbl_risk_control a', [
+			'select' => 'b.*, concat(c.risk," - ", d.bobot) as risk , c.keterangan',
 			'join' => [
-				'tbl_m_audit_section b on a.id_section = b.id type LEFT',
-				'tbl_m_audit_section b1 on b.level1 = b1.id type LEFT',
-				'tbl_m_audit_section b2 on b.level2 = b2.id type LEFT',
-				'tbl_m_audit_section b3 on b.level3 = b3.id type LEFT',
-				'tbl_m_audit_section b4 on b.level4 = b4.id type LEFT',
-				'tbl_m_audit_section b5 on b.level5 = b5.id type LEFT',
-				'tbl_sub_aktivitas c on a.id_sub_aktivitas = c.id type LEFT',
-				'tbl_aktivitas e on c.id_aktivitas = e.id type LEFT',
-				'tbl_risk_control d on a.id_risk_control = d.id type LEFT',
-			],
-			'order_by' => 'b4.urutan, department, e.aktivitas, c.sub_aktivitas',
+				'tbl_risk_control_detail b on a.id = b.id_risk_control',
+				'tbl_risk_register c on b.id_risk = c.id',
+				'tbl_bobot_status_audit d on b.bobot = d.id',
+			],	
+			'where' => [
+				'a.id' => $val['id_risk_control']
+			]
+		])->result_array();
+		
+		foreach($risk_control as $r) {
+			$risk_list[$val['id_risk_control']][] = $r['risk'];
+			$keterangan[$val['id_risk_control']][] = $r['keterangan'];
+		}
+
+		// ambil internal control
+		$control = get_data('tbl_internal_control a', [
+			'select' => 'a.id_internal_control as id,b.internal_control',
+			'join' => 'tbl_m_internal_control b on a.id_internal_control = b.id',
+			'where' => [
+				'a.is_active' => 1,
+				'a.id_aktivitas' => $val['id_aktivitas'],
+				'a.id_sub_aktivitas' => $val['id_sub_aktivitas'],
+			]
 		])->result_array();
 
-		foreach($grup as $val){
-			$risk_control = get_data('tbl_risk_control','id', $val['id_risk_control'])->row_array();
-			$id_risk = [];
-			if (isset($risk_control['id_risk']) && $risk_control['id_risk']) {
-				$id_risk = json_decode($risk_control['id_risk'], true);
-			}
-			if (!is_array($id_risk)) {
-				$id_risk = $id_risk ? [$id_risk] : [];
-			}
-
-			$risk = [];
-			if (!empty($id_risk)) {
-				$risk = get_data('tbl_risk_register a', [
-					'select' => 'concat(a.risk," - ", b.bobot) as risk, a.keterangan',
-					'join' => [
-						'tbl_bobot_status_audit b on a.bobot = b.id'
-					],
-					'where' => [
-						'a.id' => $id_risk
-					],
-				])->result_array();
-			}
-
-			foreach($risk as $r) {
-				if (!isset($risk_list[$val['id_risk_control']])) $risk_list[$val['id_risk_control']] = [];
-				if (!isset($keterangan[$val['id_risk_control']])) $keterangan[$val['id_risk_control']] = [];
-				$risk_list[$val['id_risk_control']][] = $r['risk'];
-				$keterangan[$val['id_risk_control']][] = $r['keterangan'];
-			}
-
-			$control = get_data('tbl_internal_control a', [
-				'select' => 'a.id_internal_control as id,b.internal_control',
-				'join' => 'tbl_m_internal_control b on a.id_internal_control = b.id',
-				'where' => [
-					'a.is_active' => 1,
-					'a.id_aktivitas' => $val['id_aktivitas'],
-					'a.id_sub_aktivitas' => $val['id_sub_aktivitas'],
-				]
-			])->result_array();
-
-			foreach($control as $v1) {
-				if (!isset($control_list[$val['id']])) $control_list[$val['id']] = [];
-				$control_list[$val['id']][] = $v1['internal_control'];
-			}
+		foreach($control as $v1) {
+			$control_list[$val['id']][] = $v1['internal_control'];
 		}
-
-		$rows = [];
-		foreach($grup as $m0) {
-			$rows[] = [
-				'location'       => $m0['location'],
-				'divisi'         => $m0['divisi'],
-				'department'     => $m0['department'],
-				'section'        => $m0['section'],
-				'aktivitas'      => $m0['aktivitas'],
-				'sub_aktivitas'  => $m0['sub_aktivitas'],
-				'risk'           => isset($risk_list[$m0['id_risk_control']]) ? $this->bg_array($risk_list[$m0['id_risk_control']]) : '',
-				'internal_control' => isset($control_list[$m0['id']]) ? $this->bg_array($control_list[$m0['id']]) : '',
-				'keterangan'     => isset($keterangan[$m0['id_risk_control']]) ? $this->bg_array($keterangan[$m0['id_risk_control']]) : '',
-				'aksi'           => '<button class="btn btn-warning btn-sm btn-input btn-icon-only" data-key="edit" data-id="'.$m0['id'].'"><i class="fa-edit"></i> </button><button class="btn btn-danger btn-sm btn-delete btn-icon-only" data-key="delete" data-id="'.$m0['id'].'"><i class="fa-trash-alt"></i> </button>'
-			];
-		}
-		render(['data' => $rows],'json');
 	}
+
+	$rows = [];
+	foreach($grup as $m0) {
+		$rows[] = [
+			'location'        => $m0['location'],
+			'divisi'          => $m0['divisi'],
+			'department'      => $m0['department'],
+			'section'         => $m0['section'],
+			'aktivitas'       => $m0['aktivitas'],
+			'sub_aktivitas'   => $m0['sub_aktivitas'],
+			'risk'            => isset($risk_list[$m0['id_risk_control']]) ? $this->bg_array($risk_list[$m0['id_risk_control']]) : '',
+			'internal_control'=> isset($control_list[$m0['id']]) ? $this->bg_array($control_list[$m0['id']]) : '',
+			'keterangan'      => isset($keterangan[$m0['id_risk_control']]) ? $this->bg_array($keterangan[$m0['id_risk_control']]) : '',
+			'aksi'            => '<button class="btn btn-warning btn-sm btn-input btn-icon-only" data-key="edit" data-id="'.$m0['id'].'"><i class="fa-edit"></i></button>
+			                       <button class="btn btn-danger btn-sm btn-delete btn-icon-only" data-key="delete" data-id="'.$m0['id'].'"><i class="fa-trash-alt"></i></button>'
+		];
+	}
+
+	render(['data' => $rows],'json');
+}
+
 
 	function bg_array($arr){
 		$html = [];
@@ -258,6 +250,7 @@ class Rcm extends BE_Controller {
 				'is_active'=>1
 			];
 			$risk = save_data('tbl_risk_register', $data_r);
+
 			$id_risk1[] = $risk['id'];
 		}
 		
@@ -271,7 +264,26 @@ class Rcm extends BE_Controller {
 		];
 		
 		$id_risk_control = save_data('tbl_risk_control',$data_rk);
-		
+
+		// untuk risk control detail
+		foreach($id_risk1 as $i => $val){
+			$cek = get_data('tbl_risk_control_detail', [
+				'where' => [
+					'id_risk_control' => $id_risk_control['id'],
+					'id_risk' => $val,
+				]
+			])->row_array();
+			$data_detail = [
+				'id' => $cek['id'] ?? 0,
+				'id_risk_control' => $id_risk_control['id'],
+				'id_risk' => $val,
+				'score_dampak' => $score_dampak[$i],
+				'score_kemungkinan' => $score_kemungkinan[$i],
+				'bobot' => $bobot_risk[$i],
+			];
+			save_data('tbl_risk_control_detail', $data_detail);
+		}
+
 		// Ambil data RCM lama untuk update / hapus
 		$existing_rcms = get_data('tbl_rcm', [
 			'where' => ['id_risk_control' => $id_risk_control['id']]
