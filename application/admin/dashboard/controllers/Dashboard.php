@@ -302,11 +302,11 @@ class Dashboard extends BE_Controller {
 			'where' => [
 				'u.id' => user('id')
 			]
-		])->row_array()['id_department'];
+		])->row_array()['id_department'] ?? [];
 		// $auditee_section = $auditee_section ? json_decode($auditee_section['id_section']) : [];
 
 		$data = get_data('tbl_finding_records fr', [
-			'select' => 'fr.site_auditee, s.section_name as dept, a.aktivitas, fr.finding, fr.status_finding, sc.status as status_capa, c.dateline_capa as deadline_capa',
+			'select' => 'DISTINCT dept.section_name AS dept_name, fr.site_auditee, s.section_name as dept, a.aktivitas, fr.finding, fr.status_finding, sc.status as status_capa, c.dateline_capa as deadline_capa',
 			'join' => [
 				'tbl_capa c on fr.id = c.id_finding type left',
 				'tbl_m_audit_section s on fr.id_department_auditee = s.id',
