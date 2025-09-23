@@ -4395,4 +4395,8 @@ table.table-hover tbody tr.hover .text-danger {
 }
 
 
+.modal-fullscreen {
+	max-width: 100% !important;
+	width: 100% im !important;
+}
 

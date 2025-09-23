@@ -2277,3 +2277,20 @@ function get_active_user(){
     $data = get_data('tbl_user', 'is_active', 1)->result_array();
     return $data ?: [];
 }
+
+function get_detail_all_audit_universe(){
+    $data = get_data('tbl_audit_universe au', [
+        'select' => 'au.id, concat(a.aktivitas, " - " ,sa.sub_aktivitas, " - ", rr.risk, " - ", bsa.bobot) as val',
+        'join' => [
+            'tbl_rcm rcm on au.id_rcm = rcm.id',
+            'tbl_m_audit_section mas on rcm.id_section = mas.id',
+            'tbl_sub_aktivitas sa on rcm.id_sub_aktivitas = sa.id',
+            'tbl_aktivitas a on sa.id_aktivitas = a.id',
+            'tbl_risk_control rc on rcm.id_risk_control = rc.id',
+            'tbl_risk_control_detail rcd on rc.id = rcd.id_risk_control',
+            'tbl_bobot_status_audit bsa on rcd.bobot = bsa.id',
+            'tbl_risk_register rr on rcd.id_risk = rr.id'
+        ]
+    ])->result_array();
+    return $data ?: [];
+}
