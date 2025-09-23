@@ -195,7 +195,7 @@
 													<input type='text' class='form-control form-control-sm' name='activity_name[]' placeholder='Activity Name' required>
 												</div>
 												<div class='col-4'>
-													<input type='number' class='form-control form-control-sm duration-input' name='duration[]' placeholder='Duration (Days)' min='1' required>
+													<input type='number' class='form-control form-control-sm duration-input' name='duration[]' placeholder='Duration (Days)' min='0' required>
 												</div>
 												<div class='col-1'>
 													<button type='button' class='btn btn-sm btn-icon-only btn-outline-danger remove-activity' style='display:none;'>
