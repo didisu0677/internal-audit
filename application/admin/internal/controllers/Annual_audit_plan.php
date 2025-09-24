@@ -7,6 +7,19 @@ class Annual_audit_plan extends BE_Controller {
 	}
 
 	function index() {
+		$activity = [
+			'SPA, STA',
+			'Pemahaman Bisnis Proses (Incl. Interview)',
+			'Kick off Meeting',
+			'Permintaan & Pengumpulan Data',
+			'On-desk & on-site Audit (Incl. Interview)',
+			'Analisa Data & Perumusan Temuan',
+			'Pre-exit (Konfirmasi Temuan)',
+			'Exit Meeting, Questioner',
+			'CAPA', 
+			'LHA'
+		];
+
 		$year = date('Y');
 		$query = get_data('tbl_annual_audit_plan a', [
 			'select' => 'a.id as id_audit_plan, dep.section_name as department, ak.aktivitas, sa.sub_aktivitas, a.*, rc.id_risk',
@@ -74,7 +87,9 @@ class Annual_audit_plan extends BE_Controller {
 		$expense_item = get_data('tbl_expense_type', 'is_active', 1)->result_array();
 		render([
 			'data' => $query,
-			'expense_item' => $expense_item]);
+			'expense_item' => $expense_item,
+			'activity' => $activity
+		]);
 	}
 
 	function getData(){
@@ -87,13 +102,16 @@ class Annual_audit_plan extends BE_Controller {
 		$id = post('id_plan');
 		$objektif = post('objektif');
 		$start_date = post('start_date');
+		$activity_type = post('activity_type');
 		$activity = $this->input->post('activity_name');
+		$start_duration = $this->input->post('start_duration');
+		$end_duration = $this->input->post('end_duration');
 		$duration = $this->input->post('duration');
 		$expense_type = $this->input->post('expense_type');
-		$expense_amount = $this->input->post('expense_amount');
+		$expense_amount = toInt($this->input->post('expense_amount'));
 		$expense_day = $this->input->post('expense_day');
 		$expense_note = $this->input->post('expense_note');
-		
+
 		// $expense_est = 0;
 		foreach($expense_type as $i => $type){
 			if(empty($type)){
@@ -143,19 +161,13 @@ class Annual_audit_plan extends BE_Controller {
 				render($response, 'json');
 				return;
 			}
-			if(!isset($duration[$i]) || empty($duration[$i]) || (int)$duration[$i] <= 0){
-				$response = [
-					'status' => 'error',
-					'message' => 'Durasi pada aktivitas '.$act.' harus diisi dan lebih dari 0'
-				];
-				render($response, 'json');
-				return;
-			}
 
 			$insertActivity = [
 				'id_audit_plan' => $id,
 				'activity_name' => $act,
+				'start_date' => isset($start_duration[$i]) ? $start_duration[$i] : null,
 				'duration_day' => (int)$duration[$i],
+				'end_date' => isset($end_duration[$i]) ? $end_duration[$i] : null,
 			];
 			insert_data('tbl_audit_plan_duration', $insertActivity);
 			$total_durasi += (int)$duration[$i];
@@ -172,6 +184,7 @@ class Annual_audit_plan extends BE_Controller {
 			// 'durasi' => $total_durasi,
 			'start_date' => $start_date,
 			'end_date' => $end_date,
+			'type' => $activity_type,
 			// 'expense_est' => $expense_est,
 		];
 		$save = save_data('tbl_annual_audit_plan', $data);
@@ -208,7 +221,13 @@ class Annual_audit_plan extends BE_Controller {
 	function getDetailDuration(){
 		$id = post('id');
 		$data = get_data('tbl_audit_plan_duration', 'id_audit_plan', $id)->result_array();
-		render($data,'json');
+		$formated = [];
+		foreach($data as $v){
+			$v['start_date'] = date('Y-m-d', strtotime($v['start_date']));
+			$v['end_date'] = date('Y-m-d', strtotime($v['end_date']));
+			$formated[] = $v;
+		}
+		render($formated,'json');
 	}
 
 	function getDetailExpense(){

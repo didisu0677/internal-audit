@@ -14,7 +14,7 @@
 	</div>
 
 <div class="content-body mt-6">
-
+	<input type="hidden" id="activity_item" value="<?=htmlspecialchars(json_encode($activity))?>">
 	<div class="main-container mt-2">
 		<div class="row">
 			<div class="col-12">
@@ -184,39 +184,22 @@
 					<input type='hidden' id='start_date' name='start_date'>
 					
 					<div class='row mb-4'>
-						<div class='col-7'>
+						<div class='col-8'>
 							<h6 class='text-muted mb-3'>Activities & Duration</h6>
 							<div class='card border-0 shadow-sm'>
 								<div class='card-body p-3'>
+									<label class='form-label small text-muted'>Activity Type</label>
+									<select class='form-control form-control-sm mb-2 w-25' name='activity_type' id='activity_type' required>
+										<option value=''>-- Select Activity Type --</option>
+										<option value='full'>Full</option>
+										<option value='partial'>Partial</option>
+									</select>
 									<div id='activity-container'>
-										<div class='activity-row mb-2'>
-											<div class='row align-items-center'>
-												<div class='col-7'>
-													<input type='text' class='form-control form-control-sm' name='activity_name[]' placeholder='Activity Name' required>
-												</div>
-												<div class='col-4'>
-													<input type='number' class='form-control form-control-sm duration-input' name='duration[]' placeholder='Duration (Days)' min='0' required>
-												</div>
-												<div class='col-1'>
-													<button type='button' class='btn btn-sm btn-icon-only btn-outline-danger remove-activity' style='display:none;'>
-														<i class='fas fa-trash'></i>
-													</button>
-												</div>
-											</div>
-										</div>
-									</div>
-									<div class='d-flex justify-content-between align-items-center mt-3 pt-3 border-top'>
-										<button type='button' class='btn btn-sm btn-outline-primary' id='add-activity'>
-											<i class='fas fa-plus me-1'></i> Add Activity
-										</button>
-										<div class='text-muted'>
-											<small>Total Duration: <span id='total-duration' class='font-weight-bold'>0</span> Days</small>
-										</div>
-									</div>
+									</div>	
 								</div>
 							</div>
 						</div>
-						<div class='col-5' style='border-left: 4px solid #22c2dc; padding-left: 10px; border-radius: 4px;'>
+						<div class='col-4' style='border-left: 4px solid #22c2dc; padding-left: 10px; border-radius: 4px;'>
 							<h6 class='text-muted mb-3'>Objective</h6>
 							<div class='card border-0 shadow-sm'>
 								<div class='card-body p-3'>
@@ -245,13 +228,13 @@
 													echo "</select>
 												</div>
 												<div class='col-2'>
-													<input type='number' class='form-control form-control-sm' name='expense_amount[]' placeholder='Amount' min='0' required>
+													<input type='text' class='form-control money form-control-sm expense' name='expense_amount[]' placeholder='Amount' min='0' required>
 												</div>
 												<div class='col-1'>
 													<input type='number' class='form-control form-control-sm day-input' name='expense_day[]' placeholder='Days' min='0' required>
 												</div>
 												<div class='col-2'>
-													<input type='number' class='form-control form-control-sm expense-est-input' name='total_amount[]' placeholder='Total Amount' min='0' required>
+													<input type='text' class='form-control money form-control-sm expense-est-input' name='total_amount[]' placeholder='Total Amount' min='0' required>
 												</div>
 												<div class='col-4'>
 													<input type='text' class='form-control form-control-sm note-input' name='expense_note[]' placeholder='Note' required>
@@ -366,7 +349,9 @@
 						<tr>
 							<th class='text-center'>No</th>
 							<th>Activity Name</th>
+							<th class='text-center'>Start Date</th>
 							<th class='text-center'>Duration (Days)</th>
+							<th class='text-center'>End Date</th>
 						</tr>
 					</thead>
 					<tbody id='detail-duration-body'>
@@ -449,9 +434,17 @@
 		$('.detail-expense').css('cursor', 'pointer');
 		$('.cancel-detail').css('cursor', 'pointer');
 		
+		$(document).on('input', '.expense, .day-input', function() {
+			const row = $(this).closest('.expense-est-row');
+			const amount = parseInt(row.find('.expense').val().replace(/\./g, '').replace(/,/g, '')) || 0;
+			const days = parseInt(row.find('.day-input').val()) || 0;
+			const total = amount * days;
+			row.find('.expense-est-input').val(total);
+			calculateTotalExpenseEst();
+		});
 		
 		// Add activity row
-		$('#add-activity').click(function() {
+		$(document).on('click','#add-activity', function() {
 			const newRow = $('.activity-row:first').clone();
 			newRow.find('input').val('');
 			newRow.find('.remove-activity').show();
@@ -472,6 +465,7 @@
 			newRow.find('input').val('');
 			newRow.find('.remove-expense-est').show();
 			$('#expense-est-container').append(newRow);
+			money_init();
 			updateRemoveButtons('.expense-est-row', '.remove-expense-est');
 		});
 
@@ -523,7 +517,7 @@
 		function calculateTotalExpenseEst() {
 			let total = 0;
 			$('.expense-est-input').each(function() {
-				total += parseInt($(this).val()) || 0;
+				total += parseInt($(this).val().replace(/\./g, '').replace(/,/g, '')) || 0;
 			});
 			$('#total-expense-est').text(total.toLocaleString());
 		}
@@ -579,19 +573,21 @@
 							<tr>
 								<td class='text-center' width='1px'>${index + 1}</td>
 								<td>${item.activity_name}</td>
+								<td class='text-nowrap' width='1px'>${item.start_date}</td>
 								<td class='text-center'>${item.duration_day}</td>
+								<td class='text-nowrap' width='1px'>${item.end_date}</td>
 							</tr>
 						`;
 					});
 					tbody += `
 						<tr>
-							<td colspan='2' class='text-right font-weight-bold'>Total Duration</td>
+							<td colspan='3' class='text-right font-weight-bold'>Total Duration</td>
 							<td class='text-center font-weight-bold'>${res.reduce((sum, item) => sum + (parseInt(item.duration_day) || 0), 0)} days</td>
 						</tr>`;
 				} else {
 					tbody = `
 						<tr>
-							<td colspan='3' class='text-center text-muted'>No data available</td>
+							<td colspan='5' class='text-center text-muted'>No data available</td>
 						</tr>
 					`;
 				}
@@ -652,6 +648,81 @@
 		// cConfirm.open('Are you sure you want to cancel this audit plan?', 'confirmCancel');
 	});
 
+	$(document).on('change', '#activity_type', function () {
+		let activityItem = JSON.parse($("#activity_item").val());
+		let type = $(this).val();
+
+		let html = `
+		`;
+
+		// Kumpulkan semua activity
+		$.each(activityItem, function (index, item) {
+			html += `
+			<div class='activity-row mb-2'>
+				<div class='row align-items-center mb-2'>
+					<div class='col-4'>
+						<input type='text' class='form-control form-control-sm' name='activity_name[]' value="${item}" placeholder='Activity Name' required >
+					</div>
+					<div class='col-3'>
+						<div class='input-group input-group-sm'>
+							<span class='input-group-text'>Start</span>
+							<input type='date' class='form-control start-date' name='start_duration[]' required>
+						</div>
+					</div>
+					<div class='col-1'>
+						<input type='number' class='form-control form-control-sm duration-input' name='duration[]' placeholder='Duration (Days)' min='0' required>
+					</div>
+					<div class='col-3'>
+						<div class='input-group input-group-sm'>
+							<span class='input-group-text'>End</span>
+							<input type='date' class='form-control end-date' name='end_duration[]' required>
+						</div>
+					</div>
+					<div class='col-1'>
+						<button type='button' class='btn btn-sm btn-icon-only btn-outline-danger remove-activity'>
+							<i class='fas fa-trash'></i>
+						</button>
+					</div>
+				</div>
+			</div>
+			`;
+		});
+		$('#activity-container').html(html);
+
+		footer = `
+			<div id='activity-footer'>
+				<div class='d-flex justify-content-between align-items-center mt-3 pt-3 border-top'>
+					<button type='button' class='btn btn-sm btn-outline-primary' id='add-activity'>
+						<i class='fas fa-plus me-1'></i> Add Activity
+					</button>
+					<div class='text-muted'>
+						<small>Total Duration: <span id='total-duration' class='font-weight-bold'>0</span> Days</small>
+					</div>
+				</div>
+			</div>`;    
+	    $('#activity-footer').remove();
+		$('#activity-container').after(footer);	
+	});
+
+	$(document).on('change input', '.start-date, .duration-input', function () {
+		let row = $(this).closest('.activity-row');
+		let startDate = row.find('.start-date').val();
+		let duration = parseInt(row.find('.duration-input').val());
+
+		if (startDate && duration && duration > 0) {
+			let start = new Date(startDate);
+
+			// hitung end date dengan skip weekend
+			let end = workdays(start, duration);
+
+			// format yyyy-mm-dd
+			let endDate = end.toISOString().split('T')[0];
+			row.find('.end-date').val(endDate);
+		} else {
+			row.find('.end-date').val('');
+		}
+	});
+
 
 	function confirmCancel(){
 		let id = $('#id_plan_cancel').val();
@@ -674,6 +745,21 @@
 
 	function reloadPage(){
 		location.reload();
+	}
+
+	function workdays(startDate, days) {
+		let current = new Date(startDate);
+
+		while (days > 1) {  
+			current.setDate(current.getDate() + 1);
+
+			// Cek kalau bukan Sabtu(6) atau Minggu(0)
+			if (current.getDay() !== 0 && current.getDay() !== 6) {
+				days--;
+			}
+		}
+
+		return current;
 	}
 
 </script>
