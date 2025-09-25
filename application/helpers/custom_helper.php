@@ -2294,3 +2294,14 @@ function get_detail_all_audit_universe(){
     ])->result_array();
     return $data ?: [];
 }
+
+function toInt($val)
+{
+    // Kalau array, proses tiap elemen
+    if (is_array($val)) {
+        return array_map('toInt', $val);
+    }
+
+    // Kalau bukan array, hapus separator dan jadikan integer
+    return (int) str_replace('.', '', (string) $val);
+}
