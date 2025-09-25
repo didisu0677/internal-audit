@@ -1,3 +1,5 @@
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
+
 <div class="content-header">
 	<div class="main-container position-relative">
 		<div class="header-info">
@@ -5,60 +7,72 @@
 			<?php echo breadcrumb(); ?>
 		</div>
 		<div class="float-right">
-			<label class=""><?php echo lang('tahun'); ?>  &nbsp</label>
-			<select class="select2 infinity custom-select" style="width: 80px;" id="filter_tahun">
-				<?php foreach ($tahun as $tahun) { ?>
-                <option value="<?php echo $tahun->tahun; ?>"<?php if($tahun->tahun == date('Y')) echo ' selected'; ?>><?php echo $tahun->tahun; ?></option>
-                <?php } ?>
-			</select>
-
-			<label class=""><?php echo lang('department'); ?> &nbsp</label>					
-			<select class = "select2 infinity custom-select" style="width: 500px;" id="department">
-				<option value="ALL">ALL Department</option>
-				<?php foreach($department as $d){ ?>
-				<option value="<?php echo $d['id']; ?>"><?php echo $d['description'] . ' | ' . $d['section_name']; ?></option>
-				<?php } ?>
-			</select>
-
 			<?php 
 			if(user('id_group')!=AUDITEE)
 			echo access_button('delete,active,inactive,export,import'); 
 			?>
-			<input type="hidden" value="<?= $id_transaction; ?>" id="id_transaction">
+			<!-- <input type="hidden" value="<?= $id_transaction; ?>" id="id_transaction"> -->
 		</div>
 		<div class="clearfix"></div>
 	</div>
 </div>
 <div class="content-body">
-	<?php
-	table_open('',true,base_url('internal/finding_records/data'),'tbl_finding_records');
-		thead();
-			tr();
-				th('checkbox','text-center','width="30" data-content="id"');
-				// th(lang('periode_audit'),'','data-content="periode_audit"');
-				// th(lang('institusi_audit'),'','data-content="nama_institusi" data-table="tbl_institusi_audit"');
-				th(lang('auditor'),'','data-content="nama_auditor"');
-				th(lang('tgl_mulai_audit'),'','data-content="tgl_mulai_audit" data-type="daterange"');
-				// th(lang('tgl_akhir_audit'),'','data-content="tgl_akhir_audit" data-type="daterange"');
-				th(lang('auditee'),'','data-content="nama" data-table="tbl_auditee"');
-				th(lang('site_auditee'),'','data-content="site_auditee"');
-				th(lang('section'),'','data-content="section_name" data-table="tbl_m_audit_section tbl_section_department"');
-				th(lang('audit_area'),'','data-content="sub_aktivitas" data-table="sa"');
-				th(lang('finding_description') . ' description','','data-content="finding"');
-				th(lang('bobot'),'','data-content="bobot_finding"');
-				// th(lang('bobot_finding'),'','data-content="bobot_finding"');
-				th(lang('status'),'','data-content="status_finding" data-badge="warna_status" data-replace="0:Open|1:Delivered|2:Closed"');
+	<div class="container-fluid mt-3">
+		<table class="table table-hover table-bordered table-striped table-sm" id="table-data">
+			<thead>
+				<tr>
+					<th style="display:none"></th>
+					<th><?= lang('no'); ?></th>
+					<th><?= lang('auditor'); ?></th>
+					<th><?= lang('tgl_mulai_audit'); ?></th>
+					<th><?= lang('auditee'); ?></th>
+					<th><?= lang('site_auditee'); ?></th>
+					<th><?= lang('section'); ?></th>
+					<th><?= lang('audit_area'); ?></th>
+					<th><?= lang('finding_description'); ?></th>
+					<th><?= lang('bobot'); ?></th>
+					<th><?= lang('status'); ?></th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php 
+				$no = 1;
+				$status_finding = [
+					'0' => ['text' => 'Open', 'class' => 'badge-danger'],
+					'1' => ['text' => 'Delivered', 'class' => 'badge-warning'],
+					'2' => ['text' => 'Closed', 'class' => 'badge-success']
+				];
+				foreach($data as $val):?>
+				<tr>
+					<td style="display:none"><?= $val['id'] ?></td> <!-- hidden ID -->
+					<td width="1" class="text-center"><?= $no++ ?></td>
+					<td width="1" class="text-nowrap"><?= $val['nama_auditor'] ?></td>
+					<td width="1" class="text-nowrap"><?= $val['tgl_mulai_audit']?></td>
+					<td width="1" class="text-nowrap"><?= $val['auditee']?></td>
+					<td width="1" class="text-nowrap"><?= $val['site_auditee']?></td>
+					<td><?= $val['section_name']?></td>
+					<td><?= $val['sub_aktivitas']?></td>
+					<td><?= $val['finding']?></td>
+					<td width="1" class="text-nowrap"><?= $val['bobot_finding']?></td>
+					<td width="1" class="text-nowrap">
+						<span class="badge <?= $status_finding[$val['status_finding']]['class'] ?>">
+							<?= $status_finding[$val['status_finding']]['text'] ?>
+						</span>
+					</td>
+					<td width="1" class="text-nowrap">
+						<button type="button" class="btn btn-secondary btn-sm btn-capa btn-icon-only" data-id="<?= $val['id'] ?>"><i class="far fa-copy"></i> </button>
+						<?php if(user('id_group')!=AUDITEE): ?>
+						<button type="button" class="btn btn-warning btn-sm btn-input btn-icon-only" data-id="<?= $val['id'] ?>" data-key="edit"><i class="fa fa-edit"></i> </button>
+						<button type="button" class="btn btn-danger btn-sm btn-delete btn-icon-only" data-id="<?= $val['id'] ?>" ><i class="fa fa-trash"></i> </button>
+						<?php endif; ?>
+					</td>
 
-
-				// th(lang('capa'),'','data-content="capa"');
-				// th(lang('status_capa'),'','data-content="status_capa"');
-				// th(lang('follow_up'),'','data-content="follow_up"');
-				// th(lang('capa_score'),'','data-content="capa_score"');
-				// th(lang('achivement'),'','data-content="achivement"');
-				// th(lang('aktif').'?','text-center','data-content="is_active" data-type="boolean"');
-				th('&nbsp;','','width="30" data-content="action_button"');
-	table_close();
-	?>
+					
+				</tr>
+				<?php endforeach;?>
+		</table>
+	</div>
 </div>
 <?php 
 
@@ -125,7 +139,7 @@ modal_open('modal-form','Finding','modal-xl','data-openCallback="formOpen1"');
 			card_open(lang('auditee'),'mb-2');
 				select2(lang('auditee'),'auditee','required');
 				select2(lang('site_auditee'),'site_auditee','required|infinity',['Head Office (HO)','Factory']);
-				select2(lang('section'),'id_section_department','required',$department,'id','section_name');
+				select2(lang('section'),'id_section_department','required',$department,'id_section','section_name');
 				// input('text',lang('audit_area'),'audit_area');
 				select2('Audit Area','id_sub_aktivitas','required', $aktivitas, 'id','sub_aktivitas');
 			card_close();
@@ -338,9 +352,11 @@ modal_close();
 	} ?>
 </select>
 
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap4.min.js"></script>
 <script type="text/javascript" src="<?php echo base_url('assets/plugins/ckeditor/ckeditor.js') ?>"></script>
 <script>
-
+new DataTable('#table-data');
 var select_value = '';
 var select_value2 = '';
 $(document).on('click','.btn-capa',function(){
@@ -533,21 +549,42 @@ var idx = 777;
 var idy = 999;
 
 $(document).ready(function() {
-    let id_trans = $('#id_transaction').val();
-    let url = base_url + 'internal/finding_records/data/';
-	
-    if (id_trans != '') {
-        // param 1 & 2 kosong, param 3 isi id_trans
-        url += '?id='+id_trans;   // pakai double slash biar param kosong
-    } else {
-        // pakai tahun & department
-        url += $('#filter_tahun').val();
-        url += '/'+$('#department').val();
+
+    let table = $('#table-data').DataTable();
+    let id_target = new URLSearchParams(window.location.search).get("id");
+    id_target = decodeId(id_target)[0];
+	console.log(id_target);
+    if (id_target) {
+        // lakukan search by id
+        table.search(id_target).draw();
+
+        // highlight row target
+        let row = $('#table-data button[data-id="'+id_target+'"]').closest('tr');
+        row.addClass('table-warning');
+
+        // scroll ke row target
+        $('html, body').animate({
+            scrollTop: row.offset().top - 100
+        }, 500);
     }
 
-    $('[data-serverside]').attr('data-serverside', url);
-    refreshData();
+
+    // let id_trans = $('#id_transaction').val();
+    // let url = base_url + 'internal/finding_records/data/';
+	
+    // if (id_trans != '') {
+    //     // param 1 & 2 kosong, param 3 isi id_trans
+    //     url += '?id='+id_trans;   // pakai double slash biar param kosong
+    // } else {
+    //     // pakai tahun & department
+    //     url += $('#filter_tahun').val();
+    //     url += '/'+$('#department').val();
+    // }
+
+    // $('[data-serverside]').attr('data-serverside', url);
+    // refreshData();
 });
+
 
 
 $('#department').change(function(){
@@ -615,7 +652,7 @@ function formOpen1() {
 				btn_download.wrap('<a href="'+base_url+'assets/uploads/finding_records/'+v.filename+'" download></a>');
 
 			} else {
-				addFinding(v.id,v.bobot_finding,v.filename,'',v.finding);
+				// addFinding(v.id,v.bobot_finding,v.filename,'',v.finding);
 			}
 
 			setTimeout(function(){
@@ -829,7 +866,7 @@ function addFinding(id_finding_records,bobot_finding,file,lampiran, isi_finding)
 			+ '<button type="button" class="btn btn-danger btn-remove-finding"><i class="fa-times"></i> '+lang.hapus+'</button>';
 		+ '</div>'
 	+ '</div>';
-	$('#additional-finding').append(konten);
+	$('#additional-finding').html(konten);
 
 	var $t1 = $('#additional-finding .bobot_temuan:last-child');
 	$t1.select2({
@@ -905,6 +942,10 @@ function get_auditee() {
 			readonly_ajax = true;
 		}
 	});
+}
+
+function getDataTable(){
+
 }
 
 

@@ -5,7 +5,56 @@ class Finding_records extends BE_Controller {
 		parent::__construct();
 	}
 
-	function index() {
+	function index(){
+		$data = [];
+		if(user('id_group') != AUDITEE){
+			$dept = get_data('tbl_m_audit_section',[
+				'select' => 'id as id_section, section_name',
+				'where' => [
+					'is_active' => 1,
+					'__m' => 'id in (select id_section_department from tbl_finding_records)'
+				],
+				])->result_array();
+			$data['department'] = $dept;
+		}else{
+			$dept = get_data('tbl_detail_auditee a',[
+				'select' => 'a.nip,a.id_department,a.id_section',
+				'join' => 'tbl_user b on a.nip = b.username type LEFT',
+				'where' => [
+					'a.nip' => user('username') 
+				]
+			])->result_array();
+		}
+		
+		$data['auditor'] = get_data('tbl_m_auditor','is_active',1)->result_array();
+		$data['aktivitas'] = get_data('tbl_sub_aktivitas a',[
+			'select' => 'a.id, CONCAT(b.aktivitas," - ", a.sub_aktivitas) as sub_aktivitas',
+			'join'  => 'tbl_aktivitas b on a.id_aktivitas = b.id type LEFT',
+		])->result_array();
+
+		$arr_d = [];
+		foreach($dept as $d) {
+			$arr_d[] = $d['id_section'];
+		}
+
+		$data['data'] = get_data('tbl_finding_records fr', [
+			'select' => 'fr.*, a.nama as auditee, sa.sub_aktivitas, b.section_name',
+			'join' => [
+				'tbl_auditee a on a.id = fr.auditee',
+				'tbl_sub_aktivitas sa on sa.id = fr.id_sub_aktivitas',
+				'tbl_m_audit_section b on b.id = fr.id_section_department',
+			],
+			'where' => [
+				'fr.id_section_department' => $arr_d
+			],
+			'order_by' => 'sa.sub_aktivitas',
+			'sort' => 'asc'
+		])->result_array();
+
+		render($data);
+	}
+
+	function indexxxxx() {
 		$id = get('id');
 		$data['id_transaction'] = decode_id($id)[0] ?? '';
 		$data['auditor'] = get_data('tbl_m_auditor','is_active',1)->result_array();
@@ -116,7 +165,7 @@ class Finding_records extends BE_Controller {
 			])->result_array();
 
 		}
-
+		debug($data);die;
 		render($data);
 	}
 
@@ -168,7 +217,6 @@ class Finding_records extends BE_Controller {
 		}
 		
 		//
-
 
 		$config['join'] = [
 			'tbl_auditee ON tbl_auditee.id = tbl_finding_records.auditee TYPE LEFT',
@@ -258,7 +306,7 @@ class Finding_records extends BE_Controller {
 			data-tgl_closing_meeting ="'.c_date($d->tgl_closing_meeting).'"
             >'.$d->nomor.'  |  '.$d->deskripsi.'</option>';
 	    }
-
+		
 		render($data,'json');
 	}
 
