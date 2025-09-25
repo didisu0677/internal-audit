@@ -653,4 +653,16 @@ class Rcm extends BE_Controller {
 	    else return $data;
 	    
 	}
+	
+	function get_detail(){
+		$id_risk_control = post('id_rk');
+		$id_risk = post('id_risk');
+		$data = get_data('tbl_risk_control_detail' ,[
+			'where' => [
+				'id_risk_control' => $id_risk_control,
+				'id_risk' => $id_risk
+			]
+		])->row_array();
+		render($data,'json');
+	}
 }

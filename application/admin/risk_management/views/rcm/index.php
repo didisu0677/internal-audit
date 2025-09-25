@@ -175,11 +175,13 @@ $(document).ready(function () {
 // });
 
 var bobot = '';
-function formOpen() {
+var detail = '';
+async function formOpen() {
 	is_edit = true;
 	var index1 = 0;
 	get_bobot();
 	var response = response_edit;
+
 	$('#id_rk').val(response.id_risk_control);
 	$('#result tbody').html('');
 	$('#result2 tbody').html('')
@@ -196,20 +198,22 @@ function formOpen() {
 			f.find('.id_sub_aktivitas').val(v.id);
 		});
 
-		$.each(response.risk,function(k,v){
+		for (const v of response.risk) {
+			detail = await get_detail(response.id_risk_control, v.id);
+			console.log(detail);
 			add_itemrisk();
-			var f = $('#result2 tbody tr').last();
+			let f = $('#result2 tbody tr').last();
 			f.find('.id_risk').val(v.id);
 			f.find('.risk').val(v.risk);
 			f.find('.keterangan').val(v.keterangan);
 			f.find('.dampak').val(v.dampak);
-			f.find('.score_dampak').val(v.score_dampak);
+			f.find('.score_dampak').val(detail.score_dampak);
 			f.find('.kemungkinan').val(v.kemungkinan);
-			f.find('.score_kemungkinan').val(v.score_kemungkinan);
+			f.find('.score_kemungkinan').val(detail.score_kemungkinan);
 			f.find('.total_score').val(v.total_score);
-			// f.find('.bobot_risk').val(v.bobot);
 			f.find('.bobot_risk').val(v.bobot).trigger('change');
-		});
+		}
+
 
 		$.each(response.ctrl_item,function(k,v){
 			add_itemcontrol();
@@ -314,6 +318,15 @@ function get_bobot() {
 			}
 		});
 	}
+}
+
+function get_detail(id_risk_control, id_risk){
+	return $.ajax({
+		url : base_url + 'risk_management/rcm/get_detail',
+		data : {id_rk:id_risk_control, id_risk:id_risk},
+		type : 'POST',
+		dataType: 'json'
+	});
 }
 
 const scoreMatrix = {
