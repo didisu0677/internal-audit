@@ -629,6 +629,17 @@
 				nearestBtn.attr('aria-expanded','true');
 			}
 		})();
+		// Apply cursor styling after dynamic content load
+		$(document).on('content:rebind', function(){
+			// collapse icons reset
+			$('.year-toggle .fas').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+			// Apply cursor styling to clickable elements
+			$('.detail-durasi').css('cursor', 'pointer');
+			$('.detail-expense').css('cursor', 'pointer');
+			$('.cancel-detail').css('cursor', 'pointer');
+		});
+		
+		// Initial load
 		$('.detail-durasi').css('cursor', 'pointer');
 		$('.detail-expense').css('cursor', 'pointer');
 		$('.cancel-detail').css('cursor', 'pointer');

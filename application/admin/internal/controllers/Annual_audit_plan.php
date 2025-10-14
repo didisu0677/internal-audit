@@ -340,12 +340,12 @@ class Annual_audit_plan extends BE_Controller {
 		}
 
 		$data_cancel = [
-			'id_audit_plan' => $id,
+			'id_audit_plan_group' => $id,
 			'reason' => $reason,
 			'canceled_at' => date('Y-m-d H:i:s'),
 			'canceled_by' => user('id')
 		];
-		
+
 		insert_data('tbl_audit_plan_canceled', $data_cancel);
 		
 		$data = [
@@ -353,7 +353,7 @@ class Annual_audit_plan extends BE_Controller {
 			'status' => 'canceled',
 		];
 
-		$save = save_data('tbl_annual_audit_plan', $data);
+		$save = save_data('tbl_annual_audit_plan_group', $data);
 		
 		if($save){
 			$response = [
@@ -376,7 +376,7 @@ class Annual_audit_plan extends BE_Controller {
 				'tbl_user u on tbl_audit_plan_canceled.canceled_by = u.id'
 			],
 			'where' => [
-				'tbl_audit_plan_canceled.id_audit_plan' => $id
+				'tbl_audit_plan_canceled.id_audit_plan_group' => $id
 			]
 		])->row_array() ?? [];
 		render($data,'json');
