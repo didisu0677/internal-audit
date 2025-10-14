@@ -408,7 +408,13 @@ class Dashboard extends BE_Controller {
 	}
 
 	function get_data_questioner_gauge(){
-		$question = get_data('tbl_kuisioner_respon', 'respon !=', null)->result_array();
+		$year = post('year') ?: date('Y');
+		$question = get_data('tbl_kuisioner_respon', [
+			'where' => [
+				'respon !=' => null,
+				'periode_audit' => $year
+			]
+		])->result_array();
 		
 		$hasil_audit = 0;
 		$proses_audit = 0;
