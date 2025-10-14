@@ -40,7 +40,10 @@
 						<td><?= $v['bobot']?></td>
 						<td><?= $v['description']?></td>
 						<td><?= $row['initial_audit']?></td>
-						<td><button class="btn btn-warning btn-icon-only btn-sm" id="edit" data-id="<?=$v['id']?>" data-universe="<?=$row['id']?>"><i class="fas fa-pencil"></i></button></td>
+						<td><?php if (empty($row['initial_audit'])): ?>
+							<button class="btn btn-warning btn-icon-only btn-sm" id="edit" data-id="<?=$v['id']?>" data-universe="<?=$row['id']?>"><i class="fas fa-pencil"></i></button>
+							<?php endif; ?>
+						</td>
 					</tr>
 					<?php endforeach; ?>
 				<?php endforeach; ?>

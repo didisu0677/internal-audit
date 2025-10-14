@@ -22,27 +22,15 @@
 					<div class="card-body p-4">
 						<div id="result">
 							<?php 
-							$currentYear = null;
-							$yearGroups = [];
-
-							// Group data by year
-							foreach($data as $val): 
-								$year = date('Y', strtotime($val['start_date']));
-								$yearGroups[$year][] = $val;
-							endforeach;
+							// $yearGroups = [];
+							// // Group data by year
+							// foreach($data as $val): 
+							// 	$year = $val['year'];
+							//     $dept = $val['label_department'];
+    						// 	$yearGroups[$year][$dept][] = $val;
+							// endforeach;
 							
-							// Sort years (closest to current year first)
-							// $currentYearNum = (int)date('Y');
-							// uksort($yearGroups, function($a, $b) use ($currentYearNum) {
-							// 	$diffA = abs($currentYearNum - (int)$a);
-							// 	$diffB = abs($currentYearNum - (int)$b);
-							// 	if ($diffA === $diffB) {
-							// 		return (int)$a - (int)$b;
-							// 	}
-							// 	return $diffA - $diffB;
-							// });
-							
-							foreach($yearGroups as $year => $yearData): ?>
+							foreach($data as $year => $departments):?>
 								<div class="mb-4">
 									<div class="card border-0 shadow-sm">
 										<div class="card-header bg-gradient-light border-0 py-3">
@@ -51,15 +39,17 @@
 													<button class="btn btn-link text-decoration-none text-dark p-0 font-weight-bold year-toggle flex-grow-1 text-left" 
 															type="button" 
 															data-toggle="collapse" 
-															data-target="#collapse<?=$year?>" 
+															data-target="#year-collapse<?=$year?>" 
 															aria-expanded="false" 
-															aria-controls="collapse<?=$year?>">
+															aria-controls="year-collapse<?=$year?>">
 														<div class="d-flex justify-content-between align-items-center">
 															<div>
 																<i class="fas fa-chevron-down me-2 text-primary"></i>
 																<span class="text-primary">Annual Audit Plan <?= $year ?></span>
 															</div>
-															<span class="badge badge-primary"><?= count($yearData) ?> items</span>
+															<span class="badge badge-primary">
+																<?= count($departments) ?> items
+															</span>
 														</div>
 													</button>
 													<button class="btn btn-sm btn-outline-primary ml-3 add-plan" type="button" data-year="<?=$year?>" title="Add Plan">
@@ -69,100 +59,195 @@
 											</h5>
 										</div>
 										
-										<div class="collapse" id="collapse<?=$year?>" data-year="<?=$year?>">
+										<div class="collapse" id="year-collapse<?=$year?>" data-year="<?=$year?>">
 											<div class="card-body p-0">
-												<div class="table-responsive">
-													<table class="table table-hover mb-0">
-														<thead class="bg-light">
-															<tr>
-																<th class="border-0 text-muted small">Department</th>
-																<th class="border-0 text-muted small">Aktivitas</th>
-																<th class="border-0 text-muted small">Audit Area</th>
-																<th class="border-0 text-muted small">Resiko</th>
-																<th class="border-0 text-muted small">Objektif</th>
-																<th class="border-0 text-muted small">Durasi</th>
-																<th class="border-0 text-muted small">Start Date Est</th>
-																<th class="border-0 text-muted small">End Date Est</th>
-																<th class="border-0 text-muted small">Expense Est</th>
-																<th class="border-0 text-muted small">Closing Date</th>
-																<th class="border-0 text-muted small">Expense Real</th>
-																<th class="border-0 text-muted small">Status</th>
-																<th class="border-0 text-muted small text-center"></th>
-															</tr>
-														</thead>
-														<tbody>
-															<?php foreach($yearData as $val): ?>
-																<tr>
-																	<td class="align-middle">
-																		<div class="text-sm font-weight-medium"><?= $val['department'] ?></div>
-																	</td>
-																	<td class="align-middle">
-																		<div class="text-sm"><?= $val['aktivitas'] ?></div>
-																	</td>
-																	<td class="align-middle">
-																		<div class="text-sm"><?= $val['sub_aktivitas'] ?></div>
-																	</td>
-																	<td class="align-middle">
-																		<div class="d-flex flex-wrap">
-																			<?php foreach($val['risk'] as $risk) : ?>
-																				<span class="badge badge-light border mr-1 mb-1 p-2"><?=$risk['risk']?></span>
-																			<?php endforeach ?>
-																		</div>
-																	</td>
-																	<td class="align-middle">
-																		<div class="text-sm"><?=$val['objektif']?></div>
-																	</td>
-																	<td class="align-middle text-center detail-durasi" data-id="<?=$val['id']?>">
-																		<?php if(isset($val['duration'])): ?>
-																			<span class="badge badge-info"><?= $val['duration'] ?> Hari</span>
-																		<?php else: ?>
-																			<span class="text-muted">-</span>
-																		<?php endif; ?>
-																	</td>
-																	<td class="align-middle text-nowrap">
-																		<small class="text-muted"><?= $val['start_date'] ? date('d M Y', strtotime($val['start_date'])) : '-' ?></small>
-																	</td>
-																	<td class="align-middle text-nowrap">
-																		<small class="text-muted"><?= $val['end_date'] ? date('d M Y', strtotime($val['end_date'])) : '-' ?></small>
-																	</td>
-																	<td class="align-middle text-nowrap text-right detail-expense" data-id="<?=$val['id']?>" data-cat="est">
-																		<span class="font-weight-medium">Rp. <?= isset($val['expense_est_total']) ? number_format($val['expense_est_total'],0) : 0 ?></span>
-																	</td>
-																	<td class="align-middle text-nowrap">
-																		<small class="text-muted"><?= $val['closing_date'] ? date('d M Y', strtotime($val['closing_date'])) : '-' ?></small>
-																	</td>
-																	<td class="align-middle text-nowrap text-right detail-expense" data-id="<?=$val['id']?>" data-cat="real">
-																		<span class="font-weight-medium">Rp. <?= isset($val['expense_real_total']) ? number_format($val['expense_real_total'],0) : 0 ?></span>
-																	</td>
-																	<td>
-																		<?php if(isset($val['status']) && $val['status'] == 'planned'): ?>
-																			<span class="badge badge-warning"><?= ucfirst($val['status']) ?> </span>
-																		<?php elseif(isset($val['status']) && $val['status'] == 'canceled'): ?>
-																			<span class="badge badge-danger cancel-detail" data-id="<?=$val['id']?>"><?= ucfirst($val['status']) ?> </span>
-																		<?php else : ?>
-																			<span class="badge badge-success"><?= ucfirst($val['status']) ?> </span>
-																		<?php endif; ?>
-																	</td>
-																	<td class="align-middle text-center">
-																		<?php if(empty($val['end_date'])) : ?>
-																			<button class="btn btn-sm btn-outline-warning btn-icon-only btn-edit" type="button" data-id="<?=$val['id']?>" title="Edit">
-																				<i class="fas fa-edit"></i>
-																			</button>
-																		<?php elseif($val['status'] == 'planned'):
-																			?>
-																			<button class="btn btn-sm btn-outline-success btn-icon-only btn-completed" type="button" data-id="<?=$val['id']?>" title="Completed">
-																				<i class="fas fa-check"></i>
-																			</button>
-																			<button class="btn btn-sm btn-outline-danger btn-icon-only btn-cancel" type="button" data-id="<?=$val['id']?>" title="Cancel">
-																				<i class='fas fa-times'></i>
-																			</button>
-																		<?php endif; ?>
-																	</td>
+												<?php
+												// Build summary schedule table (simple calendar-like) for the year
+												$summaryRows = [];
+												$rowNo = 1;
+												foreach($departments as $deptName => $deptData){
+													// $deptData structure appears to be an array with one or more detail arrays containing aktivitas
+													foreach($deptData as $detail){
+														if(!is_array($detail) || !isset($detail['aktivitas'])) continue; // skip non-detail entries
+														$months = array_fill(1,12,false);
+														$startDate = isset($detail['start_date']) && $detail['start_date'] ? strtotime($detail['start_date']) : null;
+														$endDate   = isset($detail['end_date']) && $detail['end_date'] ? strtotime($detail['end_date']) : $startDate;
+														if($startDate){
+															$startMonth = (int)date('n',$startDate);
+															$endMonth   = (int)date('n',$endDate);
+															if($endMonth < $startMonth) $endMonth = $startMonth; // safety
+															for($m=$startMonth; $m <= $endMonth; $m++){
+																$months[$m] = true;
+															}
+														}
+														$summaryRows[] = [
+															'no' => $rowNo++,
+															'department' => $deptName . (isset($detail['objective']) && $detail['objective'] ? '' : ''),
+															'auditor' => $detail['auditor'] ?? ($detail['auditor_name'] ?? ''),
+															'auditee' => $detail['auditee'] ?? ($detail['auditee_name'] ?? ''),
+															'expense' => isset($detail['expense_est_total']) ? number_format($detail['expense_est_total'],0,',','.') : '',
+															'months' => $months
+														];
+													}
+												}
+												?>
+												<?php if(!empty($summaryRows)): ?>
+													<div class="table-responsive px-3 pt-3">
+														<table class="table table-sm table-bordered table-striped mb-4 align-middle table-summary-year">
+															<thead class="thead-light">
+																<tr class="text-center align-middle">
+																	<th rowspan="2" class="align-middle" style="vertical-align: middle;" width="40">No</th>
+																	<th rowspan="2" class="text-left align-middle">Department</th>
+																	<th rowspan="2" class="align-middle">Auditor</th>
+																	<th rowspan="2" class="align-middle">Auditee</th>
+																	<th rowspan="2" class="text-right align-middle" width="110">Expense (Rp)</th>
+																	<th colspan="12">Months</th>
 																</tr>
-															<?php endforeach; ?>
-														</tbody>
-													</table>
-												</div>
+																<tr class="text-center">
+																	<?php $mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; foreach($mn as $m): ?>
+																		<th style="width:42px;" class="p-1"><?=$m?></th>
+																	<?php endforeach; ?>
+																</tr>
+															</thead>
+															<tbody>
+																<?php foreach($summaryRows as $r): ?>
+																	<tr>
+																		<td class="text-center" width="1px"><?=$r['no']?></td>
+																		<td class="w-25"><?=$r['department']?></td>
+																		<td class="text-nowrap text-center text-nowrap" style="width: 1px;"><?=$r['auditor']?></td>
+																		<td class="text-nowrap text-center text-nowrap" style="width: 1px;"><?=$r['auditee']?></td>
+																		<td class="text-right text-nowrap"><?=$r['expense']?></td>
+																		<?php for($m=1;$m<=12;$m++): $active=$r['months'][$m]; ?>
+																			<td class="text-center p-1 month-cell <?=$active?'active-month':''?>"></td>
+																		<?php endfor; ?>
+																	</tr>
+																<?php endforeach; ?>
+															</tbody>
+														</table>
+													</div>
+												<?php endif; ?>
+
+												<style>
+													.table-summary-year th, .table-summary-year td { font-size: 11px; }
+													.table-summary-year .month-cell { font-weight: bold; font-size: 12px; }
+													.table-summary-year .month-cell.active-month { background:#007bff; color:#fff; }
+												</style>
+
+												<?php foreach($departments as $dept => $deptData): ?>
+													<div class="border-bottom">
+														<div class="p-3 bg-light font-weight-bold">
+															<button class="btn btn-link text-decoration-none text-dark p-0 font-weight-bold dept-toggle flex-grow-1 text-left" 
+																	type="button" 
+																	data-toggle="collapse" 
+																	data-target="#dept-collapse<?=$year?>-<?=md5($dept)?>" 
+																	aria-expanded="false" 
+																	aria-controls="dept-collapse<?=$year?>-<?=md5($dept)?>">
+																<div class="d-flex justify-content-between align-items-center">
+																	<div>
+																		<i class="fas fa-chevron-down me-2 text-info"></i>
+																		<span><?= $dept ?></span>
+																	</div>
+																	<span class="badge badge-info ml-2"><?= count($deptData['data']['aktivitas']) ?> items</span>
+																</div>
+															</button>
+														</div>
+														<div class="collapse" id="dept-collapse<?=$year?>-<?=md5($dept)?>">
+															<div class="table-responsive">
+																<table class="table table-hover mb-0">
+																	<thead class="bg-light">
+																		<tr>
+																			<th class="border-0 text-muted small">Aktivitas</th>
+																			<th class="border-0 text-muted small">Audit Area</th>
+																			<th class="border-0 text-muted small">Resiko</th>
+																			<th class="border-0 text-muted small">Objektif</th>
+																			<th class="border-0 text-muted small">Durasi</th>
+																			<th class="border-0 text-muted small">Start Date Est</th>
+																			<th class="border-0 text-muted small">End Date Est</th>
+																			<th class="border-0 text-muted small">Expense Est</th>
+																			<th class="border-0 text-muted small">Closing Date</th>
+																			<th class="border-0 text-muted small">Expense Real</th>
+																			<th class="border-0 text-muted small">Status</th>
+																			<th class="border-0 text-muted small text-center"></th>
+																		</tr>
+																	</thead>
+																	<tbody>
+																		<?php 
+																		foreach($deptData as $key => $detail):
+																			$count = count($detail['aktivitas']);
+																			foreach($detail['aktivitas'] as $i => $activity) : ?>
+																			<tr>
+																				<td class="align-middle text-nowrap" width="1px"><?= $activity['aktivitas'] ?></td>
+																				<td class="align-middle text-nowrap" width="1px"><?= $activity['sub_aktivitas'] ?></td>
+																				<td class="align-middle text-nowrap" width="1px">
+																					<div class="d-flex flex-wrap">
+																						<?php foreach($activity['risk'] as $risk) : ?>
+																							<span class="badge badge-light border mr-1 mb-1 p-2"><?=$risk['risk']?></span>
+																						<?php endforeach ?>
+																					</div>
+																				</td>
+																				<?php if($i == 0) : ?>
+																					<td rowspan="<?=$count?>" class="align-middle">
+																						<div class="text-sm"><?=$detail['objective']?></div>
+																					</td>
+																					<td rowspan="<?=$count?>" width="1px" class="align-middle text-center detail-durasi text-nowrap" data-id="<?=$detail['id_audit_plan_group']?>">
+																						<?php if(isset($detail['duration'])): ?>
+																							<h6 class="badge badge-info"><?= $detail['duration'] ?> Hari</h6>
+																						<?php else: ?>
+																							<h6 class="text-muted">-</h6>
+																						<?php endif; ?>
+																					</td>
+																					<td rowspan="<?=$count?>" width="1px" class="align-middle text-nowrap text-center">
+																						<h6 class="text-muted"><?= $detail['start_date'] ? date('d M Y', strtotime($detail['start_date'])) : '-' ?></h6>
+																					</td>
+																					<td rowspan="<?=$count?>" width="1px" class="align-middle text-nowrap text-center">
+																						<h6 class="text-muted"><?= $detail['end_date'] ? date('d M Y', strtotime($detail['end_date'])) : '-' ?></h6>
+																					</td>
+																					<td rowspan="<?=$count?>" width="1px" class="align-middle text-nowrap text-right detail-expense" data-id="<?=$detail['id_audit_plan_group']?>" data-cat="est">
+																						<h6 class="font-weight-medium">Rp. <?= isset($detail['expense_est_total']) ? number_format($detail['expense_est_total'],0) : 0 ?></h6>
+																					</td>
+																					<td rowspan="<?=$count?>" width="1px" class="align-middle text-nowrap text-center">
+																						<h6 class="text-muted"><?= $detail['closing_date'] ? date('d M Y', strtotime($detail['closing_date'])) : '-' ?></h6>
+																					</td>
+																					<td rowspan="<?=$count?>" width="1px" class="align-middle text-nowrap text-right detail-expense" data-id="<?=$detail['id_audit_plan_group']?>" data-cat="real">
+																						<h6 class="font-weight-medium">Rp. <?= isset($detail['expense_real_total']) ? number_format($detail['expense_real_total'],0) : 0 ?></h6>
+																					</td>
+																					<td rowspan="<?=$count?>" width="1px" class="align-middle text-center text-nowrap">
+																						<?php if(isset($detail['status']) && $detail['status'] == 'unplanned'): ?>
+																							<h6 class="badge badge-secondary"><?= ucfirst($detail['status']) ?> </h6>
+																						<?php elseif(isset($detail['status']) && $detail['status'] == 'planned'): ?>
+																							<h6 class="badge badge-warning"><?= ucfirst($detail['status']) ?> </h6>
+																						<?php elseif(isset($detail['status']) && $detail['status'] == 'canceled'): ?>
+																							<h6 class="badge badge-danger cancel-detail" data-id="<?=$detail['id_audit_plan_group']?>"><?= ucfirst($detail['status']) ?> </h6>
+																						<?php else : ?>
+																							<h6 class="badge badge-success"><?= ucfirst($detail['status']) ?> </h6>
+																						<?php endif; ?>
+																					</td>
+																					<td rowspan="<?=$count?>" width="1px" class="align-middle text-center text-nowrap">
+																						<?php if(empty($detail['end_date'])) : ?>
+																							<button class="btn btn-sm btn-outline-warning btn-icon-only btn-edit" type="button" data-id="<?=$detail['id_audit_plan_group']?>" title="Edit">
+																								<i class="fas fa-edit"></i>
+																							</button>
+																						<?php elseif($detail['status'] == 'planned'):
+																							?>
+																							<button class="btn btn-sm btn-outline-success btn-icon-only btn-completed" type="button" data-id="<?=$detail['id_audit_plan_group']?>" title="Completed">
+																								<i class="fas fa-check"></i>
+																							</button>
+																							<button class="btn btn-sm btn-outline-danger btn-icon-only btn-cancel" type="button" data-id="<?=$detail['id_audit_plan_group']?>" title="Cancel">
+																								<i class='fas fa-times'></i>
+																							</button>
+																						<?php endif; ?>
+																					</td>
+																				<?php endif ?>
+																			</tr>																	
+																		<?php 
+																	endforeach;
+																	endforeach; ?>
+																	</tbody>
+																</table>
+															</div>
+														</div>
+													</div>
+												<?php endforeach; ?>
 											</div>
 										</div>
 									</div>
@@ -181,6 +266,7 @@
 			form_open(base_url('internal/annual_audit_plan/save'), 'post', 'form');
 				echo "
 					<input type='hidden' id='id_plan' name='id_plan'>
+					<input type='hidden' id='id_plan_group' name='id_plan_group'>
 					<input type='hidden' id='start_date' name='start_date'>
 					
 					<div class='row mb-4'>
@@ -269,7 +355,7 @@
 			col_init(3,9);
 			form_open(base_url('internal/annual_audit_plan/completedPlan'), 'post', 'formCompleted');
 				echo "
-					<input type='hidden' id='id_plan_completed' name='id_plan'>
+					<input type='hidden' id='id_plan_completed' name='id_plan_group'>
 					
 					<div class='row mb-4'>
 						<div class='col-12'>
@@ -398,16 +484,60 @@
 		modal_body();
 			form_open(base_url('internal/annual_audit_plan/add_plan'), 'post', 'formAddPlan');
 				input('hidden', 'year_plan', 'year_plan', '', 'readonly');		
-				select2('Audit', 'id_audit_universe', 'required', get_detail_all_audit_universe(), 'id', 'val');
+				select2('Audit', 'id_audit_universe[]', 'required', get_detail_all_audit_universe(), 'id', 'val', '', 'multiple');
 				form_button('Save Plan', 'Cancel');
 			form_close();
 	modal_close();
 	?>
 
 <script type="text/javascript">
+	// Handle year collapse - hanya satu year yang bisa terbuka
+	$(document).on('click', '.year-toggle', function(e) {
+		let targetCollapse = $(this).data('target');
+		
+		// Tutup semua year collapse yang lain
+		$('.year-toggle').not(this).each(function() {
+			let otherTarget = $(this).data('target');
+			if (otherTarget !== targetCollapse) {
+				$(otherTarget).collapse('hide');
+				$(this).attr('aria-expanded', 'false');
+				$(this).find('.fas').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+			}
+		});
+	});
+
+	// Handle department collapse - hanya satu department yang bisa terbuka dalam satu year
+	$(document).on('click', '.dept-toggle', function(e) {
+		let targetCollapse = $(this).data('target');
+		let currentYear = $(this).closest('[data-year]').data('year');
+		
+		// Tutup semua department collapse dalam year yang sama
+		$(`[data-year="${currentYear}"] .dept-toggle`).not(this).each(function() {
+			let otherTarget = $(this).data('target');
+			if (otherTarget !== targetCollapse) {
+				$(otherTarget).collapse('hide');
+				$(this).attr('aria-expanded', 'false');
+				$(this).find('.fas').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+			}
+		});
+	});
+
+	// Update icon saat collapse ditampilkan
+	$(document).on('shown.bs.collapse', '.collapse', function() {
+		let toggle = $(`[data-target="#${this.id}"]`);
+		toggle.find('.fas').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+		toggle.attr('aria-expanded', 'true');
+	});
+
+	// Update icon saat collapse disembunyikan
+	$(document).on('hidden.bs.collapse', '.collapse', function() {
+		let toggle = $(`[data-target="#${this.id}"]`);
+		toggle.find('.fas').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+		toggle.attr('aria-expanded', 'false');
+	});
+
 	$(document).on('click', '.btn-edit', function(){
 		let id = $(this).data('id');
-
 		$.ajax({
 			url: base_url + 'internal/annual_audit_plan/getData',
 			type: 'post',
@@ -415,6 +545,7 @@
 			dataType: 'json',
 			success: function(res){
 				$('#id_plan').val(res.id);
+				$('#id_plan_group').val(res.id_audit_plan_group);
 				$('#start_date').val(res.start_date);
 				$('#durasi').val(res.durasi);
 				$('#expense').val(res.expense_est);
@@ -430,6 +561,32 @@
 	})
 
 	$(document).ready(function() {
+		// Auto expand nearest year collapse on load
+		(function autoOpenNearestYear(){
+			var nowYear = (new Date()).getFullYear();
+			var nearestBtn = null;
+			var nearestDiff = Infinity;
+			$('.year-toggle').each(function(){
+				var txt = $(this).text();
+				var match = txt.match(/(20\d{2})/); // capture year like 2023, 2024, etc
+				if(match){
+					var y = parseInt(match[1]);
+					var diff = Math.abs(y - nowYear);
+					if(diff < nearestDiff){
+						nearestDiff = diff;
+						nearestBtn = $(this);
+					}
+				}
+			});
+			if(nearestBtn){
+				var target = nearestBtn.data('target');
+				// Open the collapse
+				$(target).collapse('show');
+				// Set icon state
+				nearestBtn.find('.fas').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+				nearestBtn.attr('aria-expanded','true');
+			}
+		})();
 		$('.detail-durasi').css('cursor', 'pointer');
 		$('.detail-expense').css('cursor', 'pointer');
 		$('.cancel-detail').css('cursor', 'pointer');
@@ -679,7 +836,7 @@
 						</div>
 					</div>
 					<div class='col-1'>
-						<button type='button' class='btn btn-sm btn-icon-only btn-outline-danger remove-activity'>
+						<button type='button' class='btn btn-sm btn-icon-only btn-outline-danger d-none remove-activity'>
 							<i class='fas fa-trash'></i>
 						</button>
 					</div>
@@ -702,6 +859,11 @@
 			</div>`;    
 	    $('#activity-footer').remove();
 		$('#activity-container').after(footer);	
+		if(type === 'full') {
+			$('.remove-activity').addClass('d-none');
+		} else {
+			$('.remove-activity').removeClass('d-none');
+		}
 	});
 
 	$(document).on('change input', '.start-date, .duration-input', function () {

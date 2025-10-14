@@ -153,20 +153,21 @@ class Audit_universe extends BE_Controller {
 		
 		update_data('tbl_audit_universe', ['initial_audit' => $data['initial_audit']], 'id', $data['id_universe']);
 		
-		$audit_plan = get_data('tbl_annual_audit_plan ap', [
-			'select' => 'ap.*, rc.id_risk',
+		$audit_universe = get_data('tbl_audit_universe u',[
+			'select' => 'u.*, r.*, s4.id as id_department, s4.section_name as department, s.section_name, rc.id_risk',
 			'join' => [
-				'tbl_audit_universe u on ap.id_universe = u.id',
 				'tbl_rcm r on u.id_rcm = r.id',
+				'tbl_m_audit_section s on r.id_section = s.id',
+				'tbl_m_audit_section s4 on s.parent_id = s4.id',
 				'tbl_risk_control rc on r.id_risk_control = rc.id',
 			],
 			'where' => [
-				'ap.id_universe' => $data['id_universe']
+				'u.id' => $data['id_universe']
 			]
 		])->row_array();
 		
-		if($audit_plan){
-			$id_risk = json_decode($audit_plan['id_risk'], true);
+		if($audit_universe){
+			$id_risk = json_decode($audit_universe['id_risk'], true);
 			
 			foreach($id_risk as $id){
 				$risk = get_data('tbl_risk_register a',[
@@ -187,12 +188,27 @@ class Audit_universe extends BE_Controller {
 					continue;
 				}
 
+				
+				$cek = get_data('tbl_annual_audit_plan_group', [
+					'where' => [
+						'id_department' => $audit_universe['id_department'],
+						'year' => date('Y', strtotime($start_date))
+					]
+				])->row_array();
+				$data_audit_plan_group = [
+					'id' =>	$cek['id'] ?? 0,				
+					'id_department' => $audit_universe['id_department'],
+					'year' => date('Y', strtotime($start_date)),
+					'start_date' => $start_date
+				];
+				$id_group = save_data('tbl_annual_audit_plan_group', $data_audit_plan_group);
+				
 				$data_audit_plan = [
-					'id' => $audit_plan['id'] ?? 0,
 					'id_universe' => $data['id_universe'],
-					'start_date' => $start_date,
+					'id_audit_plan_group' => $id_group['id'],
 				];
 				$resp = save_data('tbl_annual_audit_plan', $data_audit_plan);
+
 			}
 		}
 		render([
