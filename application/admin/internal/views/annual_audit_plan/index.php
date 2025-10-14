@@ -6,9 +6,8 @@
 		</div>
 		
 		<div class="float-right">   		
-    		
-    		</div>
-			<div class="clearfix"></div>
+    	</div>
+		<div class="clearfix"></div>
 			
 		</div>
 	</div>
@@ -18,6 +17,20 @@
 	<div class="main-container mt-2">
 		<div class="row">
 			<div class="col-12">
+				<div class="text-right">
+					<div class="btn-group btn-group-sm" role="group" aria-label="Filter Plan History">
+						<?php 
+							$activeFilter = isset($filter)?$filter:'plan';
+							$baseUrl = base_url('internal/annual_audit_plan');
+						?>
+						<a href="<?="{$baseUrl}?filter=plan"?>" class="btn btn-outline-primary filter-switch <?=($activeFilter=='plan'?'active':'')?>" data-filter="plan">
+							<i class="fas fa-calendar-alt mr-1"></i> Plan
+						</a>
+						<a href="<?="{$baseUrl}?filter=history"?>" class="btn btn-outline-primary filter-switch <?=($activeFilter=='history'?'active':'')?>" data-filter="history">
+							<i class="fas fa-history mr-1"></i> History
+						</a>
+					</div>
+				</div>
 				<div class="card shadow-sm border-0">
 					<div class="card-body p-4">
 						<div id="result">
@@ -491,6 +504,35 @@
 	?>
 
 <script type="text/javascript">
+	// Filter switch via AJAX (progressive enhancement)
+	$(document).on('click', '.filter-switch', function(e){
+		// Allow normal navigation if user opens in new tab
+		if(e.ctrlKey || e.metaKey || e.shiftKey) return;
+		e.preventDefault();
+		var url = $(this).attr('href');
+		$('.filter-switch').removeClass('active');
+		$(this).addClass('active');
+		$('#result').html('<div class="text-center p-5"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div><div class="mt-2 small text-muted">Loading '+$(this).data('filter')+'...</div></div>');
+		$.get(url, function(html){
+			// Extract #result content from full response
+			var temp = $('<div>').html(html);
+			var newContent = temp.find('#result').html();
+			if(newContent){
+				$('#result').html(newContent);
+				// Re-run auto open year logic after content replacement
+				$(document).trigger('content:rebind');
+			}else{
+				// fallback full reload
+				location.href = url;
+			}
+		});
+	});
+
+	// Rebind after dynamic load
+	$(document).on('content:rebind', function(){
+		// collapse icons reset
+		$('.year-toggle .fas').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+	});
 	// Handle year collapse - hanya satu year yang bisa terbuka
 	$(document).on('click', '.year-toggle', function(e) {
 		let targetCollapse = $(this).data('target');

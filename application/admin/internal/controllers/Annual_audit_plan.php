@@ -20,6 +20,12 @@ class Annual_audit_plan extends BE_Controller {
 			'LHA'
 		];
 
+		// Filter (plan | history) - default plan
+		$filter = get('filter');
+		if(!in_array($filter, ['plan','history'])) $filter = 'plan';
+		$plan_status    = ['unplanned','planned'];
+		$history_status = ['completed','canceled'];
+
 		$year = date('Y');
 		$data_clean = [];
 		$query = get_data('tbl_annual_audit_plan a', [
@@ -42,6 +48,11 @@ class Annual_audit_plan extends BE_Controller {
 		
 
 		foreach($query as $v){
+			// Apply status filter early to reduce processing
+			$group_status = $v['status'];
+			if($filter == 'plan' && !in_array($group_status, $plan_status)) continue;
+			if($filter == 'history' && !in_array($group_status, $history_status)) continue;
+
 			if(!isset($data_clean[$v['year']][$v['label_department']]['data'])){
 				$data_clean[$v['year']][$v['label_department']]['data'] = [
 					'id_audit_plan_group' => $v['id_audit_plan_group'],
@@ -117,7 +128,10 @@ class Annual_audit_plan extends BE_Controller {
 		render([
 			'data' => $data_clean,
 			'expense_item' => $expense_item,
-			'activity' => $activity
+			'activity' => $activity,
+			'filter' => $filter,
+			'plan_status' => $plan_status,
+			'history_status' => $history_status
 		]);
 	}
 
@@ -411,10 +425,10 @@ class Annual_audit_plan extends BE_Controller {
 			'status' => 'completed',
 			'closing_date' => $closing_date,
 		];
-		
 		$save = save_data('tbl_annual_audit_plan_group', $data);
 		if($save){
 			$data_audit_plan = get_data('tbl_annual_audit_plan', 'id_audit_plan_group', $save['id'])->result_array();
+			
 			$id_universe = array_column($data_audit_plan, 'id_universe'); 
 			$data_universe = get_data('tbl_audit_universe', 'id', $id_universe)->result_array();
 			foreach($data_universe as $universe){
