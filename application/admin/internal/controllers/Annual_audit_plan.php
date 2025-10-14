@@ -109,6 +109,19 @@ class Annual_audit_plan extends BE_Controller {
 					$data_clean[$v['year']][$v['label_department']]['data']['expense_est_total'] += ((int)$e['days'] * (int)$e['amount']);
 				}
 			}
+
+			$data_clean[$v['year']][$v['label_department']]['data']['expense_real_total'] = 0;
+			$expense_real= get_data('tbl_audit_plan_expense', [
+				'where' => [
+					'id_audit_plan_group' => $v['id_audit_plan_group'],
+					'category' => 'real'
+				]
+			])->result_array();
+			foreach($expense_real as $r){
+				if(isset($r['days']) && isset($r['amount'])){
+					$data_clean[$v['year']][$v['label_department']]['data']['expense_real_total'] += ((int)$r['days'] * (int)$r['amount']);
+				}
+			}
 		}
 
 		// $expense_real = get_data('tbl_audit_plan_expense', [
