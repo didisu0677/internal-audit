@@ -29,7 +29,7 @@ class Annual_audit_plan extends BE_Controller {
 		$year = date('Y');
 		$data_clean = [];
 		$query = get_data('tbl_annual_audit_plan a', [
-			'select' => 'a.id as id_audit_plan, a.id_audit_plan_group, concat(dep.section_name, " - ",dep.description) as label_department, dep.section_name as department, ak.aktivitas, sa.sub_aktivitas, ag.*, rc.id_risk',
+			'select' => 'a.id as id_audit_plan, a.id_audit_plan_group, dep.id as id_department, concat(dep.section_name, " - ",dep.description) as label_department, dep.section_name as department, ak.aktivitas, sa.sub_aktivitas, ag.*, rc.id_risk',
 			'join' => [
 				'tbl_audit_universe u on a.id_universe = u.id', 
 				'tbl_rcm rcm on u.id_rcm = rcm.id',
@@ -45,8 +45,7 @@ class Annual_audit_plan extends BE_Controller {
 			],
 			'order_by' => 'ag.year, dep.urutan'
 		])->result_array();
-		
-
+			
 		foreach($query as $v){
 			// Apply status filter early to reduce processing
 			$group_status = $v['status'];
@@ -56,12 +55,15 @@ class Annual_audit_plan extends BE_Controller {
 			if(!isset($data_clean[$v['year']][$v['label_department']]['data'])){
 				$data_clean[$v['year']][$v['label_department']]['data'] = [
 					'id_audit_plan_group' => $v['id_audit_plan_group'],
-					'objective'    => $v['objective'],
-					'start_date'   => $v['start_date'],
-					'end_date'     => $v['end_date'],
-					'closing_date' => $v['closing_date'],
-					'status'       => $v['status'],
-					'duration'     => 0,
+					'id_department' => $v['id_department'],
+					'objective'    	=> $v['objective'],
+					'start_date'   	=> $v['start_date'],
+					'end_date'     	=> $v['end_date'],
+					'closing_date' 	=> $v['closing_date'],
+					'status'       	=> $v['status'],
+					'auditee'     	=> $v['auditee'],
+					'auditor'     	=> $v['auditor'],
+					'duration'     	=> 0,
 					'expense_est_total' => 0,
 					'aktivitas' => []
 				];
@@ -123,20 +125,8 @@ class Annual_audit_plan extends BE_Controller {
 				}
 			}
 		}
-
-		// $expense_real = get_data('tbl_audit_plan_expense', [
-		// 	'where' => [
-		// 		'id_audit_plan' => $v['id_audit_plan'],
-		// 		'category' => 'real'
-		// 	]
-		// ])->result_array();
-
-		// foreach($expense_real as $e){
-		// 	if(isset($e['days']) && isset($e['amount'])){
-		// 		$query[$i]['expense_real_total'] += ((int)$e['days'] * (int)$e['amount']);
-		// 	}
-		// }
-	
+		$auditee = get_active_auditee();
+		$auditor = get_active_auditor();
 		$expense_item = get_data('tbl_expense_type', 'is_active', 1)->result_array();
 		render([
 			'data' => $data_clean,
@@ -144,10 +134,44 @@ class Annual_audit_plan extends BE_Controller {
 			'activity' => $activity,
 			'filter' => $filter,
 			'plan_status' => $plan_status,
-			'history_status' => $history_status
+			'history_status' => $history_status,
+			'auditee' => $auditee,
+			'auditor' => $auditor,
 		]);
 	}
 
+	function setAuditeeAuditor(){
+		$value = post('value');
+		$type = post('type');
+		$id_audit_plan_group = post('id_audit_plan_group');
+		$id_department = post('id_department');
+
+
+		$where = [
+			'id' => $id_audit_plan_group,
+			'id_department' => $id_department
+		];
+
+		if($type === 'auditee') {
+			$data['auditee'] = $value;
+		} else {
+			$data['auditor'] = $value;
+		}
+		
+		$save = update_data('tbl_annual_audit_plan_group', $data, $where);
+		if($save){
+			$response = [
+				'status' => 'success',
+				'message' => 'Data berhasil disimpan'
+			];
+		}else{
+			$response = [
+				'status' => 'error',
+				'message' => 'Data gagal disimpan'
+			];
+		}
+		render($response, 'json');
+	}
 	function getData(){
 		$id_audit_plan_group = post('id');
 		$data = get_data('tbl_annual_audit_plan a',[

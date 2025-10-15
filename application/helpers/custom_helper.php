@@ -2273,6 +2273,11 @@ function get_active_auditee(){
     return $data ?: [];
 }
 
+function get_active_auditor(){
+    $data = get_data('tbl_m_auditor', 'is_active', 1)->result_array();
+    return $data ?: [];
+}
+
 function get_active_user(){
     $data = get_data('tbl_user', 'is_active', 1)->result_array();
     return $data ?: [];

@@ -95,9 +95,11 @@
 														}
 														$summaryRows[] = [
 															'no' => $rowNo++,
+															'id_department' => $detail['id_department'] ?? '',
+															'id_plan_group' => $detail['id_audit_plan_group'] ?? '',
 															'department' => $deptName . (isset($detail['objective']) && $detail['objective'] ? '' : ''),
-															'auditor' => $detail['auditor'] ?? ($detail['auditor_name'] ?? ''),
-															'auditee' => $detail['auditee'] ?? ($detail['auditee_name'] ?? ''),
+															'auditor' => $detail['auditor'] ?? '',
+															'auditee' => $detail['auditee'] ?? '',
 															'expense' => isset($detail['expense_est_total']) ? number_format($detail['expense_est_total'],0,',','.') : '',
 															'months' => $months
 														];
@@ -127,8 +129,24 @@
 																	<tr>
 																		<td class="text-center" width="1px"><?=$r['no']?></td>
 																		<td class="w-25"><?=$r['department']?></td>
-																		<td class="text-nowrap text-center text-nowrap" style="width: 1px;"><?=$r['auditor']?></td>
-																		<td class="text-nowrap text-center text-nowrap" style="width: 1px;"><?=$r['auditee']?></td>
+																		<td width="10%" class="text-nowrap">
+																			<select class="select2 form-control auditor" name="auditor" data-id-plan-group="<?=$r['id_plan_group']?>" data-id-department="<?=$r['id_department']?>">
+																				<option value="">-- Auditor --</option>
+																				<?php foreach($auditor as $a) :?> 
+																					<option value="<?=$a['id']?>" <?= $r['auditor'] == $a['id'] ? 'selected' : '' ?>><?=$a['nama']?></option>
+																				<?php endforeach ?>
+																			</select>
+																		</td>
+																		<td width="10%" class="text-nowrap">
+																			<select class="select2 form-control auditee" name="auditee" data-id-plan-group="<?=$r['id_plan_group']?>" data-id-department="<?=$r['id_department']?>">
+																				<option value="">-- Auditee --</option>
+																				<?php foreach($auditee as $a) : ?>
+																					<option value="<?=$a['id']?>" <?= $r['auditee'] == $a['id'] ? 'selected' : '' ?>><?=$a['nama']?></option>
+																				<?php endforeach ?>
+																			</select>
+																		</td>
+																		<!-- <td class="text-nowrap text-center text-nowrap" style="width: 1px;"><?=$r['auditor']?></td>
+																		<td class="text-nowrap text-center text-nowrap" style="width: 1px;"><?=$r['auditee']?></td> -->
 																		<td class="text-right text-nowrap"><?=$r['expense']?></td>
 																		<?php for($m=1;$m<=12;$m++): $active=$r['months'][$m]; ?>
 																			<td class="text-center p-1 month-cell <?=$active?'active-month':''?>"></td>
@@ -504,6 +522,30 @@
 	?>
 
 <script type="text/javascript">
+
+	$(document).on('change', '.auditor', function(){
+		let id_plan_group = $(this).data('id-plan-group');
+		let id_department = $(this).data('id-department');
+		let value = $(this).val();
+
+		if(value.length == 0){
+			cAlert.open('Please select an auditor.', 'info');
+			return;
+		}
+		setAuditeeAuditor('auditor', id_plan_group, id_department, value);
+	})
+
+	$(document).on('change', '.auditee', function(){
+		let id_plan_group = $(this).data('id-plan-group');
+		let id_department = $(this).data('id-department');
+		let value = $(this).val();
+
+		if(value.length == 0){
+			cAlert.open('Please select an auditee.', 'info');
+			return;
+		}
+		setAuditeeAuditor('auditee', id_plan_group, id_department, value);
+	})
 	// Filter switch via AJAX (progressive enhancement)
 	$(document).on('click', '.filter-switch', function(e){
 		// Allow normal navigation if user opens in new tab
@@ -975,6 +1017,28 @@
 		}
 
 		return current;
+	}
+
+	function setAuditeeAuditor(type, id_audit_plan_group, id_department, value) {
+		let data = {};
+		if(type === 'auditee') {
+			data.value = value;
+		} else {
+			data.value = value;
+		}
+		data.type = type;
+		data.id_audit_plan_group = id_audit_plan_group;
+		data.id_department = id_department;
+
+		$.ajax({
+			url: base_url + 'internal/annual_audit_plan/setAuditeeAuditor',
+			type: 'post',
+			data: data,
+			dataType: 'json',
+			success: function(res){
+				cAlert.open(res.message, res.status);
+			}
+		});
 	}
 
 </script>
