@@ -254,18 +254,16 @@
 																						<?php endif; ?>
 																					</td>
 																					<td rowspan="<?=$count?>" width="1px" class="align-middle text-center text-nowrap">
-																						<?php if(empty($detail['end_date'])) : ?>
-																							<button class="btn btn-sm btn-outline-warning btn-icon-only btn-edit" type="button" data-id="<?=$detail['id_audit_plan_group']?>" title="Edit">
-																								<i class="fas fa-edit"></i>
-																							</button>
-																						<?php elseif($detail['status'] == 'planned'):
-																							?>
-																							<button class="btn btn-sm btn-outline-success btn-icon-only btn-completed" type="button" data-id="<?=$detail['id_audit_plan_group']?>" title="Completed">
-																								<i class="fas fa-check"></i>
-																							</button>
-																							<button class="btn btn-sm btn-outline-danger btn-icon-only btn-cancel" type="button" data-id="<?=$detail['id_audit_plan_group']?>" title="Cancel">
-																								<i class='fas fa-times'></i>
-																							</button>
+																						<?php if($detail['status'] == 'planned' || $detail['status'] == 'unplanned'):?>
+																						<button class="btn btn-sm btn-outline-warning btn-icon-only btn-edit" type="button" data-id="<?=$detail['id_audit_plan_group']?>" title="Edit">
+																							<i class="fas fa-edit"></i>
+																						</button>
+																						<button class="btn btn-sm btn-outline-success btn-icon-only btn-completed" type="button" data-id="<?=$detail['id_audit_plan_group']?>" title="Completed">
+																							<i class="fas fa-check"></i>
+																						</button>
+																						<button class="btn btn-sm btn-outline-danger btn-icon-only btn-cancel" type="button" data-id="<?=$detail['id_audit_plan_group']?>" title="Cancel">
+																							<i class='fas fa-times'></i>
+																						</button>
 																						<?php endif; ?>
 																					</td>
 																				<?php endif ?>
@@ -307,7 +305,7 @@
 								<div class='card-body p-3'>
 									<label class='form-label small text-muted'>Activity Type</label>
 									<select class='form-control form-control-sm mb-2 w-25' name='activity_type' id='activity_type' required>
-										<option value=''>-- Select Activity Type --</option>
+										<option value='' selected>-- Select Activity Type --</option>
 										<option value='full'>Full</option>
 										<option value='partial'>Partial</option>
 									</select>
@@ -334,43 +332,7 @@
 							<div class='card border-0 shadow-sm'>
 								<div class='card-body p-3'>
 									<div id='expense-est-container'>
-										<div class='expense-est-row mb-2'>
-											<div class='row align-items-center'>
-												<div class='col-2'>
-													<select class='form-control form-control-sm' name='expense_type[]' required>
-														<option value=''>-- Select Expense Item --</option>";
-														foreach($expense_item as $item){
-															echo "<option value='".$item['id']."'>".$item['name']."</option>";
-														}
-													echo "</select>
-												</div>
-												<div class='col-2'>
-													<input type='text' class='form-control money form-control-sm expense' name='expense_amount[]' placeholder='Amount' min='0' required>
-												</div>
-												<div class='col-1'>
-													<input type='number' class='form-control form-control-sm day-input' name='expense_day[]' placeholder='Days' min='0' required>
-												</div>
-												<div class='col-2'>
-													<input type='text' class='form-control money form-control-sm expense-est-input' name='total_amount[]' placeholder='Total Amount' min='0' required>
-												</div>
-												<div class='col-4'>
-													<input type='text' class='form-control form-control-sm note-input' name='expense_note[]' placeholder='Note' required>
-												</div>
-												<div class='col-1'>
-													<button type='button' class='btn btn-sm btn-outline-danger btn-icon-only remove-expense-est' style='display:none;'>
-														<i class='fas fa-trash'></i>
-													</button>
-												</div>
-											</div>
-										</div>
-									</div>
-									<div class='d-flex justify-content-between align-items-center mt-3 pt-3 border-top'>
-										<button type='button' class='btn btn-sm btn-outline-primary' id='add-expense-est'>
-											<i class='fas fa-plus me-1'></i> Add Item
-										</button>
-										<div class='text-muted'>
-											<small>Total: Rp <span id='total-expense-est' class='font-weight-bold'>0</span></small>
-										</div>
+										
 									</div>
 								</div>
 							</div>
@@ -620,23 +582,66 @@
 		toggle.attr('aria-expanded', 'false');
 	});
 
-	$(document).on('click', '.btn-edit', function(){
+	$(document).on('click', '.btn-edit', async function(){
 		let id = $(this).data('id');
-		$.ajax({
+		let res = await $.ajax({
 			url: base_url + 'internal/annual_audit_plan/getData',
 			type: 'post',
 			data: {id:id},
-			dataType: 'json',
-			success: function(res){
-				$('#id_plan').val(res.id);
-				$('#id_plan_group').val(res.id_audit_plan_group);
-				$('#start_date').val(res.start_date);
-				$('#durasi').val(res.durasi);
-				$('#expense').val(res.expense_est);
-				$('#objektif').val(res.objektif);
-				$('#mEdit').modal('show');
-			} 
+			dataType: 'json'
 		})
+		
+		$('#id_plan').val(res.id);
+		$('#id_plan_group').val(res.id_audit_plan_group);
+		$('#start_date').val(res.start_date);
+		$('#objektif').val(res.objective);
+		$('#activity_type').val(res.type || '');
+		if(res.type == null){
+			$('#activity-container').html('');
+			$('#activity-footer').remove();
+		}else{
+			generateActivityItem(res.activity);
+		}
+	
+		generateExpenseEst(res.expense);
+		// let html = '';
+		// $.each(res.expense, function(i, item){
+		// 	html += `
+		// 	<div class='expense-est-row mb-2'>
+		// 		<div class='row align-items-center'>
+		// 			<div class='col-2'>
+		// 				<select class='form-control form-control-sm' name='expense_type[]' required>
+		// 					<option value=''>-- Select Expense Item --</option>`;
+		// 					$.each(res.expense_type, function(j, v){
+		// 						let selected = item.expense_type == v.id ? 'selected' : '';
+		// 						html += `<option value='${v.id}' ${selected}>${v.name}</option>`;
+		// 					});
+		// 				html += `</select>
+		// 			</div>
+		// 			<div class='col-2'>
+		// 				<input type='text' class='form-control money form-control-sm expense' name='expense_amount[]' placeholder='Amount' min='0' value='${item.amount}' required>
+		// 			</div>
+		// 			<div class='col-1'>
+		// 				<input type='number' class='form-control form-control-sm day-input' name='expense_day[]' placeholder='Days' min='0' value='${item.days}' required>
+		// 			</div>
+		// 			<div class='col-2'>
+		// 				<input type='text' class='form-control money form-control-sm expense-est-input' name='total_amount[]' placeholder='Total Amount' min='0' value='${item.amount * item.days}' required>
+		// 			</div>
+		// 			<div class='col-4'>
+		// 				<input type='text' class='form-control form-control-sm note-input' name='expense_note[]' placeholder='Note' value='${item.note}' required>
+		// 			</div>
+		// 			<div class='col-1'>
+		// 				<button type='button' class='btn btn-sm btn-outline-danger btn-icon-only remove-expense-est' >
+		// 					<i class='fas fa-trash'></i>
+		// 				</button>
+		// 			</div>
+		// 		</div>
+		// 	</div>`;	
+		// });
+		// $('#expense-est-container').html(html);
+	
+		money_init();
+		$('#mEdit').modal('show');
 	})
 	$(document).on('click', '.btn-completed', function(){
 		let id = $(this).data('id');
@@ -712,7 +717,7 @@
 		});
 		
 		// Add expense estimate row
-		$('#add-expense-est').click(function() {
+		$(document).on('click', '#add-expense-est', function() {
 			const newRow = $('.expense-est-row:first').clone();
 			newRow.find('input').val('');
 			newRow.find('.remove-expense-est').show();
@@ -903,61 +908,21 @@
 	$(document).on('change', '#activity_type', function () {
 		let activityItem = JSON.parse($("#activity_item").val());
 		let type = $(this).val();
-
-		let html = `
-		`;
-
-		// Kumpulkan semua activity
-		$.each(activityItem, function (index, item) {
-			html += `
-			<div class='activity-row mb-2'>
-				<div class='row align-items-center mb-2'>
-					<div class='col-4'>
-						<input type='text' class='form-control form-control-sm' name='activity_name[]' value="${item}" placeholder='Activity Name' required >
-					</div>
-					<div class='col-3'>
-						<div class='input-group input-group-sm'>
-							<span class='input-group-text'>Start</span>
-							<input type='date' class='form-control start-date' name='start_duration[]' required>
-						</div>
-					</div>
-					<div class='col-1'>
-						<input type='number' class='form-control form-control-sm duration-input' name='duration[]' placeholder='Duration (Days)' min='0' required>
-					</div>
-					<div class='col-3'>
-						<div class='input-group input-group-sm'>
-							<span class='input-group-text'>End</span>
-							<input type='date' class='form-control end-date' name='end_duration[]' required>
-						</div>
-					</div>
-					<div class='col-1'>
-						<button type='button' class='btn btn-sm btn-icon-only btn-outline-danger d-none remove-activity'>
-							<i class='fas fa-trash'></i>
-						</button>
-					</div>
-				</div>
-			</div>
-			`;
-		});
-		$('#activity-container').html(html);
-
-		footer = `
-			<div id='activity-footer'>
-				<div class='d-flex justify-content-between align-items-center mt-3 pt-3 border-top'>
-					<button type='button' class='btn btn-sm btn-outline-primary' id='add-activity'>
-						<i class='fas fa-plus me-1'></i> Add Activity
-					</button>
-					<div class='text-muted'>
-						<small>Total Duration: <span id='total-duration' class='font-weight-bold'>0</span> Days</small>
-					</div>
-				</div>
-			</div>`;    
-	    $('#activity-footer').remove();
-		$('#activity-container').after(footer);	
+		let activityArray = activityItem.map(name => ({
+			activity_name: name,
+			start_date: '',
+			end_date: '',
+			duration_day: ''
+		}));
+		
+		generateActivityItem(activityArray);
 		if(type === 'full') {
 			$('.remove-activity').addClass('d-none');
-		} else {
+		} else if(type === 'partial') {
 			$('.remove-activity').removeClass('d-none');
+		}else{
+			$('#activity-container').html('');
+			$('#activity-footer').remove();
 		}
 	});
 
@@ -1040,5 +1005,156 @@
 			}
 		});
 	}
+
+	function generateActivityItem(data){
+		let html = '';
+		let duration = 0;
+		$.each(data, function (index, item) {
+			duration += parseInt(item.duration_day)
+			html += `
+				<div class='activity-row mb-2'>
+					<div class='row align-items-center mb-2'>
+						<div class='col-4'>
+							<input type='text' class='form-control form-control-sm' name='activity_name[]' value="${item.activity_name || ''} " placeholder='Activity Name' required >
+						</div>
+						<div class='col-3'>
+							<div class='input-group input-group-sm'>
+								<span class='input-group-text'>Start</span>
+								<input type='date' class='form-control start-date' name='start_duration[]' value="${item.start_date || ''}" required>
+							</div>
+						</div>
+						<div class='col-1'>
+							<input type='number' class='form-control form-control-sm duration-input' name='duration[]' value="${item.duration_day || ''}" placeholder='Duration (Days)' min='0' required>
+						</div>
+						<div class='col-3'>
+							<div class='input-group input-group-sm'>
+								<span class='input-group-text'>End</span>
+								<input type='date' class='form-control end-date' name='end_duration[]' value="${item.end_date || ''}" required>
+							</div>
+						</div>
+						<div class='col-1'>
+							<button type='button' class='btn btn-sm btn-icon-only btn-outline-danger d-none remove-activity'>
+								<i class='fas fa-trash'></i>
+							</button>
+						</div>
+					</div>
+				</div>`;
+				});
+			$('#activity-container').html(html);
+
+			footer = `
+				<div id='activity-footer'>
+					<div class='d-flex justify-content-between align-items-center mt-3 pt-3 border-top'>
+						<button type='button' class='btn btn-sm btn-outline-primary' id='add-activity'>
+							<i class='fas fa-plus me-1'></i> Add Activity
+						</button>
+						<div class='text-muted'>
+							<small>Total Duration: <span id='total-duration' class='font-weight-bold'>${duration || 0}</span> Days</small>
+						</div>
+					</div>
+				</div>`;    
+			$('#activity-footer').remove();
+			$('#activity-container').after(footer);	
+	}
+
+	async function generateExpenseEst(data) {
+				
+    try {
+		let res = await $.ajax({
+			url: base_url + 'internal/annual_audit_plan/getExpenseItem/1',
+			type: 'post',
+			dataType: 'json'
+		});	
+
+		let html = '';
+		if(!data || data.length == 0){
+			html += `
+			<div class='expense-est-row mb-2'>
+				<div class='row align-items-center'>
+					<div class='col-2'>
+						<select class='form-control form-control-sm' name='expense_type[]' required>
+							<option value=''>-- Select Expense Item --</option>`;
+							$.each(res, function(j, v){
+								html += `<option value='${v.id}'>${v.name}</option>`;
+							});
+						html += `</select>
+					</div>
+					<div class='col-2'>
+						<input type='text' class='form-control money form-control-sm expense' name='expense_amount[]' placeholder='Amount' min='0' required>
+					</div>
+					<div class='col-1'>
+						<input type='number' class='form-control form-control-sm day-input' name='expense_day[]' placeholder='Days' min='0' required>
+					</div>
+					<div class='col-2'>
+						<input type='text' class='form-control money form-control-sm expense-est-input' name='total_amount[]' placeholder='Total Amount' min='0' required>
+					</div>
+					<div class='col-4'>
+						<input type='text' class='form-control form-control-sm note-input' name='expense_note[]' placeholder='Note' required>
+					</div>
+					<div class='col-1'>
+						<button type='button' class='btn btn-sm btn-outline-danger btn-icon-only remove-expense-est' >
+							<i class='fas fa-trash'></i>
+						</button>
+					</div>
+				</div>
+			</div>`;	
+		}else{
+			$.each(data, function(i, item){
+				html += `
+				<div class='expense-est-row mb-2'>
+					<div class='row align-items-center'>
+						<div class='col-2'>
+							<select class='form-control form-control-sm' name='expense_type[]' required>
+								<option value=''>-- Select Expense Item --</option>`;
+								$.each(res, function(j, v){
+									let selected = item.expense_type == v.id ? 'selected' : '';
+									html += `<option value='${v.id}' ${selected}>${v.name}</option>`;
+								});
+							html += `</select>
+						</div>
+						<div class='col-2'>
+							<input type='text' class='form-control money form-control-sm expense' name='expense_amount[]' placeholder='Amount' min='0' value='${item.amount}' required>
+						</div>
+						<div class='col-1'>
+							<input type='number' class='form-control form-control-sm day-input' name='expense_day[]' placeholder='Days' min='0' value='${item.days}' required>
+						</div>
+						<div class='col-2'>
+							<input type='text' class='form-control money form-control-sm expense-est-input' name='total_amount[]' placeholder='Total Amount' min='0' value='${item.amount * item.days}' required>
+						</div>
+						<div class='col-4'>
+							<input type='text' class='form-control form-control-sm note-input' name='expense_note[]' placeholder='Note' value='${item.note}' required>
+						</div>
+						<div class='col-1'>
+							<button type='button' class='btn btn-sm btn-outline-danger btn-icon-only remove-expense-est' >
+								<i class='fas fa-trash'></i>
+							</button>
+						</div>
+					</div>
+				</div>`;	
+			});
+		}
+		$('#expense-est-container').html(html);
+		$('#expense-est-footer').remove();
+		
+		let footer = `
+			<div id='expense-est-footer'>
+				<div class='d-flex justify-content-between align-items-center mt-3 pt-3 border-top'>
+					<button type='button' class='btn btn-sm btn-outline-primary' id='add-expense-est'>
+						<i class='fas fa-plus me-1'></i> Add Item
+					</button>
+					<div class='text-muted'>
+						<small>Total: Rp <span id='total-expense-est' class='font-weight-bold'>0</span></small>
+					</div>
+				</div>
+			</div>`
+		$('#expense-est-container').after(footer);
+		money_init();
+		
+    } catch (err) {
+        console.error("Gagal load expense item:", err);
+    }
+}
+
+
 
 </script>

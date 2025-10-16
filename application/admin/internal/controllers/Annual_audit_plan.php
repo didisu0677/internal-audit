@@ -127,7 +127,7 @@ class Annual_audit_plan extends BE_Controller {
 		}
 		$auditee = get_active_auditee();
 		$auditor = get_active_auditor();
-		$expense_item = get_data('tbl_expense_type', 'is_active', 1)->result_array();
+		$expense_item = $this->getExpenseItem();
 		render([
 			'data' => $data_clean,
 			'expense_item' => $expense_item,
@@ -174,14 +174,27 @@ class Annual_audit_plan extends BE_Controller {
 	}
 	function getData(){
 		$id_audit_plan_group = post('id');
-		$data = get_data('tbl_annual_audit_plan a',[
+
+		$data = get_data('tbl_annual_audit_plan_group', 'id', $id_audit_plan_group)->row_array();
+		$data['id_audit_plan_group'] = $id_audit_plan_group;
+		
+		$activity = get_data('tbl_audit_plan_duration', 'id_audit_plan_group', $id_audit_plan_group)->result_array();
+		foreach($activity as $i => $a){
+			$activity[$i]['start_date'] = date('Y-m-d', strtotime($a['start_date']));
+			$activity[$i]['end_date'] = date('Y-m-d', strtotime($a['end_date']));
+		}
+		$data['activity'] = $activity;
+		$data['expense'] = get_data('tbl_audit_plan_expense', [
 			'join' => [
-				'tbl_annual_audit_plan_group ag on a.id_audit_plan_group = ag.id'
+				'tbl_expense_type et on tbl_audit_plan_expense.expense_type = et.id'
 			],
 			'where' => [
-				'a.id_audit_plan_group' => $id_audit_plan_group
+				'id_audit_plan_group' => $id_audit_plan_group,
+				'category' => 'est'
 			]
-		])->row_array();
+		])->result_array();
+
+		$data['expense_type'] = get_data('tbl_expense_type', 'is_active', 1)->result_array();
 		render($data,'json');
 	}
 
@@ -226,8 +239,15 @@ class Annual_audit_plan extends BE_Controller {
 				render($response, 'json');
 				return;
 			}
-
+			$cek = get_data('tbl_audit_plan_expense', [
+				'where' => [
+					'id_audit_plan_group' => $id_audit_plan_group,
+					'expense_type' => $type,
+					'category' => 'est'
+				]
+			])->row_array();
 			$insertExpense = [
+				'id' => $cek['id'] ?? 0,
 				'id_audit_plan_group' => $id_audit_plan_group,
 				'expense_type' => $type,
 				'category' => 'est',
@@ -235,8 +255,8 @@ class Annual_audit_plan extends BE_Controller {
 				'amount' => (int)$expense_amount[$i],
 				'note' => isset($expense_note[$i]) ? $expense_note[$i] : '',
 			];
-			insert_data('tbl_audit_plan_expense', $insertExpense);
-			// $expense_est += ((int)$expense_day[$i] * (int)$expense_amount[$i]);
+			
+			save_data('tbl_audit_plan_expense', $insertExpense);
 		}
 
 		$total_durasi = 0;
@@ -250,17 +270,24 @@ class Annual_audit_plan extends BE_Controller {
 				return;
 			}
 
+			$cek = get_data('tbl_audit_plan_duration', [
+				'where' => [
+					'id_audit_plan_group' => $id_audit_plan_group,
+					'activity_name' => $act
+				]
+			])->row_array();
 			$insertActivity = [
+				'id' => $cek['id'] ?? 0,
 				'id_audit_plan_group' => $id_audit_plan_group,
 				'activity_name' => $act,
 				'start_date' => isset($start_duration[$i]) ? $start_duration[$i] : null,
 				'duration_day' => (int)$duration[$i],
 				'end_date' => isset($end_duration[$i]) ? $end_duration[$i] : null,
 			];
-			insert_data('tbl_audit_plan_duration', $insertActivity);
+			
+			save_data('tbl_audit_plan_duration', $insertActivity);
 			$total_durasi += (int)$duration[$i];
 		}
-
 		$end_date = null;
 		if(!empty($start_date) && !empty($total_durasi)){
 			$end_date = $this->add_working_days($start_date, $total_durasi);
@@ -627,4 +654,38 @@ class Annual_audit_plan extends BE_Controller {
 		return $resp;
 	}
 
+	function getExpenseItem($view = null){
+		$data = get_data('tbl_expense_type', 'is_active', 1)->result_array();
+
+		if(empty($view)){
+			return $data;
+		}else{
+			render($data, 'json');
+		}
+	}
+
+	function dataFormEdit(){
+		$id_audit_plan_group = post('id_audit_plan_group');
+		$data = get_data('tbl_annual_audit_plan_group ag', [
+			'join' => [
+				'tbl_audit_plan_duration ad on ag.id = ad.id_audit_plan_group',
+				'tbl_audit_plan_expense ae on ag.id = ae.id_audit_plan_group',
+				'tbl_expense_type et on ae.expense_type = et.id',
+			],
+			'where' => [
+				'ag.id' => $id_audit_plan_group
+			]
+		])->result_array();
+		debug($data);die;
+		// $activity = get_data('tbl_audit_plan_duration', 'id_audit_plan_group', $id_audit_plan_group)->result_array();
+		// $expense = get_data('tbl_audit_plan_expense a', [
+		// 	'join' => [
+		// 		'tbl_expense_type et on a.expense_type = et.id'
+		// 	],
+		// 	'where' => [
+		// 		'a.category' => 'est',
+		// 		'a.id_audit_plan_group' => $id_audit_plan_group
+		// 	],
+		// ])->result_array();
+	}
 }
