@@ -242,12 +242,15 @@ class Annual_audit_plan extends BE_Controller {
 			$cek = get_data('tbl_audit_plan_expense', [
 				'where' => [
 					'id_audit_plan_group' => $id_audit_plan_group,
-					'expense_type' => $type,
 					'category' => 'est'
 				]
-			])->row_array();
+			])->result_array();
+			if($cek){
+				foreach($cek as $c){
+					delete_data('tbl_audit_plan_expense', 'id', $c['id']);
+				}
+			}
 			$insertExpense = [
-				'id' => $cek['id'] ?? 0,
 				'id_audit_plan_group' => $id_audit_plan_group,
 				'expense_type' => $type,
 				'category' => 'est',
@@ -273,11 +276,14 @@ class Annual_audit_plan extends BE_Controller {
 			$cek = get_data('tbl_audit_plan_duration', [
 				'where' => [
 					'id_audit_plan_group' => $id_audit_plan_group,
-					'activity_name' => $act
 				]
-			])->row_array();
+			])->result_array();
+			if($cek){
+				foreach($cek as $c){
+					delete_data('tbl_audit_plan_duration', 'id', $c['id']);
+				}
+			}
 			$insertActivity = [
-				'id' => $cek['id'] ?? 0,
 				'id_audit_plan_group' => $id_audit_plan_group,
 				'activity_name' => $act,
 				'start_date' => isset($start_duration[$i]) ? $start_duration[$i] : null,
