@@ -7,18 +7,7 @@ class Annual_audit_plan extends BE_Controller {
 	}
 
 	function index() {
-		$activity = [
-			'SPA, STA',
-			'Pemahaman Bisnis Proses (Incl. Interview)',
-			'Kick off Meeting',
-			'Permintaan & Pengumpulan Data',
-			'On-desk & on-site Audit (Incl. Interview)',
-			'Analisa Data & Perumusan Temuan',
-			'Pre-exit (Konfirmasi Temuan)',
-			'Exit Meeting, Questioner',
-			'CAPA', 
-			'LHA'
-		];
+		$activity = get_data('tbl_audit_plan_activity', 'is_active', 1)->result_array();
 
 		// Filter (plan | history) - default plan
 		$filter = get('filter');
@@ -132,6 +121,7 @@ class Annual_audit_plan extends BE_Controller {
 			'data' => $data_clean,
 			'expense_item' => $expense_item,
 			'activity' => $activity,
+			'duration' => $durasi,
 			'filter' => $filter,
 			'plan_status' => $plan_status,
 			'history_status' => $history_status,

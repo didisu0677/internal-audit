@@ -908,11 +908,11 @@
 	$(document).on('change', '#activity_type', function () {
 		let activityItem = JSON.parse($("#activity_item").val());
 		let type = $(this).val();
-		let activityArray = activityItem.map(name => ({
-			activity_name: name,
+		let activityArray = activityItem.map(item => ({
+			activity_name: item.activity,
 			start_date: '',
 			end_date: '',
-			duration_day: ''
+			duration_day: item.day
 		}));
 		
 		generateActivityItem(activityArray);
