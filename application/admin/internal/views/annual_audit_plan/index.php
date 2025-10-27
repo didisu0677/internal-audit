@@ -1,75 +1,63 @@
-<div class="content-header page-data">
-	<div class="main-container position-relative">
-		<div class="header-info">
-			<div class="content-title"><?php echo $title; ?></div>
-			<?php echo breadcrumb(); ?>
-		</div>
-		
-		<div class="float-right">   		
-    	</div>
-		<div class="clearfix"></div>
-			
-		</div>
-	</div>
-
 <div class="content-body mt-6">
 	<input type="hidden" id="activity_item" value="<?=htmlspecialchars(json_encode($activity))?>">
 	<div class="main-container mt-2">
-		<div class="row">
-			<div class="col-12">
-				<div class="text-right">
-					<div class="btn-group btn-group-sm" role="group" aria-label="Filter Plan History">
-						<?php 
-							$activeFilter = isset($filter)?$filter:'plan';
-							$baseUrl = base_url('internal/annual_audit_plan');
-						?>
-						<a href="<?="{$baseUrl}?filter=plan"?>" class="btn btn-outline-primary filter-switch <?=($activeFilter=='plan'?'active':'')?>" data-filter="plan">
-							<i class="fas fa-calendar-alt mr-1"></i> Plan
-						</a>
-						<a href="<?="{$baseUrl}?filter=history"?>" class="btn btn-outline-primary filter-switch <?=($activeFilter=='history'?'active':'')?>" data-filter="history">
-							<i class="fas fa-history mr-1"></i> History
-						</a>
+		<div class="row justify-content-center">
+			<div class="col-12 col-xl-11">
+				<div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
+					<div class="card-body py-3">
+						<div class="d-flex justify-content-between align-items-center">
+							<h3 class="mb-0 text-dark font-weight-bold">
+								Annual Audit Plan
+							</h3>
+							<div class="btn-group" role="group" aria-label="Filter Plan History">
+								<?php 
+									$activeFilter = isset($filter)?$filter:'plan';
+									$baseUrl = base_url('internal/annual_audit_plan');
+								?>
+								<a href="<?="{$baseUrl}?filter=plan"?>" class="btn btn-outline-primary filter-switch <?=($activeFilter=='plan'?'active':'')?>" data-filter="plan">
+									<i class="fas fa-calendar-alt mr-1"></i> Plan
+								</a>
+								<a href="<?="{$baseUrl}?filter=history"?>" class="btn btn-outline-primary filter-switch <?=($activeFilter=='history'?'active':'')?>" data-filter="history">
+									<i class="fas fa-history mr-1"></i> History
+								</a>
+							</div>
+						</div>
 					</div>
 				</div>
 				<div class="card shadow-sm border-0">
 					<div class="card-body p-4">
 						<div id="result">
 							<?php 
-							// $yearGroups = [];
-							// // Group data by year
-							// foreach($data as $val): 
-							// 	$year = $val['year'];
-							//     $dept = $val['label_department'];
-    						// 	$yearGroups[$year][$dept][] = $val;
-							// endforeach;
-							
 							foreach($data as $year => $departments):?>
 								<div class="mb-4">
 									<div class="card border-0 shadow-sm">
-										<div class="card-header bg-gradient-light border-0 py-3">
-											<h5 class="mb-0">
-												<div class="d-flex justify-content-between align-items-center w-100">
-													<button class="btn btn-link text-decoration-none text-dark p-0 font-weight-bold year-toggle flex-grow-1 text-left" 
-															type="button" 
-															data-toggle="collapse" 
-															data-target="#year-collapse<?=$year?>" 
-															aria-expanded="false" 
-															aria-controls="year-collapse<?=$year?>">
-														<div class="d-flex justify-content-between align-items-center">
+										<div class="card-header text-white border-0 py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);border-radius: 15px;">
+											<div class="d-flex justify-content-between align-items-center w-100">
+												<button class="btn btn-link text-white text-decoration-none p-0 font-weight-bold year-toggle flex-grow-1 text-left" 
+														type="button" 
+														data-toggle="collapse" 
+														data-target="#year-collapse<?=$year?>" 
+														aria-expanded="false" 
+														aria-controls="year-collapse<?=$year?>">
+													<div class="d-flex justify-content-between align-items-center">
+														<div class="d-flex align-items-center">
+															<i class="fas fa-chevron-down mr-3"></i>
 															<div>
-																<i class="fas fa-chevron-down me-2 text-primary"></i>
-																<span class="text-primary">Annual Audit Plan <?= $year ?></span>
+																<h4 class="mb-1 font-weight-bold text-white">Annual Audit Plan <?= $year ?></h4>
+																<small class="text-white-50">Click to expand audit plan details</small>
 															</div>
-															<span class="badge badge-primary">
-																<?= count($departments) ?> items
+														</div>
+														<div class="text-right">
+															<span class="badge badge-light text-primary font-weight-bold px-3 py-2">
+																<?= count($departments) ?> Department<?= count($departments) > 1 ? 's' : '' ?>
 															</span>
 														</div>
-													</button>
-													<button class="btn btn-sm btn-outline-primary ml-3 add-plan" type="button" data-year="<?=$year?>" title="Add Plan">
-														<i class="fas fa-plus"></i> Add Plan
-													</button>
-												</div>
-											</h5>
+													</div>
+												</button>
+												<button class="btn btn-light btn-sm ml-3 add-plan" type="button" data-year="<?=$year?>" title="Add New Plan">
+													<i class="fas fa-plus mr-2"></i>Add Plan
+												</button>
+											</div>
 										</div>
 										
 										<div class="collapse" id="year-collapse<?=$year?>" data-year="<?=$year?>">
@@ -907,6 +895,7 @@
 
 	$(document).on('change', '#activity_type', function () {
 		let activityItem = JSON.parse($("#activity_item").val());
+		
 		let type = $(this).val();
 		let activityArray = activityItem.map(item => ({
 			activity_name: item.activity,
