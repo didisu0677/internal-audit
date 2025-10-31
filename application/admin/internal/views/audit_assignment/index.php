@@ -1,83 +1,120 @@
-<div class="content-header page-data">
-	<div class="main-container position-relative">
-		<div class="header-info">
-			<div class="content-title"><?php echo $title; ?></div>
-			<?php echo breadcrumb(); ?>
-		</div>
-		<div class="clearfix"></div>
-	</div>
-</div>
-
 <div class="content-body mt-6">
 	<div class="main-container mt-2">
-		<div class="row">
-			<div class="col-12">
+		<div class="row justify-content-center">
+			<div class="col-12 col-xl-11">
+				<div class="card border-0 shadow-sm mb-4" style="border-radius: 15px;">
+					<div class="card-body py-3">
+						<div class="d-flex justify-content-between align-items-center">
+							<h3 class="mb-0 text-dark font-weight-bold">
+								Individual Audit Assignment
+							</h3>
+							<div class="btn-group" role="group" aria-label="Filter Assignment">
+								<?php 
+									$activeFilter = isset($filter)?$filter:'active';
+									$baseUrl = base_url('internal/audit_assignment');
+								?>
+								<a href="<?="{$baseUrl}?filter=active"?>" class="btn btn-outline-primary filter-switch <?=($activeFilter=='active'?'active':'')?>" data-filter="active">
+									<i class="fas fa-calendar-check mr-1"></i> Active
+								</a>
+								<a href="<?="{$baseUrl}?filter=history"?>" class="btn btn-outline-primary filter-switch <?=($activeFilter=='history'?'active':'')?>" data-filter="history">
+									<i class="fas fa-history mr-1"></i> History
+								</a>
+							</div>
+						</div>
+					</div>
+				</div>
 				<div class="card shadow-sm border-0">
 					<div class="card-body p-4">
 						<div id="result">
-							<?php foreach($data as $dept => $val): ?>
+							<?php foreach($data as $year => $departments): ?>
 								<div class="mb-4">
 									<div class="card border-0 shadow-sm">
-										<div class="card-header bg-gradient-light border-0 py-3">
-											<h5 class="mb-0">
-												<button class="btn btn-link text-decoration-none text-dark p-0 font-weight-bold dept-toggle flex-grow-1 text-left" 
-														type="button" 
-														data-toggle="collapse" 
-														data-target="#dept-collapse-<?=md5($dept)?>" 
-														aria-expanded="false" 
-														aria-controls="dept-collapse-<?=md5($dept)?>">
+										<div class="card-header text-white border-0 py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);border-radius: 15px;">
+											<button class="btn btn-link text-white text-decoration-none p-0 font-weight-bold year-toggle flex-grow-1 text-left" 
+													type="button" 
+													data-toggle="collapse" 
+													data-target="#year-collapse<?=$year?>" 
+													aria-expanded="false" 
+													aria-controls="year-collapse<?=$year?>">
 													<div class="d-flex justify-content-between align-items-center">
-														<div>
-															<i class="fas fa-chevron-down me-2 text-info"></i>
-															<span><?= $dept ?></span>
+														<div class="d-flex align-items-center">
+															<i class="fas fa-chevron-down mr-3"></i>
+															<div>
+																<h4 class="mb-1 font-weight-bold text-white">Audit Assignment <?=$year?></h4>
+																<small class="text-white-50">Click to expand assignment details</small>
+															</div>
 														</div>
 													</div>
 												</button>
-											</h5>
-										</div>
-										
-										<div class="collapse" id="dept-collapse-<?=md5($dept)?>">
-											<div class="table-responsive">
-												<table class="table table-hover mb-0">
-													<thead class="bg-light">
-														<tr>
-															<th class="border-0 text-muted small">Section</th>
-															<th class="border-0 text-muted small">Aktivitas</th>
-															<th class="border-0 text-muted small">Audit Area</th>
-															<th class="border-0 text-muted small">Kriteria</th>
-															<th class="border-0 text-muted small">Risk</th>
-															<th class="border-0 text-muted small">Internal Control</th>
-															<th class="border-0 text-muted small">Pengujian</th>
-															<th class="border-0 text-muted small">Hasil Review</th>
-															<th class="border-0 text-muted small">Finding</th>
-															<th class="border-0 text-muted small">Bobot Finding</th>
-															<th class="border-0 text-muted small">Unconformity</th>
-															<th class="border-0 text-muted small">Dampak</th>
-															<th class="border-0 text-muted small">Root Cause</th>
-															<th class="border-0 text-muted small">Recommendation</th>
-															<th class="border-0 text-muted small">Finding Control Status Finding</th>
-															<th class="border-0 text-muted small">CAPA</th>
-															<th class="border-0 text-muted small">Deadline CAPA</th>
-															<th class="border-0 text-muted small">PIC CAPA</th>
-															<th class="border-0 text-muted small text-center">Action</th>
-														</tr>
-													</thead>
-													<tbody class="department-data" data-group-id="<?=$val['id_audit_plan_group']?>">
-														<tr>
-															<td colspan="20" class="text-center py-4">
-																<div class="spinner-border spinner-border-sm text-primary mr-2" role="status">
-																	<span class="sr-only">Loading...</span>
+											</div>
+											<div class="collapse" id="year-collapse<?=$year?>" data-year="<?=$year?>">
+												<div class="card-body p-0">
+													<?php foreach($departments as $dept => $deptData): ?>
+														<div class="border-bottom">
+															<div class="p-3 bg-light font-weight-bold">
+																<button class="btn btn-link text-decoration-none text-dark p-0 font-weight-bold dept-toggle flex-grow-1 text-left" 
+																			type="button" 
+																			data-toggle="collapse" 
+																			data-target="#dept-collapse<?=$year?>-<?=md5($dept)?>" 
+																			aria-expanded="false" 
+																			aria-controls="dept-collapse<?=$year?>-<?=md5($dept)?>">
+																		<div class="d-flex justify-content-between align-items-center">
+																			<div>
+																				<i class="fas fa-chevron-down me-2 text-info"></i>
+																				<span><?= $dept ?></span>
+																			</div>
+																			<!-- <span class="badge badge-info ml-2 assignment-count">Loading...</span> -->
+																		</div>
+																	</button>
 																</div>
-																Loading audit assignments...
-															</td>
-														</tr>
-													</tbody>
-												</table>
+																<div class="collapse" id="dept-collapse<?=$year?>-<?=md5($dept)?>">
+																	<div class="table-responsive" style="max-height: 70vh; overflow-y: auto;">
+																		<table class="table table-hover table-bordered mb-0">
+																			<thead class="bg-light text-center sticky-top">
+																				<tr>
+																					<th class="border-0 text-muted small bg-light">Section</th>
+																					<th class="border-0 text-muted small bg-light">Aktivitas</th>
+																					<th class="border-0 text-muted small bg-light">Audit Area</th>
+																					<th class="border-0 text-muted small bg-light">Kriteria</th>
+																					<th class="border-0 text-muted small bg-light">Risk</th>
+																					<th class="border-0 text-muted small bg-light">Internal Control</th>
+																					<th class="border-0 text-muted small bg-light">Pengujian</th>
+																					<th class="border-0 text-muted small bg-light">Hasil Review</th>
+																					<th class="border-0 text-muted small bg-light">Finding</th>
+																					<th class="border-0 text-muted small bg-light">Bobot Finding</th>
+																					<th class="border-0 text-muted small bg-light">Unconformity</th>
+																					<th class="border-0 text-muted small bg-light">Dampak</th>
+																					<th class="border-0 text-muted small bg-light">Root Cause</th>
+																					<th class="border-0 text-muted small bg-light">Recommendation</th>
+																					<th class="border-0 text-muted small bg-light">Finding Control Status Finding</th>
+																					<th class="border-0 text-muted small bg-light">CAPA</th>
+																					<th class="border-0 text-muted small bg-light">Deadline CAPA</th>
+																					<th class="border-0 text-muted small bg-light">PIC CAPA</th>
+																					<th class="border-0 text-muted small bg-light">Attachment</th>
+																					<th class="border-0 text-muted small bg-light">Action</th>
+																				</tr>
+																			</thead>
+																			<tbody class="department-data" data-group-id="<?=$deptData['id_audit_plan_group']?>">
+																				<tr>
+																					<td colspan="20" class="text-center py-4">
+																						<div class="spinner-border spinner-border-sm text-primary mr-2" role="status">
+																							<span class="sr-only">Loading...</span>
+																						</div>
+																						Loading audit assignments...
+																					</td>
+																				</tr>
+																			</tbody>
+																		</table>
+																	</div>
+																</div>
+															</div>
+														<?php endforeach; ?>
+													</div>
 											</div>
 										</div>
 									</div>
-								</div>
-							<?php endforeach; ?>
+								<?php endforeach; ?>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -85,48 +122,151 @@
 		</div>
 	</div>
 </div>
-</div>
 <?php 
-modal_open('modal-form');
+modal_open('modal-form','Edit Field', 'modal-lg');
 	modal_body();
-		form_open(base_url('internal/audit_assignment/save'),'post','form');
+		// form_open(base_url('internal/audit_assignment/save'),'post','form');
 			col_init(3,9);
 			input('hidden','id','id');
-			input('text',lang('id_plan'),'id_plan');
-			input('text',lang('id_risk_control'),'id_risk_control');
-			input('datetime',lang('audit_start_date'),'audit_start_date');
-			input('datetime',lang('audit_end_date'),'audit_end_date');
-			input('datetime',lang('audit_closing_date'),'audit_closing_date');
-			input('text',lang('auditor'),'auditor');
-			input('text',lang('auditee'),'auditee');
-			textarea(lang('review_result'),'review_result');
-			textarea(lang('finding'),'finding');
-			input('text',lang('bobot_finding'),'bobot_finding');
-			textarea(lang('unconformity'),'unconformity');
-			textarea(lang('risk_finding'),'risk_finding');
-			textarea(lang('root_cause'),'root_cause');
-			textarea(lang('recomendation'),'recomendation');
-			input('text',lang('status_finding'),'status_finding');
-			textarea(lang('capa'),'capa');
-			input('datetime',lang('deadline_capa'),'deadline_capa');
-			input('text',lang('pic_capa'),'pic_capa');
-			form_button(lang('simpan'),lang('batal'));
+			input('hidden','field_name','field_name');
+			echo '<div class="form-group row">';
+				echo '<div class="col-md-12">';
+					echo '<textarea id="field-editor" name="field_value" class="form-control"></textarea>';
+				echo '</div>';
+			echo '</div>';
+			echo '<div class="form-group row">';
+				echo '<div class="col-md-12 text-center">';
+					echo '<button type="button" class="btn btn-primary mr-2" id="btn_simpan">'.lang('simpan').'</button>';
+					echo '<button type="button" class="btn btn-secondary mr-2" id="btn_batal">'.lang('batal').'</button>';
+				echo '</div>';
+			echo '</div>';
+			// form_button(lang('simpan'),lang('batal'));
 		form_close();
 	modal_footer();
 modal_close();
-modal_open('modal-import',lang('impor'));
+
+modal_open('modal-attachment','Attachment', 'modal-lg');
 	modal_body();
-		form_open(base_url('internal/audit_assignment/import'),'post','form-import');
+		form_open(base_url('internal/audit_assignment/attach_file'),'post','form-attachment');
 			col_init(3,9);
-			fileupload('File Excel','fileimport','required','data-accept="xls|xlsx"');
-			form_button(lang('impor'),lang('batal'));
+			fileupload('File','file','required','data-accept="xls|xlsx"');
+			form_button(lang('simpan'),lang('batal'));
 		form_close();
 modal_close();
 ?>
 
-
+<script type="text/javascript" src="<?php echo base_url('assets/plugins/ckeditor/ckeditor.js') ?>"></script>
 <script>
+	// AJAX filter switch similar to Annual Audit Plan
+	$(document).on('click', '.filter-switch', function(e){
+		if(e.ctrlKey || e.metaKey || e.shiftKey) return; // allow open in new tab
+		e.preventDefault();
+		var url = $(this).attr('href');
+		$('.filter-switch').removeClass('active');
+		$(this).addClass('active');
+		$('#result').html('<div class="text-center p-5"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div><div class="mt-2 small text-muted">Loading '+$(this).data('filter')+'...</div></div>');
+		$.get(url, function(html){
+			var temp = $('<div>').html(html);
+			var newContent = temp.find('#result').html();
+			if(newContent){
+				$('#result').html(newContent);
+				$(document).trigger('content:rebind');
+			}else{
+				location.href = url; // fallback
+			}
+		});
+	});
+
+	// Rebinding after AJAX replace
+	$(document).on('content:rebind', function(){
+		$('.year-toggle .fas').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+	});
+
 	$(document).ready(function() {
+		// Auto expand nearest year collapse on load (current year or closest)
+		(function autoOpenNearestYear(){
+			var nowYear = (new Date()).getFullYear();
+			var nearestBtn = null;
+			var nearestDiff = Infinity;
+			$('.year-toggle').each(function(){
+				var txt = $(this).text();
+				var match = txt.match(/(20\d{2})/);
+				if(match){
+					var y = parseInt(match[1]);
+					var diff = Math.abs(y - nowYear);
+					if(diff < nearestDiff){
+						nearestDiff = diff;
+						nearestBtn = $(this);
+					}
+				}
+			});
+			if(nearestBtn){
+				var target = nearestBtn.data('target');
+				$(target).collapse('show');
+				nearestBtn.find('.fas').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+				nearestBtn.attr('aria-expanded','true');
+			}
+		})();
+
+		// Allow only one year open at a time
+		$(document).on('click', '.year-toggle', function(){
+			let targetCollapse = $(this).data('target');
+			$('.year-toggle').not(this).each(function(){
+				let otherTarget = $(this).data('target');
+				if(otherTarget !== targetCollapse){
+					$(otherTarget).collapse('hide');
+					$(this).attr('aria-expanded','false');
+					$(this).find('.fas').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+				}
+			});
+		});
+
+		// Only one department open within same year
+		$(document).on('click', '.dept-toggle', function () {
+			if (isEditing) return false;
+
+			const $button = $(this);
+			const targetCollapse = $button.attr('aria-controls');
+			const $collapse = $('#' + targetCollapse);
+			const $tbody = $collapse.find('.department-data');
+			const groupId = $tbody.data('group-id');
+
+			// Pastikan element ditemukan
+			if (!groupId) return;
+
+			// Load data hanya kalau belum pernah dimuat atau kosong
+			if (!$tbody.data('loaded')) {
+				loadDepartmentData(groupId, $tbody);
+			}
+		});
+
+
+		// Icon update on collapse show/hide
+		$(document).on('shown.bs.collapse', '.collapse', function(){
+			let toggle = $(`[data-target="#${this.id}"]`);
+			toggle.find('.fas').removeClass('fa-chevron-down').addClass('fa-chevron-up');
+			toggle.attr('aria-expanded','true');
+		});
+		$(document).on('hidden.bs.collapse', '.collapse', function(){
+			let toggle = $(`[data-target="#${this.id}"]`);
+			toggle.find('.fas').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+			toggle.attr('aria-expanded','false');
+		});
+		CKEDITOR.replace("field-editor", {
+			height: 250,
+		    extraPlugins: 'font',
+			toolbar: [
+				{ name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'Strike', 'RemoveFormat'] },
+		        { name: 'paragraph',   items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'] },
+				{ name: 'insert',      items: ['Table', 'HorizontalRule'] },
+				{ name: 'links',       items: ['Link', 'Unlink'] },
+				{ name: 'clipboard',   items: ['Undo', 'Redo'] },
+				{ name: 'styles',      items: ['Format', 'FontSize'] }
+			],
+			format_tags: 'p;h4;h5;pre',
+    		fontSize_sizes: '10/10px;11/11px;12/12px;14/14px;16/16px;18/18px;20/20px;22/22px;24/24px'
+		});
+
 		let isEditing = false;
 		let originalValue = '';
 		let loadedDepartments = [];
@@ -137,129 +277,52 @@ modal_close();
 			
 			const $cell = $(this);
 			const field = $cell.data('field');
-			originalValue = $cell.text().trim();
-			
-			// Create input element
-			let inputElement;
-			if (field === 'finding' || field === 'review_result' || field === 'root_cause' || field === 'recomendation' || field === 'unconformity' || field === 'risk_finding' || field === 'capa') {
-				inputElement = $('<textarea class="inline-input"></textarea>');
-			} else {
-				inputElement = $('<input type="text" class="inline-input">');
-			}
-			
-			inputElement.val(originalValue);
-			
-			// Replace cell content
-			$cell.addClass('editing').html(inputElement);
-			inputElement.focus().select();
-			isEditing = true;
-			
-			// Add editing indicator
-			$cell.append('<i class="fas fa-edit editing-indicator"></i>');
-		});
-		
-		// Status editing with dropdown
-		$(document).on('click', '.editable-status', function() {
-			if (isEditing) return;
-			
-			const $badge = $(this);
-			const currentStatus = $badge.data('value');
-			const currentColor = $badge.data('color');
-			originalValue = {status: currentStatus, color: currentColor};
-			
-			const statusOptions = [
-				{status: 'Open', color: 'warning'},
-				{status: 'In Progress', color: 'info'},
-				{status: 'Closed', color: 'success'},
-				{status: 'Cancelled', color: 'danger'}
-			];
-			
-			let selectElement = $('<select class="status-dropdown"></select>');
-			statusOptions.forEach(option => {
-				const selected = option.status === currentStatus ? 'selected' : '';
-				selectElement.append(`<option value="${option.status}" data-color="${option.color}" ${selected}>${option.status}</option>`);
-			});
-			
-			$badge.addClass('editing').html(selectElement);
-			selectElement.focus();
-			isEditing = true;
-		});
-		
-		// Save on Enter key
-		$(document).on('keydown', '.inline-input, .status-dropdown', function(e) {
-			if (e.key === 'Enter' && !e.shiftKey) {
-				e.preventDefault();
-				saveInlineEdit($(this));
-			} else if (e.key === 'Escape') {
-				cancelInlineEdit($(this));
-			}
-		});
-		
-		// Save on blur (when leaving the field)
-		$(document).on('blur', '.inline-input, .status-dropdown', function() {
-			saveInlineEdit($(this));
-		});
-		
-		// Save inline edit
-		function saveInlineEdit($input) {
-			if (!isEditing) return;
-			
-			const $cell = $input.closest('.editable, .editable-status');
-			const field = $cell.data('field');
 			const rowId = $cell.closest('tr').data('id');
-			let newValue = $input.val().trim();
+			originalValue = $cell.html().trim();
 			
-			// Handle status field
-			if ($cell.hasClass('editable-status')) {
-				const selectedOption = $input.find('option:selected');
-				const newStatus = selectedOption.val();
-				const newColor = selectedOption.data('color');
-				
-				$cell.removeClass('editing').html(`<span class="badge badge-${newColor} editable-status" data-field="status_finding" data-value="${newStatus}" data-color="${newColor}">${newStatus}</span>`);
-				newValue = newStatus;
-			} else {
-				$cell.removeClass('editing').html(newValue || originalValue);
+			// Set modal data
+			$('#modal-form').find('[name="id"]').val(rowId);
+			$('#modal-form').find('[name="field_name"]').val(field);
+			$('#field-label').text(field.replace(/_/g, ' ').toUpperCase());
+			
+			// Set CKEditor content
+			if (CKEDITOR.instances['field-editor']) {
+				CKEDITOR.instances['field-editor'].setData(originalValue);
 			}
+			$('#modal-form').modal('show');
+		});
+
+		$(document).on('click', '#btn_batal', function() {
+			$('#modal-form').modal('hide');
+		});
+
+		// Handle form submission
+		$(document).on('click', '#btn_simpan', function(e) {
+			e.preventDefault();
+			
+			const formData = {
+				id: $('[name="id"]').val(),
+				field: $('[name="field_name"]').val(),
+				value: CKEDITOR.instances['field-editor'].getData()
+			};
 			
 			$.ajax({
-                url: '<?= base_url('internal/audit_assignment/update_field') ?>',
-                type: 'POST',
-                dataType: 'json',
-                data: {
-                    id: rowId,
-                    field: field,
-                    value: newValue
-                },
-                success: function(response) {
-                    $cell.removeClass('saving');
-                    
-                    if (response.status === 'success') {
-                        $cell.addClass('save-success');
-                        console.log(`Successfully saved ${field}: ${newValue} for ID: ${rowId}`);
-                    } else {
-        				$cell.html(originalValue);                            
-                    }
+				url: '<?= base_url('internal/audit_assignment/save') ?>',
+				type: 'POST',
+				dataType: 'json',
+				data: formData,
+				success: function(response) {
+					if (response.status === 'success') {
+						// Update the cell with new content
+						const $cell = $(`tr[data-id="${formData.id}"] .editable[data-field="${formData.field}"]`);
+						$cell.html(formData.value);
+						$('#modal-form').modal('hide');
+					}
 					cAlert.open(response.message, response.status);
-					isEditing = false;
-                },
-			})
-		}
-		
-		// Cancel inline edit
-		function cancelInlineEdit($input) {
-			const $cell = $input.closest('.editable, .editable-status');
+				}
+			});
+		});
 			
-			if ($cell.hasClass('editable-status')) {
-				const status = originalValue.status;
-				const color = originalValue.color;
-				$cell.removeClass('editing').html(`<span class="badge badge-${color} editable-status" data-field="status_finding" data-value="${status}" data-color="${color}">${status}</span>`);
-			} else {
-				$cell.removeClass('editing').html(originalValue);
-			}
-			
-			isEditing = false;
-		}
-		
 		// Prevent accordion collapse when editing
 		$(document).on('click', '.editable, .editable-status', function(e) {
 			if (isEditing) {
@@ -297,6 +360,12 @@ modal_close();
 			const $toggle = $(`[aria-controls="${collapseId}"]`);
 			$toggle.find('i').removeClass('fa-chevron-up').addClass('fa-chevron-down');
 		});
+
+		$(document).on('click', '.attachment', function() {
+			const rowId = $(this).data('id');
+			console.log(rowId);
+			$('#modal-attachment').modal('show');
+		});
 		
 		// Load data for specific department
 		function loadDepartmentData(groupId) {
@@ -313,7 +382,7 @@ modal_close();
 				type: 'POST',
 				dataType: 'json',
 				success: function(res){
-					
+					console.log(res);
 					let html = '';
 					
 					if (res.length === 0) {
@@ -326,30 +395,44 @@ modal_close();
 					} else {
 						res.forEach(function(item, index) {
 							html += `<tr data-id="${item.id}">
-								<td class="align-middle" style="width: 120px; min-width: 120px;" data-field="section_name">${item.section || ''}</td>
-								<td class="align-middle" style="width: 200px; min-width: 200px;" data-field="aktivitas">${item.aktivitas || ''}</td>
-								<td class="align-middle" style="width: 150px; min-width: 150px;" data-field="audit_area">${item.sub_aktivitas || ''}</td>
-								<td class="align-middle" style="width: 180px; min-width: 180px;" data-field="kriteria"></td>
-								<td class="align-middle" style="width: 200px; min-width: 200px;" data-field="risk">${item.risk || ''}</td>
-								<td class="align-middle" style="width: 180px; min-width: 180px;" data-field="internal_control"></td>
-								<td class="align-middle editable" style="width: 150px; min-width: 150px;" data-field="pengujian"></td>
-								<td class="align-middle editable" style="width: 220px; min-width: 220px;" data-field="hasil_review">${item.hasil_review || ''}</td>
-								<td class="align-middle editable" style="width: 250px; min-width: 250px;" data-field="finding">${item.finding || ''}</td>
+								<td class="align-middle text-center" style="width: 120px; min-width: 120px;" data-field="section_name">${item.section || ''}</td>
+								<td class="align-middle text-center" style="width: 200px; min-width: 200px;" data-field="aktivitas">${item.aktivitas || ''}</td>
+								<td class="align-middle text-center" style="width: 150px; min-width: 150px;" data-field="audit_area">${item.sub_aktivitas || ''}</td>
+								<td class="align-middle text-center" style="width: 180px; min-width: 180px;" data-field="kriteria"></td>
+								<td class="align-middle text-center" style="width: 200px; min-width: 200px;" data-field="risk">
+									`
+									item.risk.forEach(function(risk) {
+										html += `<div class="mb-3 bg-light p-2 rounded">
+											${risk.risk}
+										</div>`;
+									});
+								html += `
+								</td>
+
+								<td class="align-middle text-center" style="width: 180px; min-width: 180px;" data-field="internal_control">
+									`
+									item.internal_control.forEach(function(ic) {
+										html += `<div class="mb-3 bg-light p-2 rounded">
+											${ic.internal_control}
+										</div>`;
+									});
+								html += `</td>
+								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="pengujian">${item.pengujian || ''}</td>
+								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="hasil_review">${item.hasil_review || ''}</td>
+								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="finding">${item.finding || ''}</td>
 								<td class="align-middle text-center editable" style="width: 80px; min-width: 80px;" data-field="bobot_finding">${item.bobot_finding || ''}</td>
-								<td class="align-middle editable" style="width: 200px; min-width: 200px;" data-field="unconformity">${item.unconformity || ''}</td>
-								<td class="align-middle editable" style="width: 180px; min-width: 180px;" data-field="dampak">${item.dampak || ''}</td>
-								<td class="align-middle editable" style="width: 200px; min-width: 200px;" data-field="root_cause">${item.root_cause || ''}</td>
-								<td class="align-middle editable" style="width: 220px; min-width: 220px;" data-field="recommendation">${item.recommendation || ''}</td>
-								<td class="align-middle editable" style="width: 200px; min-width: 200px;" data-field="capa">${item.capa || ''}</td>
+								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="unconformity">${item.unconformity || ''}</td>
+								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="dampak">${item.dampak || ''}</td>
+								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="root_cause">${item.root_cause || ''}</td>
+								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="recommendation">${item.recommendation || ''}</td>
+								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="capa">${item.capa || ''}</td>
 								<td class="align-middle text-nowrap editable" style="width: 120px; min-width: 120px;" data-field="deadline_capa">${item.deadline_capa || ''}</td>
 								<td class="align-middle editable" style="width: 120px; min-width: 120px;" data-field="pic_capa">${item.pic_capa || ''}</td>
 								<td style="width: 150px; min-width: 150px;"></td>
+								<td class="align-middle attachment" style="width: 150px; min-width: 150px;" data-id="${item.id}"></td>
 								<td class="align-middle text-center text-nowrap" style="width: 100px; min-width: 100px;">
-									<button class="btn btn-sm btn-outline-warning btn-icon-only btn-edit" type="button" data-id="${item.id}" title="Edit">
-										<i class="fas fa-edit"></i>
-									</button>
-									<button class="btn btn-sm btn-outline-danger btn-icon-only btn-delete" type="button" data-id="${item.id}" title="Delete">
-										<i class="fas fa-trash"></i>
+									<button class="btn btn-sm btn-primary btn-icon-only btn-completed" type="button" data-id="${item.id}" title="Completed">
+										<i class="fas fa-check"></i>
 									</button>
 								</td>
 							</tr>`;
@@ -357,54 +440,11 @@ modal_close();
 					}
 					tbody.html(html);
 				
-					// Update counter
-					badge.removeClass('badge-secondary').addClass('badge-info');
+					// Update counter with number of assignments loaded
+					badge.removeClass('badge-secondary').addClass('badge-info').text(res.length + ' item' + (res.length!==1?'s':''));
 				}
 				
 			})
 		}
-		
-		$(document).on('click', '.btn-edit', function() {
-			const id = $(this).data('id');
-			
-			// Create dummy data for editing
-			const dummyData = {
-				id: id,
-				id_plan: `AP-${Math.floor(Math.random() * 1000)}`,
-				auditor_name: 'Sample Auditor',
-				auditee_name: 'Sample Auditee',
-				audit_start_date: '2024-01-15',
-				audit_end_date: '2024-01-30'
-			};
-			
-			alert(`Edit mode for ID: ${id}\nData: ${JSON.stringify(dummyData, null, 2)}`);
-			
-			// Uncomment below to actually open modal if it exists
-			// $('#modal-form').modal('show');
-			// Object.keys(dummyData).forEach(key => {
-			//     $(`[name="${key}"]`).val(dummyData[key]);
-			// });
-		});
-		
-		$(document).on('click', '.btn-delete', function() {
-			const id = $(this).data('id');
-			if (confirm('Are you sure you want to delete this audit assignment?')) {
-				// Simulate delete operation
-				const row = $(this).closest('tr');
-				
-				// Add fade out animation
-				row.fadeOut(300, function() {
-					$(this).remove();
-					
-					// Update counter
-					const assignId = $(this).closest('.department-data').data('assign-id');
-					const remainingRows = $(`.department-data[data-assign-id="${assignId}"] tr`).length;
-					const badge = $(`.department-data[data-assign-id="${assignId}"]`).closest('.card').find('.assignment-count');
-				});
-				
-				// Show success message
-				alert('Audit assignment deleted successfully!');
-			}
-		});
 	});
 </script>

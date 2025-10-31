@@ -9,8 +9,14 @@ class Audit_assignment extends BE_Controller {
 	}
 
 	function index() {
+		$filter = get('filter') ?? 'active';
+		$where = ['aa.status' => 'active'];
+		
+		if($filter != 'active'){
+			$where = ['aa.status' => 'history'];
+		}
 		$query = get_data('tbl_annual_audit_plan a', [
-			'select' => 'aa.id as id_audit_assignment, concat(dep.section_name, " - ",dep.description) as label_department, a.id as id_audit_plan, a.id_audit_plan_group, dep.section_name as department, ak.aktivitas, sa.sub_aktivitas, rc.id_risk, s.section_name as section',
+			'select' => 'aa.id as id_audit_assignment, concat(dep.section_name, " - ",dep.description) as label_department, a.id as id_audit_plan, a.id_audit_plan_group, dep.section_name as department, ak.aktivitas, sa.sub_aktivitas, rc.id_risk, s.section_name as section, ag.year, aa.status',
 			'join' => [
 				'tbl_audit_universe u on a.id_universe = u.id', 
 				'tbl_rcm rcm on u.id_rcm = rcm.id',
@@ -22,21 +28,33 @@ class Audit_assignment extends BE_Controller {
 				'tbl_annual_audit_plan_group ag on ag.id = a.id_audit_plan_group',
 				'tbl_individual_audit_assignment aa on aa.id_audit_plan = a.id'
 			],		
-			'order_by' => 'dep.urutan'
+			'where' => $where,
+			'order_by' => 'ag.year, dep.urutan'
 		])->result_array();
 
 		foreach($query as $row) {
-			$data_grouped[$row['label_department']]['id_audit_plan_group'] = $row['id_audit_plan_group'];
-			$data_grouped[$row['label_department']]['section'] = $row['section'];
+			$y = $row['year'];
+			$dept_key = $row['label_department'];
+			if(!isset($data_grouped[$y][$dept_key])) {
+				$data_grouped[$y][$dept_key] = [
+					'id_audit_plan_group' => $row['id_audit_plan_group'],
+					'section' => $row['section'],
+					'count' => 0
+				];
+			}
+			$data_grouped[$y][$dept_key]['count']++;
 		}
-
-		render(['data' => $data_grouped]);
+		
+		render([
+			'data' => $data_grouped ?? [],
+			'filter' => $filter,
+		]);
 	}
 
 	function data() {
 		$id = post('id');
 		$query = get_data('tbl_annual_audit_plan a', [
-			'select' => 'aa.*, a.id as id_audit_plan, a.id_audit_plan_group, dep.section_name as department, ak.aktivitas, sa.sub_aktivitas, rc.id_risk, s.section_name as section',
+			'select' => 'aa.*, a.id as id_audit_plan, a.id_audit_plan_group, dep.section_name as department,ak.id as id_aktivitas, ak.aktivitas, sa.sub_aktivitas, rc.id_risk, s.section_name as section',
 			'join' => [
 				'tbl_audit_universe u on a.id_universe = u.id', 
 				'tbl_rcm rcm on u.id_rcm = rcm.id',
@@ -58,13 +76,14 @@ class Audit_assignment extends BE_Controller {
 		foreach($query as $row) {
 			$id_risk = json_decode($row['id_risk'],true);
 			$data_risk = get_data('tbl_risk_register','id',$id_risk)->result_array();
-			$risk = implode(', ',array_column($data_risk,'risk'));
+			// $risk = implode(', ',array_column($data_risk,'risk'));
+			$internal_control = get_data('tbl_internal_control','id_aktivitas',$row['id_aktivitas'])->result_array();
+			// $str_internal_control = implode(', ',array_column($internal_control,'internal_control'));
+			$row['internal_control'] = $internal_control;
 			$row_data = $row;
-			$row_data['risk'] = $risk;
+			$row_data['risk'] = $data_risk;
 			$clean_data[] = $row_data;
 		}
-		
-		
 		render($clean_data,'json');
 	}
 
@@ -94,7 +113,29 @@ class Audit_assignment extends BE_Controller {
 	}
 
 	function save() {
-		$response = save_data('tbl_individual_audit_assignment',post(),post(':validation'));
+		// $response = save_data('tbl_individual_audit_assignment',post(),post(':validation'));
+		// render($response,'json');
+		$id_assignment = post('id');
+		$field = post('field');
+		$value = post('value');
+		
+		$data = [
+			'id' => $id_assignment,
+			$field => $value
+		];
+		$resp = save_data('tbl_individual_audit_assignment',$data);
+		
+		if($resp){
+			$response = [
+				'status' => 'success',
+				'message' => lang('data_berhasil_disimpan')
+			];
+		} else {
+			$response = [
+				'status' => 'error',
+				'message' => lang('data_gagal_disimpan')
+			];
+		}
 		render($response,'json');
 	}
 
@@ -112,6 +153,10 @@ class Audit_assignment extends BE_Controller {
 		];
 		$this->load->library('simpleexcel',$config);
 		$this->simpleexcel->export();
+	}
+
+	function attach_file(){
+		debug(post());die;
 	}
 
 	function import() {
@@ -154,24 +199,24 @@ class Audit_assignment extends BE_Controller {
 		$this->simpleexcel->export();
 	}
 
-	function update_field() {
-		$id_assignment = post('id');
-		$field = post('field');
-		$value = post('value');
-
-		$resp = update_data('tbl_individual_audit_assignment',[$field => $value],'id',$id_assignment);
-		if($resp){
-			$response = [
-				'status' => 'success',
-				'message' => lang('data_berhasil_disimpan')
-			];
-		} else {
-			$response = [
-				'status' => 'error',
-				'message' => lang('data_gagal_disimpan')
-			];
-		}
-		render($response,'json');
-	}
+	// function update_field() {
+	// 	$id_assignment = post('id');
+	// 	$field = post('field');
+	// 	$value = post('value');
+		
+	// 	$resp = update_data('tbl_individual_audit_assignment',[$field => $value],'id',$id_assignment);
+	// 	if($resp){
+	// 		$response = [
+	// 			'status' => 'success',
+	// 			'message' => lang('data_berhasil_disimpan')
+	// 		];
+	// 	} else {
+	// 		$response = [
+	// 			'status' => 'error',
+	// 			'message' => lang('data_gagal_disimpan')
+	// 		];
+	// 	}
+	// 	render($response,'json');
+	// }
 
 }
