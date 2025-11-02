@@ -39,6 +39,7 @@ class Audit_assignment extends BE_Controller {
 				$data_grouped[$y][$dept_key] = [
 					'id_audit_plan_group' => $row['id_audit_plan_group'],
 					'section' => $row['section'],
+					'status' => $row['status'],
 					'count' => 0
 				];
 			}
@@ -54,7 +55,7 @@ class Audit_assignment extends BE_Controller {
 	function data() {
 		$id = post('id');
 		$query = get_data('tbl_annual_audit_plan a', [
-			'select' => 'aa.*, a.id as id_audit_plan, a.id_audit_plan_group, dep.section_name as department,ak.id as id_aktivitas, ak.aktivitas, sa.sub_aktivitas, rc.id_risk, s.section_name as section',
+			'select' => 'aa.*, a.id as id_audit_plan, a.id_audit_plan_group, dep.section_name as department,ak.id as id_aktivitas, ak.aktivitas, sa.sub_aktivitas, rc.id_risk, s.section_name as section, af.filename',
 			'join' => [
 				'tbl_audit_universe u on a.id_universe = u.id', 
 				'tbl_rcm rcm on u.id_rcm = rcm.id',
@@ -64,7 +65,8 @@ class Audit_assignment extends BE_Controller {
 				'tbl_sub_aktivitas sa on rcm.id_sub_aktivitas = sa.id',
 				'tbl_aktivitas ak on sa.id_aktivitas = ak.id',
 				'tbl_annual_audit_plan_group ag on ag.id = a.id_audit_plan_group',
-				'tbl_individual_audit_assignment aa on aa.id_audit_plan = a.id'
+				'tbl_individual_audit_assignment aa on aa.id_audit_plan = a.id',
+				'tbl_individual_audit_assignment_files af on af.id_audit_assignment = aa.id type left'
 			],		
 			'where' => [
 				'a.id_audit_plan_group' => $id
@@ -76,10 +78,10 @@ class Audit_assignment extends BE_Controller {
 		foreach($query as $row) {
 			$id_risk = json_decode($row['id_risk'],true);
 			$data_risk = get_data('tbl_risk_register','id',$id_risk)->result_array();
-			// $risk = implode(', ',array_column($data_risk,'risk'));
 			$internal_control = get_data('tbl_internal_control','id_aktivitas',$row['id_aktivitas'])->result_array();
-			// $str_internal_control = implode(', ',array_column($internal_control,'internal_control'));
 			$row['internal_control'] = $internal_control;
+			$row['deadline_capa'] = !empty($row['deadline_capa']) ? date_indo(date('Y-m-d', strtotime($row['deadline_capa']))) : '';
+			$row['pic_capa'] = get_data('tbl_auditee','id',$row['pic_capa'])->row_array()['nama'] ?? '';
 			$row_data = $row;
 			$row_data['risk'] = $data_risk;
 			$clean_data[] = $row_data;
@@ -111,6 +113,23 @@ class Audit_assignment extends BE_Controller {
 		}
 		return $data_grouped;
 	}
+	function change_value(){
+		$field = post('field');
+		$value = post('value');
+
+		if($field == 'deadline_capa'){
+			$value = date_indo($value);
+		}else{
+			$value = get_data('tbl_auditee', 'id', $value)->row_array()['nama'];
+		}
+		
+		$response = [
+			'status' => 'success',
+			'field' => $field,
+			'value' => $value
+		];
+		render($response,'json');
+	}
 
 	function save() {
 		// $response = save_data('tbl_individual_audit_assignment',post(),post(':validation'));
@@ -118,12 +137,11 @@ class Audit_assignment extends BE_Controller {
 		$id_assignment = post('id');
 		$field = post('field');
 		$value = post('value');
-		
 		$data = [
-			'id' => $id_assignment,
 			$field => $value
 		];
-		$resp = save_data('tbl_individual_audit_assignment',$data);
+
+		$resp = update_data('tbl_individual_audit_assignment',$data, 'id', $id_assignment);
 		
 		if($resp){
 			$response = [
@@ -156,7 +174,35 @@ class Audit_assignment extends BE_Controller {
 	}
 
 	function attach_file(){
-		debug(post());die;
+		$id = post('id');
+		$file = post('file');
+		$data = get_data('tbl_individual_audit_assignment_files','id_audit_assignment',$id)->row_array();
+		$response = [
+			'status' => 'success',
+			'message' => 'Successfully uploaded file.'
+		];
+		if($file){
+			$parts = explode('.', $file);
+			$extension = end($parts);
+
+			$fileName = uniqid('Assignment_') . '.' . $extension;
+			$destination = FCPATH . 'assets/uploads/assignment_file/'. $fileName;
+			if(copy($file, $destination)) {
+				save_data('tbl_individual_audit_assignment_files', [
+				'id' => $data['id'] ?? null,
+				'id_audit_assignment' => $id,
+				'filename'	=> $fileName,
+				'created_at' => date('Y-m-d H:i:s'),
+				'created_by' => user('id')
+				]);
+			}else{
+				$response = [
+					'status' => 'error',
+					'message' => 'Failed to upload file.'
+				];
+			}
+		}
+		render($response,'json');
 	}
 
 	function import() {
@@ -197,6 +243,25 @@ class Audit_assignment extends BE_Controller {
 		];
 		$this->load->library('simpleexcel',$config);
 		$this->simpleexcel->export();
+	}
+
+	function mark_completed(){
+		$id_plangroup = post('id_audit_plan_group');
+		$audit_group = get_data('tbl_annual_audit_plan','id_audit_plan_group',$id_plangroup)->result_array();
+		$id_plan = array_column($audit_group, 'id');
+		$resp = update_data('tbl_individual_audit_assignment',['status' => 'history'],'id_audit_plan',$id_plan);
+		if($resp){
+			$response = [
+				'status' => 'success',
+				'message' => lang('data_berhasil_disimpan')
+			];
+		} else {
+			$response = [
+				'status' => 'error',
+				'message' => lang('data_gagal_disimpan')
+			];
+		}
+		render($response,'json');
 	}
 
 	// function update_field() {

@@ -30,23 +30,24 @@
 								<div class="mb-4">
 									<div class="card border-0 shadow-sm">
 										<div class="card-header text-white border-0 py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);border-radius: 15px;">
-											<button class="btn btn-link text-white text-decoration-none p-0 font-weight-bold year-toggle flex-grow-1 text-left" 
-													type="button" 
-													data-toggle="collapse" 
-													data-target="#year-collapse<?=$year?>" 
-													aria-expanded="false" 
+											<div class="d-flex justify-content-between align-items-center p-3 rounded">
+
+												<button class="btn btn-link text-white text-decoration-none p-0 font-weight-bold year-toggle text-left"
+													type="button"
+													data-toggle="collapse"
+													data-target="#year-collapse<?=$year?>"
+													aria-expanded="false"
 													aria-controls="year-collapse<?=$year?>">
-													<div class="d-flex justify-content-between align-items-center">
-														<div class="d-flex align-items-center">
-															<i class="fas fa-chevron-down mr-3"></i>
-															<div>
-																<h4 class="mb-1 font-weight-bold text-white">Audit Assignment <?=$year?></h4>
-																<small class="text-white-50">Click to expand assignment details</small>
-															</div>
+													<div class="d-flex align-items-center">
+														<i class="fas fa-chevron-down mr-3"></i>
+														<div>
+															<h4 class="mb-1 font-weight-bold text-white">Audit Assignment <?=$year?></h4>
+															<small class="text-white-50">Click to expand assignment details</small>
 														</div>
 													</div>
 												</button>
 											</div>
+										</div>
 											<div class="collapse" id="year-collapse<?=$year?>" data-year="<?=$year?>">
 												<div class="card-body p-0">
 													<?php foreach($departments as $dept => $deptData): ?>
@@ -65,8 +66,14 @@
 																			</div>
 																			<!-- <span class="badge badge-info ml-2 assignment-count">Loading...</span> -->
 																		</div>
+																</button>
+																<?php if($deptData['status'] == 'active'): ?> 
+																	<button class="btn btn-success btn-sm float-right mark-completed" type="button" data-id-plangroup="<?=$deptData['id_audit_plan_group']?>">
+																		<i class="fas fa-check me-1"></i>
+																		Mark Complete
 																	</button>
-																</div>
+																<?php endif; ?>
+															</div>
 																<div class="collapse" id="dept-collapse<?=$year?>-<?=md5($dept)?>">
 																	<div class="table-responsive" style="max-height: 70vh; overflow-y: auto;">
 																		<table class="table table-hover table-bordered mb-0">
@@ -91,7 +98,7 @@
 																					<th class="border-0 text-muted small bg-light">Deadline CAPA</th>
 																					<th class="border-0 text-muted small bg-light">PIC CAPA</th>
 																					<th class="border-0 text-muted small bg-light">Attachment</th>
-																					<th class="border-0 text-muted small bg-light">Action</th>
+																					<!-- <th class="border-0 text-muted small bg-light">Action</th> -->
 																				</tr>
 																			</thead>
 																			<tbody class="department-data" data-group-id="<?=$deptData['id_audit_plan_group']?>">
@@ -123,7 +130,7 @@
 	</div>
 </div>
 <?php 
-modal_open('modal-form','Edit Field', 'modal-lg');
+modal_open('modal-form','', 'modal-lg' );
 	modal_body();
 		// form_open(base_url('internal/audit_assignment/save'),'post','form');
 			col_init(3,9);
@@ -141,22 +148,53 @@ modal_open('modal-form','Edit Field', 'modal-lg');
 				echo '</div>';
 			echo '</div>';
 			// form_button(lang('simpan'),lang('batal'));
-		form_close();
-	modal_footer();
+		// form_close();
+	// modal_footer();
 modal_close();
 
 modal_open('modal-attachment','Attachment', 'modal-lg');
 	modal_body();
 		form_open(base_url('internal/audit_assignment/attach_file'),'post','form-attachment');
 			col_init(3,9);
+			input('hidden','id','id');
 			fileupload('File','file','required','data-accept="xls|xlsx"');
 			form_button(lang('simpan'),lang('batal'));
 		form_close();
+modal_close();
+
+modal_open('modal-datetime','EDIT DEADLINE CAPA', 'modal-md');
+	modal_body();
+			col_init(3,9);
+			input('hidden','id','id');
+			input('hidden','field_name','field_name');
+			input('date','Deadline CAPA', 'deadline_capa','required');
+			echo '<div class="form-group row">';
+				echo '<div class="col-md-12 text-center">';
+					echo '<button type="button" class="btn btn-primary mr-2" id="btn_simpan">'.lang('simpan').'</button>';
+					echo '<button type="button" class="btn btn-secondary mr-2" id="btn_batal">'.lang('batal').'</button>';
+				echo '</div>';
+			echo '</div>';
+modal_close();
+
+modal_open('modal-pic','EDIT PIC CAPA', 'modal-md');
+	modal_body();
+			col_init(3,9);
+			input('hidden','id','id');
+			input('hidden','field_name','field_name');
+			select2('PIC CAPA', 'pic_capa', 'required', get_active_auditee(), 'id', 'nama');
+			echo '<div class="form-group row">';
+				echo '<div class="col-md-12 text-center">';
+					echo '<button type="button" class="btn btn-primary mr-2" id="btn_simpan">'.lang('simpan').'</button>';
+					echo '<button type="button" class="btn btn-secondary mr-2" id="btn_batal">'.lang('batal').'</button>';
+				echo '</div>';
+			echo '</div>';
 modal_close();
 ?>
 
 <script type="text/javascript" src="<?php echo base_url('assets/plugins/ckeditor/ckeditor.js') ?>"></script>
 <script>
+	let planGroupId = null;
+
 	// AJAX filter switch similar to Annual Audit Plan
 	$(document).on('click', '.filter-switch', function(e){
 		if(e.ctrlKey || e.metaKey || e.shiftKey) return; // allow open in new tab
@@ -271,7 +309,6 @@ modal_close();
 		let originalValue = '';
 		let loadedDepartments = [];
 		
-		// Inline editing for regular fields
 		$(document).on('click', '.editable:not(.editable-status)', function() {
 			if (isEditing) return;
 			
@@ -283,7 +320,7 @@ modal_close();
 			// Set modal data
 			$('#modal-form').find('[name="id"]').val(rowId);
 			$('#modal-form').find('[name="field_name"]').val(field);
-			$('#field-label').text(field.replace(/_/g, ' ').toUpperCase());
+			$('#modal-form .modal-title').text('EDIT ' +  field.replace(/_/g, ' ').toUpperCase());
 			
 			// Set CKEditor content
 			if (CKEDITOR.instances['field-editor']) {
@@ -292,36 +329,70 @@ modal_close();
 			$('#modal-form').modal('show');
 		});
 
-		$(document).on('click', '#btn_batal', function() {
-			$('#modal-form').modal('hide');
+		$(document).on('click', '.datetime, .pic', function() {
+			if (isEditing) return;
+			
+			const $cell = $(this);
+			const field = $cell.data('field');
+			const rowId = $cell.closest('tr').data('id');
+
+			let modalType = '#modal-datetime';
+			if(field != 'deadline_capa'){
+				modalType = '#modal-pic';
+			}
+			
+			$(modalType).find('[name="id"]').val(rowId);
+			$(modalType).find('[name="field_name"]').val(field);
+			
+			
+			$(modalType).modal('show');
 		});
 
-		// Handle form submission
-		$(document).on('click', '#btn_simpan', function(e) {
+		$(document).on('click', '#btn_batal', function() {
+			let modal = $(this).closest('.modal');
+			modal.modal('hide');
+		});
+
+		$(document).on('click', '#btn_simpan', async function(e) {
 			e.preventDefault();
-			
+
+			const modal = $(this).closest('.modal');
+
 			const formData = {
-				id: $('[name="id"]').val(),
-				field: $('[name="field_name"]').val(),
-				value: CKEDITOR.instances['field-editor'].getData()
+				id: modal.find('[name="id"]').val(),
+				field: modal.find('[name="field_name"]').val(),
+				value: modal.find('[name="deadline_capa"]').length
+					? modal.find('[name="deadline_capa"]').val()
+					: modal.find('[name="pic_capa"]').length
+						? modal.find('[name="pic_capa"]').val()
+						: CKEDITOR.instances['field-editor'].getData()
 			};
-			
-			$.ajax({
+
+			let response = await $.ajax({
 				url: '<?= base_url('internal/audit_assignment/save') ?>',
 				type: 'POST',
 				dataType: 'json',
-				data: formData,
-				success: function(response) {
-					if (response.status === 'success') {
-						// Update the cell with new content
-						const $cell = $(`tr[data-id="${formData.id}"] .editable[data-field="${formData.field}"]`);
-						$cell.html(formData.value);
-						$('#modal-form').modal('hide');
-					}
-					cAlert.open(response.message, response.status);
-				}
+				data: formData
 			});
+			
+			if (response.status === 'success') {
+				const cellClass = modal.is('#modal-datetime') ? '.datetime' : 
+								  modal.is('#modal-pic') ? '.pic' : '.editable';
+
+				let temp_value = await $.ajax({
+					url: '<?= base_url('internal/audit_assignment/change_value') ?>',
+					type: 'POST',
+					dataType: 'json',
+					data: {field: formData.field, value: formData.value }
+				});
+
+			    const $cell = $(`tr[data-id="${formData.id}"] ${cellClass}[data-field="${temp_value.field}"]`);
+				$cell.html(temp_value.value);
+				modal.modal('hide');
+			}
+			cAlert.open(response.message, response.status);
 		});
+
 			
 		// Prevent accordion collapse when editing
 		$(document).on('click', '.editable, .editable-status', function(e) {
@@ -363,11 +434,40 @@ modal_close();
 
 		$(document).on('click', '.attachment', function() {
 			const rowId = $(this).data('id');
-			console.log(rowId);
+			$('#modal-attachment').find('[name="id"]').val(rowId);
 			$('#modal-attachment').modal('show');
 		});
+	});
+
+		$(document).on('click', '.mark-completed', function() {
+			planGroupId = $(this).data('id-plangroup');
+			if (!planGroupId) return;
+			cConfirm.open('Are you sure you want to mark this department as complete?', 'markCompleted');
+		});
+
+		function reload_page() {
+			location.reload();
+		}
 		
-		// Load data for specific department
+		function markCompleted() {
+			$.ajax({
+				url: '<?= base_url('internal/audit_assignment/mark_completed') ?>',
+				type: 'POST',
+				dataType: 'json',
+				data: { id_audit_plan_group: planGroupId },
+				success: function(res) {
+					if (res.status === 'success') {
+						cAlert.open(res.message, 'success', 'reload_page');
+					} else {
+						cAlert.open(res.message, 'error');
+					}
+				},
+				error: function() {
+					cAlert.open('An error occurred while processing your request.', 'error');
+				}
+			});
+		}
+		
 		function loadDepartmentData(groupId) {
 			const tbody = $(`.department-data[data-group-id="${groupId}"]`);
 			const badge = tbody.closest('.card').find('.assignment-count');
@@ -382,7 +482,6 @@ modal_close();
 				type: 'POST',
 				dataType: 'json',
 				success: function(res){
-					console.log(res);
 					let html = '';
 					
 					if (res.length === 0) {
@@ -424,16 +523,13 @@ modal_close();
 								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="unconformity">${item.unconformity || ''}</td>
 								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="dampak">${item.dampak || ''}</td>
 								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="root_cause">${item.root_cause || ''}</td>
-								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="recommendation">${item.recommendation || ''}</td>
+								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="recomendation">${item.recomendation || ''}</td>
+								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="status_finding">${item.status_finding || ''}</td>
 								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="capa">${item.capa || ''}</td>
-								<td class="align-middle text-nowrap editable" style="width: 120px; min-width: 120px;" data-field="deadline_capa">${item.deadline_capa || ''}</td>
-								<td class="align-middle editable" style="width: 120px; min-width: 120px;" data-field="pic_capa">${item.pic_capa || ''}</td>
-								<td style="width: 150px; min-width: 150px;"></td>
-								<td class="align-middle attachment" style="width: 150px; min-width: 150px;" data-id="${item.id}"></td>
-								<td class="align-middle text-center text-nowrap" style="width: 100px; min-width: 100px;">
-									<button class="btn btn-sm btn-primary btn-icon-only btn-completed" type="button" data-id="${item.id}" title="Completed">
-										<i class="fas fa-check"></i>
-									</button>
+								<td class="align-middle datetime text-nowrap" style="width: 120px; min-width: 120px;" data-field="deadline_capa">${item.deadline_capa || ''}</td>
+								<td class="align-middle pic" style="width: 120px; min-width: 120px;" data-field="pic_capa">${item.pic_capa || ''}</td>
+								<td class="align-middle attachment" style="width: 150px; min-width: 150px;" data-id="${item.id}">
+									${item.filename ? `<span class='text-primary'>Lihat Data</span>` : `<span class="text-muted">No file</span>`}
 								</td>
 							</tr>`;
 						});
@@ -446,5 +542,5 @@ modal_close();
 				
 			})
 		}
-	});
+	
 </script>
