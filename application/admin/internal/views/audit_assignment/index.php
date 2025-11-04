@@ -82,9 +82,9 @@
 																					<th class="border-0 text-muted small bg-light">Section</th>
 																					<th class="border-0 text-muted small bg-light">Aktivitas</th>
 																					<th class="border-0 text-muted small bg-light">Audit Area</th>
-																					<th class="border-0 text-muted small bg-light">Kriteria</th>
 																					<th class="border-0 text-muted small bg-light">Risk</th>
 																					<th class="border-0 text-muted small bg-light">Internal Control</th>
+																					<th class="border-0 text-muted small bg-light">Kriteria</th>
 																					<th class="border-0 text-muted small bg-light">Pengujian</th>
 																					<th class="border-0 text-muted small bg-light">Hasil Review</th>
 																					<th class="border-0 text-muted small bg-light">Finding</th>
@@ -93,12 +93,7 @@
 																					<th class="border-0 text-muted small bg-light">Dampak</th>
 																					<th class="border-0 text-muted small bg-light">Root Cause</th>
 																					<th class="border-0 text-muted small bg-light">Recommendation</th>
-																					<th class="border-0 text-muted small bg-light">Finding Control Status Finding</th>
-																					<th class="border-0 text-muted small bg-light">CAPA</th>
-																					<th class="border-0 text-muted small bg-light">Deadline CAPA</th>
-																					<th class="border-0 text-muted small bg-light">PIC CAPA</th>
 																					<th class="border-0 text-muted small bg-light">Attachment</th>
-																					<!-- <th class="border-0 text-muted small bg-light">Action</th> -->
 																				</tr>
 																			</thead>
 																			<tbody class="department-data" data-group-id="<?=$deptData['id_audit_plan_group']?>">
@@ -329,24 +324,24 @@ modal_close();
 			$('#modal-form').modal('show');
 		});
 
-		$(document).on('click', '.datetime, .pic', function() {
-			if (isEditing) return;
+		// $(document).on('click', '.datetime, .pic', function() {
+		// 	if (isEditing) return;
 			
-			const $cell = $(this);
-			const field = $cell.data('field');
-			const rowId = $cell.closest('tr').data('id');
+		// 	const $cell = $(this);
+		// 	const field = $cell.data('field');
+		// 	const rowId = $cell.closest('tr').data('id');
 
-			let modalType = '#modal-datetime';
-			if(field != 'deadline_capa'){
-				modalType = '#modal-pic';
-			}
+		// 	let modalType = '#modal-datetime';
+		// 	if(field != 'deadline_capa'){
+		// 		modalType = '#modal-pic';
+		// 	}
 			
-			$(modalType).find('[name="id"]').val(rowId);
-			$(modalType).find('[name="field_name"]').val(field);
+		// 	$(modalType).find('[name="id"]').val(rowId);
+		// 	$(modalType).find('[name="field_name"]').val(field);
 			
 			
-			$(modalType).modal('show');
-		});
+		// 	$(modalType).modal('show');
+		// });
 
 		$(document).on('click', '#btn_batal', function() {
 			let modal = $(this).closest('.modal');
@@ -369,7 +364,7 @@ modal_close();
 			};
 
 			let response = await $.ajax({
-				url: '<?= base_url('internal/audit_assignment/save') ?>',
+				url: base_url + 'internal/audit_assignment/save',
 				type: 'POST',
 				dataType: 'json',
 				data: formData
@@ -497,7 +492,6 @@ modal_close();
 								<td class="align-middle text-center" style="width: 120px; min-width: 120px;" data-field="section_name">${item.section || ''}</td>
 								<td class="align-middle text-center" style="width: 200px; min-width: 200px;" data-field="aktivitas">${item.aktivitas || ''}</td>
 								<td class="align-middle text-center" style="width: 150px; min-width: 150px;" data-field="audit_area">${item.sub_aktivitas || ''}</td>
-								<td class="align-middle text-center" style="width: 180px; min-width: 180px;" data-field="kriteria"></td>
 								<td class="align-middle text-center" style="width: 200px; min-width: 200px;" data-field="risk">
 									`
 									item.risk.forEach(function(risk) {
@@ -516,18 +510,15 @@ modal_close();
 										</div>`;
 									});
 								html += `</td>
+								<td class="align-middle editable" style="width: 300px; min-width: 180px;" data-field="kriteria">${item.kriteria || ''}</td>
 								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="pengujian">${item.pengujian || ''}</td>
 								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="hasil_review">${item.hasil_review || ''}</td>
-								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="finding">${item.finding || ''}</td>
-								<td class="align-middle text-center editable" style="width: 80px; min-width: 80px;" data-field="bobot_finding">${item.bobot_finding || ''}</td>
+								<td class="align-middle" style="width: 600px; min-width: 350px;" data-field="finding">${item.finding || ''}</td>
+								<td class="align-middle" style="width: 300px; min-width: 180px;" data-field="bobot_finding">${item.bobot_finding || ''}</td>
 								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="unconformity">${item.unconformity || ''}</td>
 								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="dampak">${item.dampak || ''}</td>
 								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="root_cause">${item.root_cause || ''}</td>
 								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="recomendation">${item.recomendation || ''}</td>
-								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="status_finding">${item.status_finding || ''}</td>
-								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="capa">${item.capa || ''}</td>
-								<td class="align-middle datetime text-nowrap" style="width: 120px; min-width: 120px;" data-field="deadline_capa">${item.deadline_capa || ''}</td>
-								<td class="align-middle pic" style="width: 120px; min-width: 120px;" data-field="pic_capa">${item.pic_capa || ''}</td>
 								<td class="align-middle attachment" style="width: 150px; min-width: 150px;" data-id="${item.id}">
 									${item.filename ? `<span class='text-primary'>Lihat Data</span>` : `<span class="text-muted">No file</span>`}
 								</td>

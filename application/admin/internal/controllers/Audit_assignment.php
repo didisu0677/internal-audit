@@ -55,7 +55,7 @@ class Audit_assignment extends BE_Controller {
 	function data() {
 		$id = post('id');
 		$query = get_data('tbl_annual_audit_plan a', [
-			'select' => 'aa.*, a.id as id_audit_plan, a.id_audit_plan_group, dep.section_name as department,ak.id as id_aktivitas, ak.aktivitas, sa.sub_aktivitas, rc.id_risk, s.section_name as section, af.filename',
+			'select' => 'aa.kriteria, aa.pengujian, aa.hasil_review, aa.unconformity, aa.dampak, aa.root_cause, aa.recomendation, ag.year, a.id as id_audit_plan, a.id_audit_plan_group, dep.section_name as department,ak.id as id_aktivitas, ak.aktivitas, sa.id as id_sub_aktivitas, sa.sub_aktivitas, rc.id_risk, s.section_name as section, af.filename',
 			'join' => [
 				'tbl_audit_universe u on a.id_universe = u.id', 
 				'tbl_rcm rcm on u.id_rcm = rcm.id',
@@ -73,19 +73,25 @@ class Audit_assignment extends BE_Controller {
 			],
 			'order_by' => 'dep.urutan'
 		])->result_array();
-
 		$clean_data = [];
 		foreach($query as $row) {
 			$id_risk = json_decode($row['id_risk'],true);
 			$data_risk = get_data('tbl_risk_register','id',$id_risk)->result_array();
 			$internal_control = get_data('tbl_internal_control','id_aktivitas',$row['id_aktivitas'])->result_array();
+			$finding = get_data('tbl_finding_records', [
+				'where' => [
+					'id_sub_aktivitas' => $row['id_sub_aktivitas'],
+					'year(tgl_mulai_audit)' => $row['year']
+				]
+			])->row_array() ?? [];
+			$row['finding'] = $finding['finding'] ?? '';
+			$row['bobot_finding'] = $finding['bobot_finding'] ?? '';
 			$row['internal_control'] = $internal_control;
-			$row['deadline_capa'] = !empty($row['deadline_capa']) ? date_indo(date('Y-m-d', strtotime($row['deadline_capa']))) : '';
-			$row['pic_capa'] = get_data('tbl_auditee','id',$row['pic_capa'])->row_array()['nama'] ?? '';
 			$row_data = $row;
 			$row_data['risk'] = $data_risk;
 			$clean_data[] = $row_data;
 		}
+		
 		render($clean_data,'json');
 	}
 
@@ -116,12 +122,6 @@ class Audit_assignment extends BE_Controller {
 	function change_value(){
 		$field = post('field');
 		$value = post('value');
-
-		if($field == 'deadline_capa'){
-			$value = date_indo($value);
-		}else{
-			$value = get_data('tbl_auditee', 'id', $value)->row_array()['nama'];
-		}
 		
 		$response = [
 			'status' => 'success',
