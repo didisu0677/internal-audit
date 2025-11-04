@@ -371,13 +371,13 @@
 													echo "</select>
 												</div>
 												<div class='col-2'>
-													<input type='number' class='form-control form-control-sm' name='expense_real_amount[]' placeholder='Amount' min='0' required>
+													<input type='text' class='form-control form-control-sm expense money' name='expense_real_amount[]' placeholder='Amount' min='0' required>
 												</div>
 												<div class='col-1'>
-													<input type='number' class='form-control form-control-sm day-real-input' name='expense_real_day[]' placeholder='Days' min='0' required>
+													<input type='number' class='form-control form-control-sm day-input day-real-input' name='expense_real_day[]' placeholder='Days' min='0' required>
 												</div>
 												<div class='col-2'>
-													<input type='number' class='form-control form-control-sm expense-real-input' name='total_real_amount[]' placeholder='Total Amount' min='0' required>
+													<input type='text' class='form-control form-control-sm expense-real-input money' name='total_real_amount[]' placeholder='Total Amount' min='0' required>
 												</div>
 												<div class='col-4'>
 													<input type='text' class='form-control form-control-sm' name='expense_real_note[]' placeholder='Note' required>
@@ -590,7 +590,7 @@
 		}else{
 			generateActivityItem(res.activity);
 		}
-	
+		
 		generateExpenseEst(res.expense);
 		// let html = '';
 		// $.each(res.expense, function(i, item){
@@ -680,13 +680,23 @@
 		$('.cancel-detail').css('cursor', 'pointer');
 		
 		$(document).on('input', '.expense, .day-input', function() {
-			const row = $(this).closest('.expense-est-row');
+
+			const modal = $(this).closest('.modal');
+			const row = (modal.attr('id') == 'mCompleted') ? $(this).closest('.expense-real-row') : $(this).closest('.expense-est-row');
+			
 			const amount = parseInt(row.find('.expense').val().replace(/\./g, '').replace(/,/g, '')) || 0;
 			const days = parseInt(row.find('.day-input').val()) || 0;
 			const total = amount * days;
-			row.find('.expense-est-input').val(total);
-			calculateTotalExpenseEst();
+
+			if(modal.attr('id') == 'mCompleted'){
+				row.find('.expense-real-input').val(total);
+				calculateTotalExpenseReal();
+			} else {
+				row.find('.expense-est-input').val(total);
+				calculateTotalExpenseEst();
+			}
 		});
+
 		
 		// Add activity row
 		$(document).on('click','#add-activity', function() {

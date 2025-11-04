@@ -121,7 +121,7 @@ class Annual_audit_plan extends BE_Controller {
 			'data' => $data_clean,
 			'expense_item' => $expense_item,
 			'activity' => $activity,
-			'duration' => $durasi,
+			'duration' => $durasi ?? [],
 			'filter' => $filter,
 			'plan_status' => $plan_status,
 			'history_status' => $history_status,
@@ -164,7 +164,6 @@ class Annual_audit_plan extends BE_Controller {
 	}
 	function getData(){
 		$id_audit_plan_group = post('id');
-
 		$data = get_data('tbl_annual_audit_plan_group', 'id', $id_audit_plan_group)->row_array();
 		$data['id_audit_plan_group'] = $id_audit_plan_group;
 		
@@ -185,6 +184,7 @@ class Annual_audit_plan extends BE_Controller {
 		])->result_array();
 
 		$data['expense_type'] = get_data('tbl_expense_type', 'is_active', 1)->result_array();
+		
 		render($data,'json');
 	}
 
@@ -203,7 +203,28 @@ class Annual_audit_plan extends BE_Controller {
 		$expense_day = $this->input->post('expense_day');
 		$expense_note = $this->input->post('expense_note');
 
-		// $expense_est = 0;
+		//delete existing expense
+		$cek_expense = get_data('tbl_audit_plan_expense', [
+				'where' => [
+					'id_audit_plan_group' => $id_audit_plan_group,
+					'category' => 'est'
+				]
+			])->result_array();
+		if($cek_expense){
+			delete_data('tbl_audit_plan_expense', 'id_audit_plan_group', $id_audit_plan_group);
+		}
+		
+		//delete existing duration
+		$cek_duration = get_data('tbl_audit_plan_duration', [
+				'where' => [
+					'id_audit_plan_group' => $id_audit_plan_group,
+				]
+			])->result_array();
+		if($cek_duration){
+			delete_data('tbl_audit_plan_duration', 'id_audit_plan_group', $id_audit_plan_group);
+
+		}
+
 		foreach($expense_type as $i => $type){
 			if(empty($type)){
 				$response = [
@@ -229,17 +250,6 @@ class Annual_audit_plan extends BE_Controller {
 				render($response, 'json');
 				return;
 			}
-			$cek = get_data('tbl_audit_plan_expense', [
-				'where' => [
-					'id_audit_plan_group' => $id_audit_plan_group,
-					'category' => 'est'
-				]
-			])->result_array();
-			if($cek){
-				foreach($cek as $c){
-					delete_data('tbl_audit_plan_expense', 'id', $c['id']);
-				}
-			}
 			$insertExpense = [
 				'id_audit_plan_group' => $id_audit_plan_group,
 				'expense_type' => $type,
@@ -263,16 +273,6 @@ class Annual_audit_plan extends BE_Controller {
 				return;
 			}
 
-			$cek = get_data('tbl_audit_plan_duration', [
-				'where' => [
-					'id_audit_plan_group' => $id_audit_plan_group,
-				]
-			])->result_array();
-			if($cek){
-				foreach($cek as $c){
-					delete_data('tbl_audit_plan_duration', 'id', $c['id']);
-				}
-			}
 			$insertActivity = [
 				'id_audit_plan_group' => $id_audit_plan_group,
 				'activity_name' => $act,
@@ -297,7 +297,7 @@ class Annual_audit_plan extends BE_Controller {
 			'type' => $activity_type,
 			'status' => 'planned'
 		];
-		$save = $id_audit_plan_group = save_data('tbl_annual_audit_plan_group', $data);
+		$id_audit_plan_group = save_data('tbl_annual_audit_plan_group', $data);
 		$data_audit_plan = get_data('tbl_annual_audit_plan', 'id_audit_plan_group', $id_audit_plan_group['id'])->result_array();
 		foreach($data_audit_plan as $d){
 			$data_assignment = get_data('tbl_individual_audit_assignment', 'id_audit_plan', $d['id'])->row_array();
@@ -308,24 +308,11 @@ class Annual_audit_plan extends BE_Controller {
 			save_data('tbl_individual_audit_assignment', $insert_assignment);
 		}
 		
-		// $audit_assignment = get_data('tbl_individual_audit_assignment', 'id_audit_plan_group', $id_audit_plan_group['id'])->row_array();
-		// $data_audit_assignment = [
-		// 	'id' => $audit_assignment['id'] ?? 0,
-		// 	'id_audit_plan_group' => $id_audit_plan_group['id']
-		// ];
-		// $save = save_data('tbl_individual_audit_assignment', $data_audit_assignment);
-
-		if($save){
-			$response = [
+		$response = [
 				'status' => 'success',
 				'message' => 'Data berhasil disimpan'
 			];
-		}else{
-			$response = [
-				'status' => 'error',
-				'message' => 'Data gagal disimpan'
-			];
-		}
+		
 		render($response, 'json');
 	}
 
@@ -672,7 +659,7 @@ class Annual_audit_plan extends BE_Controller {
 				'ag.id' => $id_audit_plan_group
 			]
 		])->result_array();
-		debug($data);die;
+		
 		// $activity = get_data('tbl_audit_plan_duration', 'id_audit_plan_group', $id_audit_plan_group)->result_array();
 		// $expense = get_data('tbl_audit_plan_expense a', [
 		// 	'join' => [
