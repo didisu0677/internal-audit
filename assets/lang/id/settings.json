@@ -521,5 +521,11 @@
     "penerbit_pnp": "Penerbit Pnp",
     "tanggal_pnp": "Tanggal Pnp",
     "type_aktivitas": "Type Aktivitas",
-    "id_aktivitas": "Id Aktivitas"
+    "id_aktivitas": "Id Aktivitas",
+    "detail": "Detail",
+    "reff_name": "Reff Name",
+    "publisher": "Publisher",
+    "effective_date": "Effective Date",
+    "created_by": "Created By",
+    "created_at": "Created At"
 }

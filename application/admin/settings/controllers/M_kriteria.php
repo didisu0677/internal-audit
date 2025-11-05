@@ -11,7 +11,12 @@ class M_kriteria extends BE_Controller {
 	}
 
 	function data() {
-		$data = data_serverside();
+		$conf = [
+			'join' => [
+				'tbl_user u on u.id = tbl_kriteria.created_by'
+			]
+		];
+		$data = data_serverside($conf);
 		render($data,'json');
 	}
 
@@ -21,7 +26,10 @@ class M_kriteria extends BE_Controller {
 	}
 
 	function save() {
-		$response = save_data('tbl_kriteria',post(),post(':validation'));
+		$data = post();
+		$data['created_by'] = user('id');
+		$data['created_at'] = date('Y-m-d H:i:s');
+		$response = save_data('tbl_kriteria',$data,post(':validation'));
 		render($response,'json');
 	}
 

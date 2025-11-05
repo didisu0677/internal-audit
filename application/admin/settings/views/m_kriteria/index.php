@@ -5,7 +5,7 @@
 			<?php echo breadcrumb(); ?>
 		</div>
 		<div class="float-right">
-			<?php echo access_button('delete,active,inactive,export,import'); ?>
+			<?php echo access_button(); ?>
 		</div>
 		<div class="clearfix"></div>
 	</div>
@@ -21,7 +21,7 @@
 				th(lang('reff_name'),'','data-content="reff_name"');
 				th(lang('publisher'),'','data-content="publisher"');
 				th(lang('effective_date'),'','data-content="effective_date" data-type="daterange"');
-				th(lang('created_by'),'','data-content="created_by"');
+				th(lang('created_by'),'','data-content="nama" data-table="u"');
 				th(lang('created_at'),'','data-content="created_at" data-type="daterange"');
 				th('&nbsp;','','width="30" data-content="action_button"');
 	table_close();
@@ -37,9 +37,9 @@ modal_open('modal-form');
 			input('text',lang('location'),'location');
 			input('text',lang('reff_name'),'reff_name');
 			input('text',lang('publisher'),'publisher');
-			input('datetime',lang('effective_date'),'effective_date');
-			input('text',lang('created_by'),'created_by');
-			input('datetime',lang('created_at'),'created_at');
+			input('date',lang('effective_date'),'effective_date');
+			// input('text',lang('created_by'),'created_by');
+			// input('datetime',lang('created_at'),'created_at');
 			form_button(lang('simpan'),lang('batal'));
 		form_close();
 	modal_footer();
