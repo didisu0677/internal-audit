@@ -55,7 +55,7 @@ class Audit_assignment extends BE_Controller {
 	function data() {
 		$id = post('id');
 		$query = get_data('tbl_annual_audit_plan a', [
-			'select' => 'aa.kriteria, aa.pengujian, aa.hasil_review, aa.unconformity, aa.dampak, aa.root_cause, aa.recomendation, ag.year, a.id as id_audit_plan, a.id_audit_plan_group, dep.section_name as department,ak.id as id_aktivitas, ak.aktivitas, sa.id as id_sub_aktivitas, sa.sub_aktivitas, rc.id_risk, s.section_name as section, af.filename',
+			'select' => 'aa.id, aa.kriteria, aa.pengujian, aa.hasil_review, aa.unconformity, aa.dampak, aa.root_cause, aa.recomendation, ag.year, a.id as id_audit_plan, a.id_audit_plan_group, dep.section_name as department,ak.id as id_aktivitas, ak.aktivitas, sa.id as id_sub_aktivitas, sa.sub_aktivitas, rc.id_risk, s.section_name as section, af.filename',
 			'join' => [
 				'tbl_audit_universe u on a.id_universe = u.id', 
 				'tbl_rcm rcm on u.id_rcm = rcm.id',
