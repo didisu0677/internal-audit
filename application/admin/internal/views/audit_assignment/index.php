@@ -93,6 +93,7 @@
 																					<th class="border-0 text-muted small bg-light">Dampak</th>
 																					<th class="border-0 text-muted small bg-light">Root Cause</th>
 																					<th class="border-0 text-muted small bg-light">Recommendation</th>
+																					<th class="border-0 text-muted small bg-light">Finding Control Status</th>
 																					<th class="border-0 text-muted small bg-light">Attachment</th>
 																				</tr>
 																			</thead>
@@ -147,44 +148,97 @@ modal_open('modal-form','', 'modal-lg' );
 	// modal_footer();
 modal_close();
 
-modal_open('modal-attachment','Attachment', 'modal-lg');
+modal_open('modal-bobot','Edit Bobot Finding','modal-md');
+	modal_body();
+		col_init(3,9);
+		input('hidden','id','id');
+		input('hidden','field_name','field_name');
+		select2('Bobot Finding', 'bobot_finding', 'required', get_list_bobot(), 'id', 'bobot');
+		echo '<div class="form-group row">';
+				echo '<div class="col-md-12 text-center">';
+					echo '<button type="button" class="btn btn-primary mr-2" id="btn_simpan">'.lang('simpan').'</button>';
+					echo '<button type="button" class="btn btn-secondary mr-2" id="btn_batal">'.lang('batal').'</button>';
+				echo '</div>';
+			echo '</div>';
+modal_close();
+
+modal_open('modal-status-finding','Edit Status Finding','modal-md');
+	modal_body();
+		col_init(3,9);
+		input('hidden','id','id');
+		input('hidden','field_name','field_name');
+		select2('Status Finding Control', 'status_finding', 'required', get_list_status_finding_control(), 'id', 'description');
+		echo '<div class="form-group row">';
+				echo '<div class="col-md-12 text-center">';
+					echo '<button type="button" class="btn btn-primary mr-2" id="btn_simpan">'.lang('simpan').'</button>';
+					echo '<button type="button" class="btn btn-secondary mr-2" id="btn_batal">'.lang('batal').'</button>';
+				echo '</div>';
+			echo '</div>';
+modal_close();
+
+modal_open('modal-attachment','Attachment Management','modal-fullscreen');
 	modal_body();
 		form_open(base_url('internal/audit_assignment/attach_file'),'post','form-attachment');
-			col_init(3,9);
-			input('hidden','id','id');
-			fileupload('File','file','required','data-accept="xls|xlsx"');
-			form_button(lang('simpan'),lang('batal'));
+		input('hidden','id','id'); 
+		echo '<div class="row">
+				<div class="col-md-12 text-right">
+					<button type="button" class="btn btn-primary btn-icon-only btn-sm mb-3" id="btn-add-attachment"><i class="fas fa-plus"></i></button>
+				</div>
+			</div>';
+		echo '<div class="card mb-4 p-4 row-container-attachments">
+			<div class="row">
+				<div class="col-md-3">
+					<label>Upload File</label>
+				</div>
+				<div class="col-md-9 mb-3">
+					<input type="text" name="original_name[]" class="form-control form-control-sm" placeholder="Optional display name">
+				</div>
+			</div>';
+			fileupload('File','file[]','required','data-accept="xls|xlsx|doc|docx"');
+
+			echo '</div>';
+		form_button(lang('simpan'),lang('batal'));
 		form_close();
-modal_close();
+		// // Upload form
+		// echo '<div class="card mb-4">
+		// <div class="form-group row">
+		// 		<label class="col-md-3 col-form-label">Upload File</label>
+		// 		<div class="col-md-9">
+		// 			<form id="form-upload-attachment" enctype="multipart/form-data" onsubmit="return false;">
+		// 				<div class="input-group mb-2">
+		// 					<input type="text" name="original_name" class="form-control form-control-sm" placeholder="Optional display name">
+		// 					<div class="input-group-append">
+		// 						<button type="button" class="btn btn-sm btn-secondary" id="btn-clear-name">Clear</button>
+		// 					</div>
+		// 				</div>';
+		// 				col_init(0,12);
+		// 					fileupload('File','attachment_file','required');
+		// echo '	<button type="button" class="btn btn-primary btn-sm mt-2" id="btn-upload-attachment">
+		// 					<i class="fas fa-upload mr-1"></i>Upload
+		// 				</button>
+		// 			</form>
+		// 		</div>
+		// 	</div>';
 
-modal_open('modal-datetime','EDIT DEADLINE CAPA', 'modal-md');
-	modal_body();
-			col_init(3,9);
-			input('hidden','id','id');
-			input('hidden','field_name','field_name');
-			input('date','Deadline CAPA', 'deadline_capa','required');
-			echo '<div class="form-group row">';
-				echo '<div class="col-md-12 text-center">';
-					echo '<button type="button" class="btn btn-primary mr-2" id="btn_simpan">'.lang('simpan').'</button>';
-					echo '<button type="button" class="btn btn-secondary mr-2" id="btn_batal">'.lang('batal').'</button>';
-				echo '</div>';
-			echo '</div>';
-modal_close();
-
-modal_open('modal-pic','EDIT PIC CAPA', 'modal-md');
-	modal_body();
-			col_init(3,9);
-			input('hidden','id','id');
-			input('hidden','field_name','field_name');
-			select2('PIC CAPA', 'pic_capa', 'required', get_active_auditee(), 'id', 'nama');
-			echo '<div class="form-group row">';
-				echo '<div class="col-md-12 text-center">';
-					echo '<button type="button" class="btn btn-primary mr-2" id="btn_simpan">'.lang('simpan').'</button>';
-					echo '<button type="button" class="btn btn-secondary mr-2" id="btn_batal">'.lang('batal').'</button>';
-				echo '</div>';
-			echo '</div>';
+		// // List
+		// echo '<div class="table-responsive">
+		// 		<table class="table table-sm table-bordered mb-0">
+		// 			<thead class="thead-light">
+		// 				<tr class="small">
+		// 					<th>Name</th>
+		// 					<th style="width:110px">Size</th>
+		// 					<th style="width:160px">Uploaded At</th>
+		// 					<th style="width:160px" class="text-center">Action</th>
+		// 				</tr>
+		// 			</thead>
+		// 			<tbody id="attachment-list">
+		// 				<tr><td colspan="4" class="text-center py-3 text-muted small">No data</td></tr>
+		// 			</tbody>
+		// 		</table>
+		// 	</div>';
 modal_close();
 ?>
+
 
 <script type="text/javascript" src="<?php echo base_url('assets/plugins/ckeditor/ckeditor.js') ?>"></script>
 <script>
@@ -324,24 +378,24 @@ modal_close();
 			$('#modal-form').modal('show');
 		});
 
-		// $(document).on('click', '.datetime, .pic', function() {
-		// 	if (isEditing) return;
+		$(document).on('click', '.bobot, .status-finding', function() {
+			if (isEditing) return;
 			
-		// 	const $cell = $(this);
-		// 	const field = $cell.data('field');
-		// 	const rowId = $cell.closest('tr').data('id');
+			const $cell = $(this);
+			const field = $cell.data('field');
+			const rowId = $cell.closest('tr').data('id');
 
-		// 	let modalType = '#modal-datetime';
-		// 	if(field != 'deadline_capa'){
-		// 		modalType = '#modal-pic';
-		// 	}
+			let modalType = '#modal-bobot';
+			if(field != 'bobot_finding'){
+				modalType = '#modal-status-finding';
+			}
 			
-		// 	$(modalType).find('[name="id"]').val(rowId);
-		// 	$(modalType).find('[name="field_name"]').val(field);
+			$(modalType).find('[name="id"]').val(rowId);
+			$(modalType).find('[name="field_name"]').val(field);
 			
 			
-		// 	$(modalType).modal('show');
-		// });
+			$(modalType).modal('show');
+		});
 
 		$(document).on('click', '#btn_batal', function() {
 			let modal = $(this).closest('.modal');
@@ -356,10 +410,10 @@ modal_close();
 			const formData = {
 				id: modal.find('[name="id"]').val(),
 				field: modal.find('[name="field_name"]').val(),
-				value: modal.find('[name="deadline_capa"]').length
-					? modal.find('[name="deadline_capa"]').val()
-					: modal.find('[name="pic_capa"]').length
-						? modal.find('[name="pic_capa"]').val()
+				value: modal.find('[name="bobot_finding"]').length
+					? modal.find('[name="bobot_finding"]').val()
+					: modal.find('[name="status_finding"]').length
+						? modal.find('[name="status_finding"]').val()
 						: CKEDITOR.instances['field-editor'].getData()
 			};
 
@@ -369,20 +423,17 @@ modal_close();
 				dataType: 'json',
 				data: formData
 			});
-			
+			let cellClass = '.editable';
 			if (response.status === 'success') {
-				const cellClass = modal.is('#modal-datetime') ? '.datetime' : 
-								  modal.is('#modal-pic') ? '.pic' : '.editable';
-
-				let temp_value = await $.ajax({
-					url: '<?= base_url('internal/audit_assignment/change_value') ?>',
-					type: 'POST',
-					dataType: 'json',
-					data: {field: formData.field, value: formData.value }
-				});
-
-			    const $cell = $(`tr[data-id="${formData.id}"] ${cellClass}[data-field="${temp_value.field}"]`);
-				$cell.html(temp_value.value);
+				if(modal.is('#modal-bobot')){
+					cellClass = '.bobot';
+					formData.value = await get_bobot_name(formData.value)
+				}else if(modal.is('#modal-status-finding')){
+					cellClass = '.status-finding';
+					formData.value = await get_status_finding_name(formData.value)
+				}
+			    const $cell = $(`tr[data-id="${formData.id}"] ${cellClass}[data-field="${formData.field}"]`);
+				$cell.html(formData.value);
 				modal.modal('hide');
 			}
 			cAlert.open(response.message, response.status);
@@ -429,9 +480,12 @@ modal_close();
 
 		$(document).on('click', '.attachment', function() {
 			const rowId = $(this).data('id');
+			console.log(rowId);
 			$('#modal-attachment').find('[name="id"]').val(rowId);
 			$('#modal-attachment').modal('show');
 		});
+
+		
 	});
 
 		$(document).on('click', '.mark-completed', function() {
@@ -478,7 +532,6 @@ modal_close();
 				dataType: 'json',
 				success: function(res){
 					let html = '';
-					
 					if (res.length === 0) {
 						html = `<tr>
 							<td colspan="19" class="text-center py-4 text-muted">
@@ -513,12 +566,13 @@ modal_close();
 								<td class="align-middle editable" style="width: 300px; min-width: 180px;" data-field="kriteria">${item.kriteria || ''}</td>
 								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="pengujian">${item.pengujian || ''}</td>
 								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="hasil_review">${item.hasil_review || ''}</td>
-								<td class="align-middle" style="width: 600px; min-width: 350px;" data-field="finding">${item.finding || ''}</td>
-								<td class="align-middle" style="width: 300px; min-width: 180px;" data-field="bobot_finding">${item.bobot_finding || ''}</td>
+								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="finding">${item.finding || ''}</td>
+								<td class="align-middle bobot" style="width: 300px; min-width: 180px;" data-field="bobot_finding">${item.bobot_finding || ''}</td>
 								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="unconformity">${item.unconformity || ''}</td>
 								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="dampak">${item.dampak || ''}</td>
 								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="root_cause">${item.root_cause || ''}</td>
 								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="recomendation">${item.recomendation || ''}</td>
+								<td class="align-middle status-finding" style="width: 300px; min-width: 180px;" data-field="status_finding">${item.status_finding || ''}</td>
 								<td class="align-middle attachment" style="width: 150px; min-width: 150px;" data-id="${item.id}">
 									${item.filename ? `<span class='text-primary'>Lihat Data</span>` : `<span class="text-muted">No file</span>`}
 								</td>
@@ -530,8 +584,171 @@ modal_close();
 					// Update counter with number of assignments loaded
 					badge.removeClass('badge-secondary').addClass('badge-info').text(res.length + ' item' + (res.length!==1?'s':''));
 				}
-				
 			})
+		}
+
+		
+		// Duplicate attachment row card when add button clicked (ensure single binding & unique upload context)
+		$(document).off('click', '#btn-add-attachment').on('click', '#btn-add-attachment', function(e){
+			e.preventDefault();
+			const $last = $('.row-container-attachments').last();
+			if($last.length===0) return; // safety
+			const $clone = $last.clone(false);
+			// Clear user-entered text
+			$clone.find('input[type="text"]').val('');
+			// Remove any previous preview & unlink old data-file attributes
+			$clone.find('.fileupload-preview').each(function(){
+				$(this).empty().removeAttr('data-file');
+			});
+			$clone.find('button.btn-file').each(function(){
+				$(this).removeAttr('data-file');
+			});
+			// Hidden input (upload holder) reset value & remove old data-file
+			$clone.find('input.input-file[type="hidden"]').each(function(){
+				$(this).val('').removeAttr('data-file').removeAttr('id');
+			});
+			// Add remove button if missing
+			if($clone.find('.btn-remove-attachment').length===0){
+				$clone.prepend('<div class="text-right"><button type="button" class="btn btn-danger btn-sm btn-remove-attachment btn-icon-only mb-3" title="Hapus blok"><i class="fas fa-times"></i></button></div>');
+			}
+			$clone.insertAfter($last);
+			// Re-init fileupload plugin for the new block
+			initAttachmentFileUpload($clone);
+			// Re-index blocks
+			$('.row-container-attachments').each(function(i){
+				$(this).attr('data-attachment-index', i+1);
+			});
+		});
+
+		// Helper to initialize a cloned attachment block with unique fileupload instance
+		function initAttachmentFileUpload($block){
+			const $hidden = $block.find('input.input-file[type="hidden"]');
+			if(!$hidden.length) return;
+			// Generate unique id token
+			const idx = 'upl-file-' + Date.now() + '-' + Math.floor(Math.random()*1000);
+			$hidden.attr('data-file', idx);
+			$block.find('.fileupload-preview').attr('data-file', idx);
+			$block.find('button.btn-file').attr('data-file', idx).text(typeof lang !== 'undefined' ? lang.unggah : 'Upload');
+			// Build hidden form with real file input
+			let accept = typeof $hidden.attr('data-accept') === 'undefined' ? (typeof upl_alw !== 'undefined' ? Base64.decode(upl_alw) : '*') : $hidden.attr('data-accept');
+			let nm = $hidden.attr('name');
+			let nmAttr = nm ? nm.replace('[','_').replace(']','') : 'file';
+			let formHtml = '<form action="'+$hidden.attr('data-action')+'" class="hidden">';
+			formHtml += '<input type="file" name="document" class="input-file" id="'+idx+'">';
+			formHtml += '<input type="hidden" name="name" value="'+nmAttr+'">';
+			formHtml += '<input type="hidden" name="token" value="'+($hidden.attr('data-token')||'')+'">';
+			formHtml += '</form>';
+			$('body').append(formHtml);
+			// Initialize jQuery fileupload
+			if(typeof $.fn.fileupload !== 'function') return; // plugin not loaded yet
+			const acceptRegex = accept === '*' ? '*' : new RegExp('(\\.|\\/)('+accept+')$','i');
+			const opt = {maxFileSize: (typeof upl_flsz!=='undefined'?upl_flsz:5242880), autoUpload:false, dataType:'text'};
+			if(acceptRegex !== '*') opt.acceptFileTypes = acceptRegex;
+			$('#'+idx).fileupload(opt)
+			.on('fileuploadadd', function(e,data){
+				$('button[data-file="'+idx+'"]').attr('disabled',true);
+				data.process();
+			})
+			.on('fileuploadprocessalways', function(e,data){
+				if(data.files.error){
+					data.abort();
+					$('button[data-file="'+idx+'"]').text(typeof lang!=='undefined'?lang.unggah:'Upload').removeAttr('disabled');
+				}else{
+					data.submit();
+				}
+			})
+			.on('fileuploadprogressall', function(e,data){
+				var progress = parseInt(data.loaded / data.total * 100,10);
+				$('button[data-file="'+idx+'"]').text(progress+'%');
+			})
+			.on('fileuploaddone', function(e,data){
+				if(data.result && data.result !== 'invalid'){
+					var parts = data.result.split('/');
+					if(parts.length==1) parts = data.result.split('\\');
+					var fname = parts[parts.length-1];
+					$('.fileupload-preview[data-file="'+idx+'"]').html('<a href="'+base_url+data.result+'" target="_blank">'+fname+'</a>');
+					$('input[data-file="'+idx+'"]').val(data.result);
+				}else{
+					cAlert.open((typeof lang!=='undefined'?lang.file_gagal_diunggah:'Upload gagal'),'error');
+				}
+				$('button[data-file="'+idx+'"]').text(typeof lang!=='undefined'?lang.unggah:'Upload').removeAttr('disabled');
+			})
+			.on('fileuploadfail', function(){
+				cAlert.open((typeof lang!=='undefined'?lang.file_gagal_diunggah:'Upload gagal'),'error');
+				$('button[data-file="'+idx+'"]').text(typeof lang!=='undefined'?lang.unggah:'Upload').removeAttr('disabled');
+			});
+		}
+
+		// Remove a duplicated attachment block
+		$(document).on('click', '.btn-remove-attachment', function(){
+			const $parent = $(this).closest('.row-container-attachments');
+			// Keep at least one block
+			if($('.row-container-attachments').length > 1){
+				$parent.remove();
+				$('.row-container-attachments').each(function(i){
+					$(this).attr('data-attachment-index', i+1);
+				});
+			}
+		});
+					
+
+		async function get_bobot_name(id){
+			let data = await $.ajax({
+				url: base_url + 'internal/audit_assignment/get_bobot_name',
+				type: 'POST',
+				dataType: 'json',
+				data: { id: id },
+			});
+			return data.bobot || '';
+		}
+
+		async function get_status_finding_name(id){
+			let status = await $.ajax({
+				url: base_url + 'internal/audit_assignment/get_status_finding',
+				type: 'POST',
+				dataType: 'json',
+				data: { id: id },
+			});
+			return status.description || '';
+		}
+
+		function loadAttachments(){
+			const $tbody=$("#attachment-list");
+			$tbody.html(`<tr><td colspan="4" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary mr-2"></div>Loading...</td></tr>`);
+			let file = $('.fileupload-preview a').html();
+			console.log(file);
+			// $.ajax({
+			// 	url: base_url + 'internal/audit_assignment/attachment_list',
+			// 	type:"POST",
+			// 	dataType:"json",
+			// 	data:{ id: currentAssignmentId },
+			// 	success:function(res){
+			// 		if(!Array.isArray(res) || res.length===0){
+			// 			$tbody.html("<tr><td colspan=\'4\' class=\'text-center text-muted small py-3\'>No data</td></tr>");
+			// 			return;
+			// 		}
+			// 		let html="";
+			// 		res.forEach(function(f){
+			// 			html+=`<tr data-id="\${f.id}">
+			// 				<td>
+			// 					<span class="filename-text">\${f.original_name || f.filename}</span>
+			// 					<input type="text" class="form-control form-control-sm filename-edit d-none" value="\${f.original_name || f.filename}">
+			// 				</td>
+			// 				<td class="small">\${fmtSize(f.size)}</td>
+			// 				<td class="small">\${f.created_at || "-"}</td>
+			// 				<td class="text-center">
+			// 					<button type="button" class="btn btn-sm btn-outline-secondary btn-rename" title="Rename"><i class="fas fa-pencil-alt"></i></button>
+			// 					<a href="\${f.download_url}" target="_blank" class="btn btn-sm btn-outline-info" title="Download"><i class="fas fa-download"></i></a>
+			// 					<button type="button" class="btn btn-sm btn-outline-danger btn-delete" title="Delete"><i class="fas fa-trash"></i></button>
+			// 				</td>
+			// 			</tr>`;
+			// 		});
+			// 		$tbody.html(html);
+			// 	},
+			// 	error:function(){
+			// 		$tbody.html("<tr><td colspan=\'4\' class=\'text-danger text-center small py-3\'>Failed load data</td></tr>");
+			// 	}
+			// });
 		}
 	
 </script>
