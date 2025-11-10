@@ -6,6 +6,7 @@
 	tr();
 		th(lang('no'),'','data-content="id"');
 		th(lang('internal_control'),'','data-content="internal_control"');
+		th(lang('penerbit_pnp'),'','data-content="penerbit_pnp"');
 		th(lang('location_control'),'','width="250" data-content="location_control"');
 		th('&nbsp;','','width="30" data-content="action_button"');
 	table_close();
