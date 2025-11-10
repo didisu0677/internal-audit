@@ -1,23 +1,23 @@
 <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap4.min.css">
-
-<div class="content-header">
-	<div class="main-container position-relative">
-		<div class="header-info">
-			<div class="content-title"><?php echo $title; ?></div>
-			<?php echo breadcrumb(); ?>
-		</div>
-		<div class="float-right">
-			<?php 
-			if(user('id_group')!=AUDITEE)
-			echo access_button('delete,active,inactive,export,import'); 
-			?>
-			<!-- <input type="hidden" value="<?= $id_transaction; ?>" id="id_transaction"> -->
-		</div>
-		<div class="clearfix"></div>
-	</div>
 </div>
-<div class="content-body">
-	<div class="container-fluid mt-3">
+<div class="container-fluid p-3">
+	<div class="row mb-4">
+		<div class="col-12">
+			<div class="card border-0 shadow-sm" style="border-radius: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+				<div class="card-body py-4">
+					<div class="row align-items-center">
+						<div class="col-md-8">
+							<h3 class="mb-1 font-weight-bold text-white"><?php echo $title; ?></h3>
+							<div class="text-white-50">Find and review recorded findings easily</div>
+						</div>
+						<div class="col-md-4 text-md-right">
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="content-body p-2">
 		<table class="table table-hover table-bordered table-striped table-sm" id="table-data">
 			<thead>
 				<tr>
@@ -63,12 +63,10 @@
 					<td width="1" class="text-nowrap">
 						<button type="button" class="btn btn-secondary btn-sm btn-capa btn-icon-only" data-id="<?= $val['id'] ?>"><i class="far fa-copy"></i> </button>
 						<?php if(user('id_group')!=AUDITEE): ?>
-						<button type="button" class="btn btn-warning btn-sm btn-input btn-icon-only" data-id="<?= $val['id'] ?>" data-key="edit"><i class="fa fa-edit"></i> </button>
-						<button type="button" class="btn btn-danger btn-sm btn-delete btn-icon-only" data-id="<?= $val['id'] ?>" ><i class="fa fa-trash"></i> </button>
+							<button type="button" class="btn btn-warning btn-sm btn-input btn-icon-only" data-id="<?= $val['id'] ?>" data-key="edit"><i class="fa fa-edit"></i> </button>
+							<button type="button" class="btn btn-danger btn-sm btn-delete btn-icon-only" data-id="<?= $val['id'] ?>" ><i class="fa fa-trash"></i> </button>
 						<?php endif; ?>
 					</td>
-
-					
 				</tr>
 				<?php endforeach;?>
 		</table>
@@ -159,7 +157,7 @@ modal_open('modal-form','Finding','modal-xl','data-openCallback="formOpen1"');
 						<option value="Improvement">Improvement</option>
 					</select>		
 				</div>
-							</div>
+			</div>
 
 			<div class="form-group row">
 				<label class="col-form-label col-sm-3" for="status_finding_control"><?php echo lang('status_finding_control'); ?></label>

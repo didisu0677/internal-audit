@@ -18,13 +18,15 @@ class Audit_universe extends BE_Controller {
 				'tbl_m_audit_section s3 on s.level3 = s3.id',
 				'tbl_m_audit_section s4 on s.level4 = s4.id',
 			],
-			'order_by' => 's4.urutan',
+			'order_by' => 'u.initial_audit, s4.urutan',
 			'sort' => 'asc',
 		])->result_array();
+		
 		// debug(last_query());
 		foreach($data as $i => $row){
 			$id_risk = json_decode($row['id_risk']);
 			$data_risk = get_data('tbl_risk_register a',[
+				'select' => 'a.*, b.id as id_bobot, b.bobot, b.status_audit, b.description',
 				'join' => [
 					'tbl_bobot_status_audit b on a.bobot = b.id'
 				],
@@ -32,11 +34,12 @@ class Audit_universe extends BE_Controller {
 					'a.id' => $id_risk
 				]
 			])->result_array();
+			
 			foreach($data_risk as $v){
 				$data[$i]['risk'][] = $v;
 			}
+			$data[$i]['id_risk'] = $id_risk;
 		}
-		
 		render(['data'=> $data]);
 	}
 	function data_table() {
@@ -149,67 +152,69 @@ class Audit_universe extends BE_Controller {
 	}
 
 	function set_initial_audit(){
-		$data = post();
-		
-		update_data('tbl_audit_universe', ['initial_audit' => $data['initial_audit']], 'id', $data['id_universe']);
-		
-		$audit_universe = get_data('tbl_audit_universe u',[
-			'select' => 'u.*, r.*, s4.id as id_department, s4.section_name as department, s.section_name, rc.id_risk',
-			'join' => [
-				'tbl_rcm r on u.id_rcm = r.id',
-				'tbl_m_audit_section s on r.id_section = s.id',
-				'tbl_m_audit_section s4 on s.parent_id = s4.id',
-				'tbl_risk_control rc on r.id_risk_control = rc.id',
-			],
-			'where' => [
-				'u.id' => $data['id_universe']
-			]
-		])->row_array();
-		
-		if($audit_universe){
-			$id_risk = json_decode($audit_universe['id_risk'], true);
+		$id_risks = explode(',',  $this->input->post('id_risk'));
+		$id_audit_universe = explode(',', $this->input->post('id_universe'));
+		$initial_audit = date('Y-m-d', strtotime(str_replace('/', '-', post('initial_audit'))));
+
+		foreach($id_risks as $i => $row){
+			update_data('tbl_audit_universe', ['initial_audit' => $initial_audit], 'id', $id_audit_universe[$i]);
 			
-			foreach($id_risk as $id){
-				$risk = get_data('tbl_risk_register a',[
-					'select' => 'a.*, b.id as id_bobot, b.status_audit, b.description',
-					'join' => [
-						'tbl_bobot_status_audit b on a.bobot = b.id'
-					],
-					'where' => [
-						'a.id' => $id
-					]
-				])->row_array();
-				$start_date = null;
-				if($risk['status_audit'] == 'Tahunan'){ // moderate & major
-					$start_date = date('Y-m-d', strtotime('+1 years', strtotime($data['initial_audit'])));
-				}elseif($risk['status_audit'] == '2 Tahun'){
-					$start_date = date('Y-m-d', strtotime('+2 years', strtotime($data['initial_audit'])));	
-				}else{
-					continue;
-				}
-
+			$audit_universe = get_data('tbl_audit_universe u',[
+				'select' => 'u.*, r.*, s4.id as id_department, s4.section_name as department, s.section_name, rc.id_risk',
+				'join' => [
+					'tbl_rcm r on u.id_rcm = r.id',
+					'tbl_m_audit_section s on r.id_section = s.id',
+					'tbl_m_audit_section s4 on s.parent_id = s4.id',
+					'tbl_risk_control rc on r.id_risk_control = rc.id',
+				],
+				'where' => [
+					'u.id' => $id_audit_universe[$i]
+				]
+			])->row_array();
+			if($audit_universe){
+				$id_risk = json_decode($audit_universe['id_risk'], true);
 				
-				$cek = get_data('tbl_annual_audit_plan_group', [
-					'where' => [
+				foreach($id_risk as $id){
+					$risk = get_data('tbl_risk_register a',[
+						'select' => 'a.*, b.id as id_bobot, b.status_audit, b.description',
+						'join' => [
+							'tbl_bobot_status_audit b on a.bobot = b.id'
+						],
+						'where' => [
+							'a.id' => $id
+						]
+					])->row_array();
+					$start_date = null;
+					if($risk['status_audit'] == 'Tahunan'){ // moderate & major
+						$start_date = date('Y-m-d', strtotime('+1 years', strtotime($initial_audit)));
+					}elseif($risk['status_audit'] == '2 Tahun'){
+						$start_date = date('Y-m-d', strtotime('+2 years', strtotime($initial_audit)));	
+					}else{
+						continue;
+					}
+					$cek = get_data('tbl_annual_audit_plan_group', [
+						'where' => [
+							'id_department' => $audit_universe['id_department'],
+							'year' => date('Y', strtotime($start_date))
+						]
+					])->row_array();
+					$data_audit_plan_group = [
+						'id' =>	$cek['id'] ?? 0,				
 						'id_department' => $audit_universe['id_department'],
-						'year' => date('Y', strtotime($start_date))
-					]
-				])->row_array();
-				$data_audit_plan_group = [
-					'id' =>	$cek['id'] ?? 0,				
-					'id_department' => $audit_universe['id_department'],
-					'year' => date('Y', strtotime($start_date)),
-					'start_date' => $start_date
-				];
-				$id_group = save_data('tbl_annual_audit_plan_group', $data_audit_plan_group);
-				
-				$data_audit_plan = [
-					'id_universe' => $data['id_universe'],
-					'id_audit_plan_group' => $id_group['id'],
-				];
-				$resp = save_data('tbl_annual_audit_plan', $data_audit_plan);
+						'year' => date('Y', strtotime($start_date)),
+						'start_date' => $start_date
+					];
+					$id_group = save_data('tbl_annual_audit_plan_group', $data_audit_plan_group);
+					
+					$data_audit_plan = [
+						'id_universe' => $id_audit_universe[$i],
+						'id_audit_plan_group' => $id_group['id'],
+					];
+					save_data('tbl_annual_audit_plan', $data_audit_plan);
 
+				}
 			}
+		
 		}
 		render([
 			'status' => 'success',
