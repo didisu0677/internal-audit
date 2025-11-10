@@ -2278,6 +2278,16 @@ function get_active_auditor(){
     return $data ?: [];
 }
 
+function get_list_bobot(){
+    $data = get_data('tbl_bobot_status_audit')->result_array();
+    return $data ?: [];
+}
+
+function get_list_status_finding_control(){
+    $data = get_data('tbl_status_finding_control')->result_array();
+    return $data ?: [];
+}
+
 function get_active_user(){
     $data = get_data('tbl_user', 'is_active', 1)->result_array();
     return $data ?: [];
