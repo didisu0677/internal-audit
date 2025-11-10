@@ -50,8 +50,8 @@
 				</tr>
 			</thead>
 			<tbody>
-				<?php foreach($data as $row) :?>
-					<?php
+				<?php foreach($data as $row) :
+					if(!empty($row['risk'])) :  
 						foreach($row['risk'] as $v) :?>
 						<tr>
 							<td>
@@ -73,7 +73,7 @@
 								<?php endif; ?>
 							</td>
 						</tr>
-					<?php endforeach; ?>
+					<?php endforeach; endif ?>
 				<?php endforeach; ?>
 			</tbody>
 	</table>
