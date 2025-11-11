@@ -176,7 +176,7 @@ modal_open('modal-status-finding','Edit Status Finding','modal-md');
 			echo '</div>';
 modal_close();
 
-modal_open('modal-attachment','Attachment Management','modal-fullscreen');
+modal_open('modal-attachment','Attachment Management','modal-xl');
 	modal_body();
 		form_open(base_url('internal/audit_assignment/attach_file'),'post','form-attachment');
 		input('hidden','id','id'); 
@@ -195,47 +195,12 @@ modal_open('modal-attachment','Attachment Management','modal-fullscreen');
 				</div>
 			</div>';
 			fileupload('File','file[]','required','data-accept="xls|xlsx|doc|docx"');
-
-			echo '</div>';
+		echo '</div>
+		<div id="list-attachments"></div>
+		</div>
+		';
 		form_button(lang('simpan'),lang('batal'));
 		form_close();
-		// // Upload form
-		// echo '<div class="card mb-4">
-		// <div class="form-group row">
-		// 		<label class="col-md-3 col-form-label">Upload File</label>
-		// 		<div class="col-md-9">
-		// 			<form id="form-upload-attachment" enctype="multipart/form-data" onsubmit="return false;">
-		// 				<div class="input-group mb-2">
-		// 					<input type="text" name="original_name" class="form-control form-control-sm" placeholder="Optional display name">
-		// 					<div class="input-group-append">
-		// 						<button type="button" class="btn btn-sm btn-secondary" id="btn-clear-name">Clear</button>
-		// 					</div>
-		// 				</div>';
-		// 				col_init(0,12);
-		// 					fileupload('File','attachment_file','required');
-		// echo '	<button type="button" class="btn btn-primary btn-sm mt-2" id="btn-upload-attachment">
-		// 					<i class="fas fa-upload mr-1"></i>Upload
-		// 				</button>
-		// 			</form>
-		// 		</div>
-		// 	</div>';
-
-		// // List
-		// echo '<div class="table-responsive">
-		// 		<table class="table table-sm table-bordered mb-0">
-		// 			<thead class="thead-light">
-		// 				<tr class="small">
-		// 					<th>Name</th>
-		// 					<th style="width:110px">Size</th>
-		// 					<th style="width:160px">Uploaded At</th>
-		// 					<th style="width:160px" class="text-center">Action</th>
-		// 				</tr>
-		// 			</thead>
-		// 			<tbody id="attachment-list">
-		// 				<tr><td colspan="4" class="text-center py-3 text-muted small">No data</td></tr>
-		// 			</tbody>
-		// 		</table>
-		// 	</div>';
 modal_close();
 ?>
 
@@ -243,6 +208,8 @@ modal_close();
 <script type="text/javascript" src="<?php echo base_url('assets/plugins/ckeditor/ckeditor.js') ?>"></script>
 <script>
 	let planGroupId = null;
+	let idSelectedFile = null;
+	let idSelectedAssignment = null;
 
 	// AJAX filter switch similar to Annual Audit Plan
 	$(document).on('click', '.filter-switch', function(e){
@@ -479,13 +446,11 @@ modal_close();
 		});
 
 		$(document).on('click', '.attachment', function() {
-			const rowId = $(this).data('id');
-			console.log(rowId);
-			$('#modal-attachment').find('[name="id"]').val(rowId);
+			idSelectedAssignment = $(this).data('id');
+			generateListAttachment();
+			$('#modal-attachment').find('[name="id"]').val(idSelectedAssignment);
 			$('#modal-attachment').modal('show');
 		});
-
-		
 	});
 
 		$(document).on('click', '.mark-completed', function() {
@@ -493,6 +458,37 @@ modal_close();
 			if (!planGroupId) return;
 			cConfirm.open('Are you sure you want to mark this department as complete?', 'markCompleted');
 		});
+
+		$(document).on('click', '#download-file', function() {
+			const fileId = $(this).data('id-file');
+			if (!fileId) return;
+			window.open(base_url + 'internal/audit_assignment/download_file?id=' + fileId, '_blank');
+		});
+
+		$(document).on('click', '#delete-file', function() {
+			let id = $(this).data('id-file');
+			idSelectedFile = id;
+			cConfirm.open('Are you sure you want to delete this file?', 'deleteFile');
+		});
+
+		function deleteFile() {
+			$.ajax({
+				url: base_url + 'internal/audit_assignment/delete_file',
+				type: 'POST',
+				dataType: 'json',
+				data: { id: idSelectedFile },
+				success: function(res) {
+					if (res.status === 'success') {
+						cAlert.open(res.message, 'success', 'generateListAttachment');
+					} else {
+						cAlert.open(res.message, 'error');
+					}
+				},
+				error: function() {
+					cAlert.open('An error occurred while processing your request.', 'error');
+				}
+			});
+		}
 
 		function reload_page() {
 			location.reload();
@@ -513,6 +509,51 @@ modal_close();
 				},
 				error: function() {
 					cAlert.open('An error occurred while processing your request.', 'error');
+				}
+			});
+		}
+		function generateListAttachment(){
+			rowId = idSelectedAssignment;
+			$.ajax({
+				url: base_url + 'internal/audit_assignment/get_attachments',
+				type: 'POST',
+				dataType: 'json',
+				data: { id: rowId },
+				success: function(res) {
+					$('#list-attachments').html('');
+
+					let html = `<div class="form-group row">
+						<div class="col-md-12">
+							<label class="font-weight-bold">Daftar File Terunggah</label>
+							<div class="table-responsive border rounded" style="max-height:360px;overflow:auto">
+								<table class="table table-sm table-hover mb-0">
+									<thead class="thead-light">
+										<tr>
+											<th style="width:45%">Nama File</th>
+											<th style="width:45%">Tanggal</th>
+											<th class="text-center">Aksi</th>
+										</tr>
+									</thead>
+									<tbody>`;
+									$.each(res, function(index, file) {
+										html += `<tr data-id-assignment="${file.id_assignment}">
+											<td class="align-middle">${file.filename}</td>
+											<td class="align-middle">${file.created_at}</td>
+											<td class="align-middle text-center" width="1px">
+												<button type="button" class="btn btn-sm btn-primary btn-icon-only mr-2" id="download-file" title="Download File" data-id-file="${file.id_file}">
+													<i class="fas fa-download"></i>
+												</button>
+												<button type="button" class="btn btn-sm btn-danger btn-icon-only" id="delete-file" title="Delete File" data-id-file="${file.id_file}">
+													<i class="fas fa-trash"></i>
+												</button>
+											</td>`	
+										})
+									html += `</tbody>
+								</table>
+							</div>
+						</div>
+					</div>`
+					$('#list-attachments').html(html);
 				}
 			});
 		}
@@ -691,7 +732,6 @@ modal_close();
 			}
 		});
 					
-
 		async function get_bobot_name(id){
 			let data = await $.ajax({
 				url: base_url + 'internal/audit_assignment/get_bobot_name',
@@ -710,45 +750,6 @@ modal_close();
 				data: { id: id },
 			});
 			return status.description || '';
-		}
-
-		function loadAttachments(){
-			const $tbody=$("#attachment-list");
-			$tbody.html(`<tr><td colspan="4" class="text-center py-4"><div class="spinner-border spinner-border-sm text-primary mr-2"></div>Loading...</td></tr>`);
-			let file = $('.fileupload-preview a').html();
-			console.log(file);
-			// $.ajax({
-			// 	url: base_url + 'internal/audit_assignment/attachment_list',
-			// 	type:"POST",
-			// 	dataType:"json",
-			// 	data:{ id: currentAssignmentId },
-			// 	success:function(res){
-			// 		if(!Array.isArray(res) || res.length===0){
-			// 			$tbody.html("<tr><td colspan=\'4\' class=\'text-center text-muted small py-3\'>No data</td></tr>");
-			// 			return;
-			// 		}
-			// 		let html="";
-			// 		res.forEach(function(f){
-			// 			html+=`<tr data-id="\${f.id}">
-			// 				<td>
-			// 					<span class="filename-text">\${f.original_name || f.filename}</span>
-			// 					<input type="text" class="form-control form-control-sm filename-edit d-none" value="\${f.original_name || f.filename}">
-			// 				</td>
-			// 				<td class="small">\${fmtSize(f.size)}</td>
-			// 				<td class="small">\${f.created_at || "-"}</td>
-			// 				<td class="text-center">
-			// 					<button type="button" class="btn btn-sm btn-outline-secondary btn-rename" title="Rename"><i class="fas fa-pencil-alt"></i></button>
-			// 					<a href="\${f.download_url}" target="_blank" class="btn btn-sm btn-outline-info" title="Download"><i class="fas fa-download"></i></a>
-			// 					<button type="button" class="btn btn-sm btn-outline-danger btn-delete" title="Delete"><i class="fas fa-trash"></i></button>
-			// 				</td>
-			// 			</tr>`;
-			// 		});
-			// 		$tbody.html(html);
-			// 	},
-			// 	error:function(){
-			// 		$tbody.html("<tr><td colspan=\'4\' class=\'text-danger text-center small py-3\'>Failed load data</td></tr>");
-			// 	}
-			// });
 		}
 	
 </script>

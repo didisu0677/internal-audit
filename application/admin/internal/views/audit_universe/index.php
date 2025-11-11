@@ -91,19 +91,6 @@ modal_open('mEdit');
 	modal_footer();
 modal_close();
 
-// Bulk modal
-modal_open('mBulk');
-	modal_body();
-		form_open(base_url('internal/audit_universe/set_initial_audit_bulk'),'post','form1', 'data-callback = "reload_page"');
-			col_init(3,9);
-			input('hidden', 'id_universe', 'id_universe_bulk');
-			input('hidden','id_risk','id_risk_bulk');
-			input('date','Initial Audit','bulk_initial_audit','required');
-			form_button(lang('simpan'),lang('batal'));
-		form_close();
-	modal_footer();
-modal_close();
-
 ?>
 
 <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>

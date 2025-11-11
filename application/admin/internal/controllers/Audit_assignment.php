@@ -160,7 +160,6 @@ class Audit_assignment extends BE_Controller {
 		$id = post('id');
 		$original_name = $this->input->post('original_name');
 		$files = $this->input->post('file');
-		$data = get_data('tbl_individual_audit_assignment_files','id_audit_assignment',$id)->row_array();
 		$response = [
 			'status' => 'success',
 			'message' => 'Successfully uploaded file.'
@@ -174,7 +173,6 @@ class Audit_assignment extends BE_Controller {
 				$destination = FCPATH . 'assets/uploads/assignment_file/'. $file;
 				if(copy($v, $destination)) {
 					save_data('tbl_individual_audit_assignment_files', [
-					'id' => $data['id'] ?? null,
 					'id_audit_assignment' => $id,
 					'filename'	=> $fileName,
 					'file' => $file,
@@ -263,5 +261,66 @@ class Audit_assignment extends BE_Controller {
 
 		$data = get_data('tbl_status_finding_control','id',$id)->row_array();
 		render($data,'json');
+	}
+
+	function get_attachments(){
+		$id = post('id');
+
+		$data = get_data('tbl_individual_audit_assignment_files af',[
+			'select' => 'aa.id as id_assignment, af.id as id_file, af.*',
+			'join' => [
+				'tbl_individual_audit_assignment aa on aa.id = af.id_audit_assignment type left'
+			],
+			'where' => [
+				'af.id_audit_assignment' => $id
+			]
+		])->result_array();
+		render($data,'json');
+	}
+
+	function delete_file(){
+		$id = post('id');
+
+		$resp = delete_data('tbl_individual_audit_assignment_files','id', $id);
+		if($resp){
+			$response = [
+				'status' => 'success',
+				'message' => lang('data_berhasil_dihapus')
+			];
+		}else{
+			$response = [
+				'status' => 'error',
+				'message' => lang('data_gagal_dihapus')
+			];
+		}
+		render($response,'json');
+	}
+
+	function download_file(){
+		$id = get('id');
+		$row = get_data('tbl_individual_audit_assignment_files','id',$id)->row_array();
+		if(!$row) exit;
+
+		$path = FCPATH.'assets/uploads/assignment_file/'.$row['file'];
+		if(!is_file($path)) exit;
+
+		$downloadName = $row['filename'];
+		$extStored = pathinfo($row['file'], PATHINFO_EXTENSION);
+		$extGiven = pathinfo($downloadName, PATHINFO_EXTENSION);
+		if(!$extGiven){
+			$downloadName .= '.'.$extStored;
+		}
+
+		$mime = function_exists('mime_content_type') ? mime_content_type($path) : 'application/octet-stream';
+		header('Content-Description: File Transfer');
+		header('Content-Type: '.$mime);
+		header('Content-Disposition: attachment; filename="'.addslashes($downloadName).'"');
+		header('Content-Transfer-Encoding: binary');
+		header('Expires: 0');
+		header('Cache-Control: must-revalidate');
+		header('Pragma: public');
+		header('Content-Length: '.filesize($path));
+		readfile($path);
+		exit;
 	}
 }
