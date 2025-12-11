@@ -184,12 +184,13 @@ class Annual_audit_plan extends BE_Controller {
 		])->result_array();
 
 		$data['expense_type'] = get_data('tbl_expense_type', 'is_active', 1)->result_array();
-		
+		$data['schedule_audit'] = get_data('tbl_schedule_audit', 'id', $data['schedule_audit'])->row_array()['id'];
 		render($data,'json');
 	}
 
 	function save(){
 		$id= post('id_plan');
+		$schedule_audit = post('schedule_audit');
 		$id_audit_plan_group= post('id_plan_group');
 		$objektif = post('objektif');
 		$start_date = post('start_date');
@@ -291,6 +292,7 @@ class Annual_audit_plan extends BE_Controller {
 		
 		$data = [
 			'id' => $id_audit_plan_group,
+			'schedule_audit' => $schedule_audit,
 			'objective' => $objektif,
 			'start_date' => $start_date,
 			'end_date' => $end_date,

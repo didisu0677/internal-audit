@@ -311,6 +311,17 @@
 									</div>
 								</div>
 							</div>
+							<h6 class='text-muted mb-3 mt-3'>Surat Tugas</h6>
+							<div class='card border-0 shadow-sm'>
+								<div class='card-body p-3'>
+									<select class='form-control form-control-sm mb-2 select2' name='schedule_audit' id='schedule_audit' style='width:100% !important' required>
+										<option value='' selected>-- Select Schedule Audit --</option>";
+										foreach(get_list_schedule_audit() as $schedule){
+											echo "<option value='".$schedule['id']."'>".$schedule['val']."</option>";
+										}
+									echo "</select>
+								</div>
+							</div>
 						</div>
 					</div>
 					<hr>
@@ -578,10 +589,11 @@
 			data: {id:id},
 			dataType: 'json'
 		})
-		
+
 		$('#id_plan').val(res.id);
 		$('#id_plan_group').val(res.id_audit_plan_group);
 		$('#start_date').val(res.start_date);
+		$('#schedule_audit').val(res.schedule_audit).trigger('change');
 		$('#objektif').val(res.objective);
 		$('#activity_type').val(res.type || '');
 		if(res.type == null){
