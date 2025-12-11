@@ -2320,3 +2320,37 @@ function toInt($val)
     // Kalau bukan array, hapus separator dan jadikan integer
     return (int) str_replace('.', '', (string) $val);
 }
+
+function get_list_schedule_audit(){
+    $data = get_data('tbl_schedule_audit', [
+        'select' => 'id, concat(surat_tugas , " | " , deskripsi) as val',
+        'where' => [
+            'is_active' => 1
+        ]
+    ])->result_array();
+    return $data ?: [];
+}
+function get_detail_schedule_audit($id){
+    $data = get_data('tbl_schedule_audit', 'id', $id)->row_array();
+    return $data ?: [];
+}
+
+function get_detail_auditor($id){
+    $data = get_data('tbl_m_auditor', 'id', $id)->row_array();
+    return $data ?: [];
+}
+
+function get_detail_auditee($id){
+    $data = get_data('tbl_auditee', 'id', $id)->row_array();
+    return $data ?: [];
+}
+
+function get_detail_department($id){
+    $data = get_data('tbl_m_audit_section', 'id', $id)->row_array();
+    return $data ?: [];
+}
+
+function get_detail_bobot($id){
+    $data = get_data('tbl_bobot_status_audit', 'id', $id)->row_array();
+    return $data ?: [];
+}
