@@ -234,6 +234,65 @@ class Audit_assignment extends BE_Controller {
 		$id_plangroup = post('id_audit_plan_group');
 		$audit_group = get_data('tbl_annual_audit_plan','id_audit_plan_group',$id_plangroup)->result_array();
 		$id_plan = array_column($audit_group, 'id');
+		$data = get_data('tbl_individual_audit_assignment','id_audit_plan',$id_plan)->result_array();
+		
+		$data_plangroup = get_data('tbl_annual_audit_plan_group','id',$id_plangroup)->row_array();
+		$data_finding = [];
+		foreach($data as $row){
+			$id_audit_plan = $row['id_audit_plan'];
+			$plan = get_data('tbl_annual_audit_plan ap',[
+				'select' => 'ag.*,rcm.id_section as id_section, ms.section_name, ms.description as site_audit, sa.id as id_audit_area, sa.sub_aktivitas as audit_area',
+				'join' => [
+					'tbl_annual_audit_plan_group ag on ap.id_audit_plan_group = ag.id type left',
+					'tbl_audit_universe au on ap.id_universe = au.id type left',
+					'tbl_rcm rcm on au.id_rcm = rcm.id type left',
+					'tbl_m_audit_section ms on rcm.id_section = ms.id type left',
+					'tbl_sub_aktivitas sa on rcm.id_sub_aktivitas = sa.id type left',
+				],
+				'where' => [
+					'ap.id' => $id_audit_plan
+				]
+			])->row_array();
+			
+			$detail_schedule = get_detail_schedule_audit($plan['schedule_audit'] ?? '');
+			$schedule = !empty($detail_schedule) ? $detail_schedule['nomor'] : '';
+			$data_finding[] = [
+				'id_assignment' => $row['id'],
+				'id_schedule' => $detail_schedule['id'],
+				'periode_audit' => $schedule,
+				'id_institusi_audit' => '1',
+				'auditor' => $plan['auditor'],
+				'nama_auditor' => get_detail_auditor($plan['auditor'])['nama'],
+				'tgl_mulai_audit' => $plan['start_date'],
+				'tgl_akhir_audit' => $plan['end_date'],
+				// 'auditee' => get_detail_auditee($plan['auditee'])['nama'],	
+				'auditee' => $plan['auditee'],
+				'site_auditee' => $plan['site_audit'],
+				'id_department_auditee' => $plan['id_department'],
+				'id_divisi' => get_detail_department($plan['id_department'])['level3'],
+				'id_section_department' => $plan['id_section'],
+				'audit_area' => $plan['audit_area'],
+				'id_sub_aktivitas' => $plan['id_audit_area'],
+				'finding' => $row['finding'],
+				'bobot_finding' => get_detail_bobot($row['bobot_finding'])['bobot'],
+				'status_finding_control' => $row['status_finding'],
+				'status_finding' => '0' 
+			];
+		}
+		foreach($data_finding as $finding){
+			if(empty($finding['finding'])) continue;
+			if(empty($finding['auditor']) || empty($finding['auditee'])){
+				render([
+					'status' => 'error',
+					'message' => 'Pastikan Auditee dan Auditor tidak kosong pada Annual Audit Plan!'
+				],'json');
+				return;
+			}
+			$cek = get_data('tbl_finding_records', 'id_assignment', $finding['id_assignment'])->row_array();
+			$finding['id'] = $cek['id'] ?? 0;
+			save_data('tbl_finding_records',$finding);
+		}
+		
 		$resp = update_data('tbl_individual_audit_assignment',['status' => 'history'],'id_audit_plan',$id_plan);
 		if($resp){
 			$response = [
