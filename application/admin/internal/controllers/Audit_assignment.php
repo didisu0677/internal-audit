@@ -271,7 +271,14 @@ class Audit_assignment extends BE_Controller {
 			$auditor = get_detail_auditor($plan['auditor']);
 			$divisi = get_detail_department($plan['id_department']);
 			$bobot = get_detail_bobot($row['bobot_finding']);
-
+			
+			if($plan['status'] != 'completed'){
+				render([
+					'status' => 'info',
+					'message' => 'Pastikan status Annual Audit Plan sudah "Completed" sebelum menandai Assignment sebagai Completed!'
+				],'json');
+				return;
+			}
 			if(!empty($row['finding']) && empty($row['status_finding'])){
 				render([
 					'status' => 'info',
