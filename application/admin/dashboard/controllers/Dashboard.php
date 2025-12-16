@@ -566,12 +566,11 @@ class Dashboard extends BE_Controller {
 				'YEAR(fr.tgl_mulai_audit)' => $year
 			],
 			'join' => [
-				'tbl_capa c on fr.id = c.id_finding type left',
-				'tbl_status_capa sc on c.id_status_capa = sc.id type left',
-				'tbl_m_audit_section s on fr.id_department_auditee = s.id type left',
-				'tbl_sub_aktivitas sa on fr.id_sub_aktivitas = sa.id type left',
-				'tbl_aktivitas a on sa.id_aktivitas = a.id type left'
-
+				'tbl_capa c on fr.id = c.id_finding',
+				'tbl_status_capa sc on c.id_status_capa = sc.id', 
+				'tbl_m_audit_section s on fr.id_department_auditee = s.id ',
+				'tbl_sub_aktivitas sa on fr.id_sub_aktivitas = sa.id ',
+				'tbl_aktivitas a on sa.id_aktivitas = a.id'
 			]
 		])->result_array();
 		
