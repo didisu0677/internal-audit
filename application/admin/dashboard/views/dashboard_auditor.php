@@ -62,6 +62,8 @@
           <div style="height: 200px;">
             <canvas id="audit_plan_chart"></canvas>
           </div>
+          <div id="audit_plan_legend" class="mt-3" style="display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;">
+          </div>
         </div>
       </div>
     </div>
@@ -130,20 +132,20 @@
             </div>
           </div>
           <h6 class="font-weight-bold text-dark mb-3">CAPA PLAN PROGRESS</h6>
-          <h2 class="text-success font-weight-bold mb-3" style="font-size: 2.5rem;">86%</h2>
+          <h2 id="capa_percentage" class="text-success font-weight-bold mb-3" style="font-size: 2.5rem;">0%</h2>
           <div class="mb-3">
-            <span class="badge badge-primary px-3 py-2 mr-1" style="border-radius: 20px;">42 Completed</span>
-            <span class="badge badge-warning px-3 py-2" style="border-radius: 20px;">7 In-progress</span>
+            <span id="capa_completed_badge" class="badge badge-primary px-3 py-2 mr-1" style="border-radius: 20px;">0 Completed</span>
+            <span id="capa_progress_badge" class="badge badge-warning px-3 py-2" style="border-radius: 20px;">0 In-progress</span>
           </div>
           <div class="bg-light rounded p-3">
             <table class="table table-borderless table-sm mb-0 text-left">
               <tr>
                 <td class="text-muted">Head Office</td>
-                <td class="font-weight-medium">1</td>
+                <td id="capa_ho" class="font-weight-medium">0</td>
               </tr>
               <tr>
                 <td class="text-muted">Factory</td>
-                <td class="font-weight-medium">6</td>
+                <td id="capa_factory" class="font-weight-medium">0</td>
               </tr>
             </table>
           </div>
@@ -268,6 +270,7 @@
     '#6ECFF6', // Moderate
     '#6EF3F2', // Minor
   ];
+  let auditPlanChart = null;
   let findingControlPie = null;
   let findingControlBar = null;
   let riskControlPie = null;
@@ -280,6 +283,8 @@
     $.when(
       // generateFindingAndCapa(),
       // get_monitoring_capa(),
+      generateAuditPlanChart(),
+      generateCapaPlanProgress(),
       generateFindingControlPie(),
       generateFindingControlBar(),
       generateRiskMonitoringBar(),
@@ -296,6 +301,8 @@
     $.when(
       // generateFindingAndCapa(),
       // get_monitoring_capa(),
+      generateAuditPlanChart(),
+      generateCapaPlanProgress(),
       generateFindingControlPie(),
       generateFindingControlBar(),
       generateRiskMonitoringBar(),
@@ -366,6 +373,125 @@
       return function (d) {
         return d == 0 ? '-' : d;
       };
+  }
+
+function generateCapaPlanProgress() {
+    let year = $('#year').val();
+    return $.ajax({
+      url: base_url + 'dashboard/get_capa_plan_progress',
+      type: 'post',
+      data: {
+        year: year
+      },
+      success: function (res) {
+        let completed = parseInt(res.completed || 0);
+        let total = parseInt(res.total || 0);
+        let capa = parseInt(res.capa || 0);
+        let factory = parseInt(res.factory || 0);
+        let ho = parseInt(res.ho || 0);
+        
+        let inProgress = capa - completed;
+        if (inProgress < 0) inProgress = 0;
+        
+        let percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+        
+        $('#capa_percentage').text(percentage + '%');
+        $('#capa_completed_badge').text(completed + ' Completed');
+        $('#capa_progress_badge').text(capa + ' In-progress');
+        $('#capa_ho').text(ho);
+        $('#capa_factory').text(factory);
+      }
+    });
+  }
+  function generateAuditPlanChart() {
+    let year = $('#year').val();
+    return $.ajax({
+      url: base_url + 'dashboard/get_audit_plan_data',
+      type: 'post',
+      data: {
+        year: year
+      },
+      success: function (res) {
+        let completed = parseInt(res.completed || 0);
+        let planned = parseInt(res.planned || 0) + parseInt(res.canceled || 0);
+
+        let labels = ['Completed', 'Planned'];
+        let datas = [completed, planned];
+        let colors = ['#5B8CCB', '#6EF3F2'];
+
+        let total = completed + planned;
+        let completedPercentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+        let plannedPercentage = total > 0 ? Math.round((planned / total) * 100) : 0;
+
+        let ctx = $('#audit_plan_chart');
+
+        if (auditPlanChart !== null) {
+          auditPlanChart.destroy();
+        }
+
+        auditPlanChart = new Chart(ctx, {
+          type: 'doughnut',
+          plugins: [ChartDataLabels],
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Audit Plan',
+              data: datas,
+              backgroundColor: colors,
+              borderColor: '#fff',
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              datalabels: {
+                font: { weight: 'bold', size: 13 },
+                color: '#fff',
+                display: (ctx) => datas[ctx.dataIndex] > 0,
+                formatter: (value, ctx) => {
+                  if (value === 0) return '';
+                  let percentage = ctx.dataIndex === 0 ? completedPercentage : plannedPercentage;
+                  return percentage + '%';
+                }
+              },
+              tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                padding: 12,
+                cornerRadius: 8,
+                titleFont: { size: 13, weight: 'bold' },
+                bodyFont: { size: 12 },
+                callbacks: {
+                  label: (ctx) => {
+                    const i = ctx.dataIndex;
+                    let percentage = i === 0 ? completedPercentage : plannedPercentage;
+                    return `${labels[i]}: ${datas[i]} (${percentage}%)`;
+                  }
+                }
+              },
+              legend: {
+                display: false
+              }
+            }
+          }
+        });
+
+        // Generate custom legend
+        let legendHTML = '';
+        labels.forEach((label, i) => {
+          if (datas[i] > 0) {
+            legendHTML += `
+              <div style="display: flex; align-items: center; padding: 5px 10px; background: #f8f9fa; border-radius: 8px;">
+                <div style="width: 12px; height: 12px; background: ${colors[i]}; border-radius: 50%; margin-right: 8px;"></div>
+                <span style="font-size: 11px; font-weight: 500; color: #495057;">${label}: ${datas[i]}</span>
+              </div>
+            `;
+          }
+        });
+        $('#audit_plan_legend').html(legendHTML);
+      }
+    });
   }
 
   function generateFindingControlPie() {

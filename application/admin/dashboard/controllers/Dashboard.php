@@ -541,4 +541,66 @@ class Dashboard extends BE_Controller {
 		}
 		render($clean_data, 'json');
 	}
+
+	function get_audit_plan_data (){
+		$year = post('year') ?: date('Y');
+		$data = get_data('tbl_annual_audit_plan_group', [
+			'select' => 'status, count(*) as jumlah',
+			'where' => [
+				'year' => $year
+			],
+			'group_by' => 'status'
+		])->result_array();
+		$result = [];
+		foreach($data as $v){
+			$result[$v['status']] = $v['jumlah'];
+		}
+		render($result, 'json');
+	}
+
+	function get_capa_plan_progress(){
+		$year = post('year') ?: date('Y');
+		$result = get_data('tbl_finding_records fr', [
+			'select' => 'fr.site_auditee, s.section_name, fr.status_finding, sc.id as id_status_capa, a.id as id_aktivitas, a.aktivitas',
+			'where' => [
+				'YEAR(fr.tgl_mulai_audit)' => $year
+			],
+			'join' => [
+				'tbl_capa c on fr.id = c.id_finding type left',
+				'tbl_status_capa sc on c.id_status_capa = sc.id type left',
+				'tbl_m_audit_section s on fr.id_department_auditee = s.id type left',
+				'tbl_sub_aktivitas sa on fr.id_sub_aktivitas = sa.id type left',
+				'tbl_aktivitas a on sa.id_aktivitas = a.id type left'
+
+			]
+		])->result_array();
+		
+		$factory = 0;
+		$ho = 0;
+		$capa = 0;
+		$completed = 0;
+		$total = 0;
+		foreach($result as $v){
+			if($v['site_auditee'] == 'Factory'){
+				$factory++;
+			}else{
+				$ho++;
+			}
+
+			if(in_array($v['id_status_capa'], ['1','2'])){ // delivered on progress
+				$capa++;
+				$total++;
+			}elseif($v['id_status_capa'] == '3'){ // done
+				$completed++;
+				$total++;
+			}
+		}
+
+		$data['factory'] = $factory;;
+		$data['ho'] = $ho;
+		$data['capa'] = $capa;
+		$data['completed'] = $completed;
+		$data['total'] = $total;
+		render($data, 'json');
+	}
 }
