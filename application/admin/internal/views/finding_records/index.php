@@ -121,17 +121,6 @@ modal_open('modal-form','Finding','modal-xl','data-openCallback="formOpen1"');
 	
 				<?php
 			card_close();
-			
-			card_open(lang('auditee'),'mb-2');
-				input('text', 'Auditee', 'auditee', '', '', 'readonly');
-				input('text', 'Site Auditee', 'site_auditee', '', '', 'readonly');
-				input('text', 'Section', 'section', '', '', 'readonly');
-				// select2(lang('auditee'),'auditee','required');
-				// select2(lang('site_auditee'),'site_auditee','required|infinity',['Head Office (HO)','Factory']);
-				// select2(lang('section'),'id_section_department','required',$department,'id_section','section_name');
-				// input('text',lang('audit_area'),'audit_area');
-				select2('Audit Area','id_sub_aktivitas','required', $aktivitas, 'id','sub_aktivitas','','disabled');
-			card_close();
 			card_open(lang('finding'),'mb-2');?>
 			<input type="hidden" name="id_finding_records[]" id="id_finding_records">
 			<div class="form-group row">
@@ -169,6 +158,11 @@ modal_open('modal-form','Finding','modal-xl','data-openCallback="formOpen1"');
 			</div>
 
 			<?php
+			card_close();
+			card_open('Attachments','mb-2');
+				echo '
+				<div id="list-attachments"></div>
+				';
 			card_close();
 			// form_button(lang('simpan'),lang('batal'));
 		form_close();
@@ -610,6 +604,7 @@ function formOpen1() {
 				const html = '<option value=""></option><option value="' + response.id_department_auditee + '">' + (response.department || '') + '</option>';
 				$('#id_department_auditee').html(html).val(response.id_department_auditee).trigger('change');
 			}
+			generateListAttachment(response.id);
 
 			// Update dependent combo
 			if (typeof get_department === 'function') {
@@ -804,10 +799,48 @@ function get_auditee() {
 	});
 }
 
-function getDataTable(){
+function generateListAttachment(rowId){
+	$.ajax({
+		url: base_url + 'internal/finding_records/get_attachments',
+		type: 'POST',
+		dataType: 'json',
+		data: { id: rowId },
+		success: function(res) {
+			$('#list-attachments').html('');
 
-}
+					let html = `<div class="form-group row">
+						<div class="col-md-12">
+								<table class="table table-sm table-hover mb-0">
+									<thead>
+										<tr>
+											<th style="width:45%">Nama File</th>
+											<th style="width:45%">Tanggal</th>
+											<th class="text-center">Aksi</th>
+										</tr>
+									</thead>
+									<tbody>`;
+									$.each(res, function(index, file) {
+										html += `<tr data-id-assignment="${file.id_assignment}">
+											<td class="align-middle">${file.filename}</td>
+											<td class="align-middle">${file.created_at}</td>
+											<td class="align-middle text-center" width="1px">
+												<button type="button" class="btn btn-sm btn-primary btn-icon-only mr-2 download-file" title="Download File" data-id-file="${file.id_file}">
+													<i class="fas fa-download"></i>
+												</button>
+											</td>`	
+										})
+									html += `</tbody>
+								</table>
+					</div>`;
+					$('#list-attachments').html(html);
+				}
+			});
 
-
+		$(document).on('click', '.download-file', function() {
+			const fileId = $(this).data('id-file');
+			if (!fileId) return;
+			window.open(base_url + 'internal/finding_records/download_file?id=' + fileId, '_blank');
+		});
+		}
 
 </script>

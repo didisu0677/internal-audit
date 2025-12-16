@@ -839,4 +839,50 @@ class Finding_records extends BE_Controller {
 		$data = get_data('tbl_finding_records', 'id', $id)->row_array();
 		render($data,'json');
 	}
+
+	function get_attachments(){
+		$id = post('id');
+		$finding_records = get_data('tbl_finding_records', 'id', $id)->row_array();
+		$id_assignment = $finding_records ? $finding_records['id_assignment'] : 0;
+
+		$data = get_data('tbl_individual_audit_assignment_files af',[
+			'select' => 'aa.id as id_assignment, af.id as id_file, af.*',
+			'join' => [
+				'tbl_individual_audit_assignment aa on aa.id = af.id_audit_assignment type left'
+			],
+			'where' => [
+				'af.id_audit_assignment' => $id_assignment
+			]
+		])->result_array();
+		render($data,'json');
+	}
+
+	function download_file(){
+		$id = get('id');
+		$row = get_data('tbl_individual_audit_assignment_files','id',$id)->row_array();
+		if(!$row) exit;
+
+		$path = FCPATH.'assets/uploads/assignment_file/'.$row['file'];
+		if(!is_file($path)) exit;
+
+		$downloadName = $row['filename'];
+		$extStored = pathinfo($row['file'], PATHINFO_EXTENSION);
+		$extGiven = pathinfo($downloadName, PATHINFO_EXTENSION);
+		if(!$extGiven){
+			$downloadName .= '.'.$extStored;
+		}
+
+		$mime = function_exists('mime_content_type') ? mime_content_type($path) : 'application/octet-stream';
+		header('Content-Description: File Transfer');
+		header('Content-Type: '.$mime);
+		header('Content-Disposition: attachment; filename="'.addslashes($downloadName).'"');
+		header('Content-Transfer-Encoding: binary');
+		header('Expires: 0');
+		header('Cache-Control: must-revalidate');
+		header('Pragma: public');
+		header('Content-Length: '.filesize($path));
+		readfile($path);
+		exit;
+	}
+
 }
