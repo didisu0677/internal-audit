@@ -22,7 +22,7 @@
 			<thead>
 				<tr>
 					<th style="display:none"></th>
-					<th><?= lang('no'); ?></th>
+					<!-- <th><?= lang('no'); ?></th> -->
 					<th><?= lang('auditor'); ?></th>
 					<th><?= lang('tgl_mulai_audit'); ?></th>
 					<th><?= lang('auditee'); ?></th>
@@ -46,7 +46,7 @@
 				foreach($data as $val):?>
 				<tr>
 					<td style="display:none"><?= $val['id'] ?></td> <!-- hidden ID -->
-					<td width="1" class="text-center"><?= $no++ ?></td>
+					<!-- <td width="1" class="text-center"><?= $no++ ?></td> -->
 					<td width="1" class="text-nowrap"><?= $val['nama_auditor'] ?></td>
 					<td width="1" class="text-nowrap"><?= $val['tgl_mulai_audit']?></td>
 					<td width="1" class="text-nowrap"><?= $val['auditee']?></td>
@@ -78,28 +78,22 @@ modal_open('modal-form','Finding','modal-xl','data-openCallback="formOpen1"');
 	modal_body();
 		form_open(base_url('internal/finding_records/save'),'post','form');
 			col_init(3,9);
-			for($i=0; $i < 1; $i++) { 
-			input('hidden','id','id');
 			card_open(lang('info_audit'),'mb-2');
-				select2(lang('periode_audit'),'periode_audit','required');
-				// input('text',lang('institusi_audit'),'institusi_audit');
-				
-				// input('date',lang('tgl_mulai_audit'),'tgl_mulai_audit');
+				select2(lang('periode_audit'),'periode_audit','required','','','','','disabled');
 				?>
 
 				<div class="form-group row">
 					<label class="col-sm-3 col-form-label" for="institusi_audit"><?php echo lang('institusi_audit'); ?></label>
 					<div class="col-sm-3">
 						<div class="input-group">
-							<input type="text" name="institusi_audit" id="institusi_audit" class="form-control" autocomplete="off" >
-							
+							<input type="text" name="institusi_audit" id="institusi_audit" class="form-control" autocomplete="off" disabled >
 						</div>
 					</div>
 
 					<label class="col-sm-2 col-form-label" for="auditor"><?php echo lang('auditor'); ?></label>
 					<div class="col-sm-3">
 						<div class="input-group">
-						<select class="select2 infinity custom-select" style="width: 80px;" id="auditor" name="auditor">
+						<select class="select2 infinity custom-select" style="width: 80px;" id="auditor" name="auditor" disabled>
 							<?php foreach ($auditor as $a =>$v) { ?>
 							<option value="<?php echo $v['id']; ?>"><?php echo $v['nama']; ?></option>
 							<?php } ?>
@@ -113,42 +107,38 @@ modal_open('modal-form','Finding','modal-xl','data-openCallback="formOpen1"');
 					<label class="col-sm-3 col-form-label" for="tgl_mulai_audit"><?php echo lang('tgl_mulai_audit'); ?></label>
 					<div class="col-sm-3">
 						<div class="input-group">
-							<input type="text" name="tgl_mulai_audit" id="tgl_mulai_audit" class="form-control dtp1" autocomplete="off">
-							
+							<input type="text" name="tgl_mulai_audit" id="tgl_mulai_audit" class="form-control" autocomplete="off" disabled>
 						</div>
 					</div>
 
 					<label class="col-sm-2 col-form-label" for="tgl_akhir_audit"><?php echo lang('tgl_akhir_audit'); ?></label>
 					<div class="col-sm-3">
 						<div class="input-group">
-							<input type="text" name="tgl_akhir_audit" id="tgl_akhir_audit" class="form-control dtp1" autocomplete="off" value="<?php echo setting('jumlah_salah_password'); ?>">
-							
+							<input type="text" name="tgl_akhir_audit" id="tgl_akhir_audit" class="form-control" autocomplete="off" disabled>
 						</div>
 					</div>
 				</div>
 	
 				<?php
-				col_init(3,9);
-				// input('date',lang('tgl_akhir_audit'),'tgl_akhir_audit');
-				// input('date',lang('tgl_closing_meeting'),'tgl_closing_meeting');
-				// select2(lang('auditor'),'auditor','required',$auditor,'id','nama');
 			card_close();
 			
 			card_open(lang('auditee'),'mb-2');
-				select2(lang('auditee'),'auditee','required');
-				select2(lang('site_auditee'),'site_auditee','required|infinity',['Head Office (HO)','Factory']);
-				select2(lang('section'),'id_section_department','required',$department,'id_section','section_name');
+				input('text', 'Auditee', 'auditee', '', '', 'readonly');
+				input('text', 'Site Auditee', 'site_auditee', '', '', 'readonly');
+				input('text', 'Section', 'section', '', '', 'readonly');
+				// select2(lang('auditee'),'auditee','required');
+				// select2(lang('site_auditee'),'site_auditee','required|infinity',['Head Office (HO)','Factory']);
+				// select2(lang('section'),'id_section_department','required',$department,'id_section','section_name');
 				// input('text',lang('audit_area'),'audit_area');
-				select2('Audit Area','id_sub_aktivitas','required', $aktivitas, 'id','sub_aktivitas');
+				select2('Audit Area','id_sub_aktivitas','required', $aktivitas, 'id','sub_aktivitas','','disabled');
 			card_close();
-
 			card_open(lang('finding'),'mb-2');?>
 			<input type="hidden" name="id_finding_records[]" id="id_finding_records">
 			<div class="form-group row">
 
 				<label class="col-form-label col-sm-3" for="bobot_finding"><?php echo lang('bobot_finding'); ?></label>
 				<div class="col-sm-9">
-				<select class="select2" name="bobot_finding[]" id="bobot_finding" required>
+				<select class="select2" name="bobot_finding[]" id="bobot_finding" required disabled>
 						<option value=""></option>
 						<option value="Critical">Critical</option>
 						<option value="Major">Major</option>
@@ -162,7 +152,7 @@ modal_open('modal-form','Finding','modal-xl','data-openCallback="formOpen1"');
 			<div class="form-group row">
 				<label class="col-form-label col-sm-3" for="status_finding_control"><?php echo lang('status_finding_control'); ?></label>
 				<div class="col-sm-9">
-				<select class="select2" name="status_finding_control" id="status_finding_control" required>
+				<select class="select2" name="status_finding_control" id="status_finding_control" required disabled>
 						<option value=""></option>
 						<option value="1">Design control tidak ada</option>
 						<option value="2">Design control tidak efektif</option>
@@ -171,47 +161,16 @@ modal_open('modal-form','Finding','modal-xl','data-openCallback="formOpen1"');
 				</div>
 			</div>	
 
-			<?php
-			// select2(lang('bobot_finding'),'bobot_finding','required',['Critical', 'Major', 'Modearate', 'Minor']);
-			?>
-			<div class="form-group row">
-
-				<label class="col-form-label col-sm-3" for="lampiran"><?php echo lang('lampiran'); ?></label>
-				<div class="col-sm-6">
-					<input type="text" name="file_finding[]" id="file_finding<?php echo $i; ?>"  data-validation="" data-action="<?php echo base_url('upload/file/datetime'); ?>" data-token="<?php echo encode_id([user('id'),(time() + 900)]); ?>" autocomplete="off" class="form-control input-file" value="" placeholder="<?php echo lang('maksimal'); ?> 5MB">
-				</div>
-				<div class="input-group-append">
-					<button class="btn btn-secondary btn-file" id="btn_download0" type="button"><?php echo lang('download'); ?></button>
-				</div>
-			</div>
-
 			<div class="form-group row">
 				<label class="col-form-label col-sm-3" for="isi_finding"><?php echo (lang('isi_finding')); ?></label>	
 				<div class="col-sm-9">
-					<textarea name="isi_finding[]" id="isi_finding<?php echo $i; ?>" class="form-control editor" data-validation="required" rows="2" data-editor="inline"></textarea>
+					<textarea name="isi_finding[]" id="isi_finding" class="form-control editor" data-validation="required" rows="2" data-editor="inline"></textarea>
 				</div>
 			</div>
 
 			<?php
-
 			card_close();
-			}
-			?>
-			<div id="additional-finding"></div>
-			<div class="form-group row">
-				<div class="col-sm-3">
-					<button type="button" class="btn btn-success" id="btn-add-finding" data-id_finding="<?php echo lang('id_finding'); ?>" data-bobot_finding="<?php echo lang('bobot_finding'); ?>" data-lampiran="<?php echo lang('lampiran'); ?>" data-file_finding="<?php echo lang('file'); ?>" data-isi_finding="<?php echo lang('isi_finding'); ?>"><i class="fa-plus"></i> <?php echo lang('add_finding'); ?></button>
-				</div>
-
-			</div>
-			<?php
-			// input('text',lang('capa'),'capa');
-			// input('text',lang('status_capa'),'status_capa');
-			// input('text',lang('follow_up'),'follow_up');
-			// input('text',lang('capa_score'),'capa_score');
-			// input('text',lang('achivement'),'achivement');
-			// toggle(lang('aktif').'?','is_active');
-			form_button(lang('simpan'),lang('batal'));
+			// form_button(lang('simpan'),lang('batal'));
 		form_close();
 	modal_footer();
 modal_close();
@@ -236,7 +195,7 @@ modal_open('modal-capa','CAPA Plan','modal-xl','data-openCallback="formOpen"');
 						?>
 						<div class="form-group row">
 							<div class="col-sm-12">
-								<textarea name="isi_finding" id="isi_finding" class="form-control editor" data-validation="required" rows="2" data-editor="inline" readonly></textarea>
+								<textarea name="isi_finding" id="isi_finding_capa" class="form-control editor" data-validation="required" rows="2" data-editor="inline" readonly></textarea>
 							</div>
 						</div>
 						<div class="form-group row">
@@ -337,13 +296,6 @@ modal_open('modal-import',lang('impor'));
 modal_close();
 ?>
 
-
-<!-- <form action="<?php echo base_url('upload/file/datetime'); ?>" class="hidden">
-	<input type="hidden" name="name" value="field_document">
-	<input type="hidden" name="token" value="<?php echo encode_id([user('id'),(time() + 900)]); ?>">
-	<input type="file" name="document" id="upl-file">
-</form> -->
-
 <select id="users" class="hidden">
 	<?php foreach($user as $v =>$u) {
 		echo '<option value="'.$u['nama'].'" data-value="'.$u['nama'].'">'.$u['nama'].'</option>';
@@ -358,10 +310,6 @@ new DataTable('#table-data');
 var select_value = '';
 var select_value2 = '';
 $(document).on('click','.btn-capa',function(){
-
-
-	// $('#username').trigger('change');
-	// select_value = $('#username').html();
 	for (var editor in CKEDITOR.instances) {
             CKEDITOR.instances[editor].setData(''); // Mengosongkan editor
         }
@@ -394,7 +342,7 @@ $(document).on('click','.btn-capa',function(){
 			$('#username').trigger('change');
 			select_value = $('#username').html();
 	
-			CKEDITOR.instances['isi_finding'].setData(decodeEntities(response.finding));
+			CKEDITOR.instances['isi_finding_capa'].setData(decodeEntities(response.finding));
 						
 			$.each(response.detail,function(k,v){
 				var x = parseInt(k);
@@ -551,7 +499,6 @@ $(document).ready(function() {
     let table = $('#table-data').DataTable();
     let id_target = new URLSearchParams(window.location.search).get("id");
     id_target = decodeId(id_target)[0];
-	console.log(id_target);
     if (id_target) {
         // lakukan search by id
         table.search(id_target).draw();
@@ -609,59 +556,76 @@ function formOpen() {
 	$('#additional-finding').html('');
 	is_edit = false;	
 }
+function formOpen1() {
+	try {
+		
+		// Pastikan editor tersedia sebelum digunakan
+		if (CKEDITOR.instances['isi_finding']) {
+			CKEDITOR.instances['isi_finding'].setReadOnly(true);
+			CKEDITOR.instances['isi_finding'].setData('');
+		}
 
-function formOpen1() {	
-	CKEDITOR.instances['isi_finding'+0].setReadOnly(false);
-	var response = response_edit;
-	console.log(response)
-	$('#additional-file').html('');
-	$('#additional-finding').html('');
+		const response = typeof response_edit === 'object' ? response_edit : {};
+		// Isi default untuk id_finding_records (support input array)
+		$('#id_finding_records').val(response.id || 0);
+		console.log(response);
+		// Safeguard pengisian tanggal
+		if (response.tgl_mulai_audit) $('#tgl_mulai_audit').val(response.tgl_mulai_audit);
+		if (response.tgl_akhir_audit) $('#tgl_akhir_audit').val(response.tgl_akhir_audit);
 
-	// $('#bobot_finding').trigger('change');
-	select_value2 = $('#bobot_finding option').map(function () {
-		return `<option value="${this.value}">${$(this).text()}</option>`;
-	}).get().join('');
-    $('#id_finding_records').val(0);
-	get_department();
-	CKEDITOR.instances['isi_finding'+0].setData('');
-	if(typeof response.id != 'undefined') {
-		$('#periode_audit').html(response.nomor_schedule).trigger('change');
-		$('#id').val(response.id);
-    	$('#id_finding_records').val(response.id);
-		get_department();
-		$('#auditor').val(response.auditor).trigger('change');
+		// Rebuild opsi bobot_finding dari yang sudah ada (hindari duplikasi)
+		$('#bobot_finding').val('').trigger('change');
+		// const $bf = $('#bobot_finding');
+		// if ($bf.length) {
+		// 	const opts = $bf.find('option').map(function () {
+		// 		return '<option value="' + $(this).val() + '">' + $(this).text() + '</option>';
+		// 	}).get().join('');
+		// 	$bf.html(opts);
+		// }
 
-		// $('#auditee option[value="'+ response.auditee +'"]').prop('selected', true).trigger('change');
+		// Set isi finding jika ada
+		if (CKEDITOR.instances['isi_finding'] && response.finding) {
+			CKEDITOR.instances['isi_finding'].setData(decodeEntities(response.finding));
+		}
 
-		$('#id_department_auditee').html('<option value=""></option><option value="'+response.id_department_auditee+'">'+response.department+'</option>').trigger('change');
-		$('#id_department_auditee').val(response.id_department_auditee).trigger('change');
-		$.each(response.detail,function(k,v){
-			var x = parseInt(k);
-			if( x < 1) {
-				CKEDITOR.instances['isi_finding'+x].setReadOnly(false);
-				CKEDITOR.instances['isi_finding'+x].setData('');
-				$('#id_finding_records').val(v.id);
-				$('#bobot_finding').val(v.bobot_finding).trigger('change');
-					CKEDITOR.instances['isi_finding'+x].setData(decodeEntities(v.finding));
-				// var konten = '<a href ="'+base_url+'assets/uploads/rekanan/'+response.id_vendor+'/'+v.file+'" target="_blank"><i class="fa-download"></i></a>';
-				
-				$('#file_finding0').val(v.filename);
-				let btn_download = $('#btn_download0');
-				btn_download.wrap('<a href="'+base_url+'assets/uploads/finding_records/'+v.filename+'" download></a>');
-
-			} else {
-				// addFinding(v.id,v.bobot_finding,v.filename,'',v.finding);
+		// Isi data ketika edit
+		if (typeof response.id !== 'undefined') {
+			// Set bobot_finding
+			if ($('#bobot_finding').length && response.bobot_finding) {
+				$('#bobot_finding').val(response.bobot_finding).trigger('change');
+			}
+			
+			// periode audit
+			if ($('#periode_audit').length && response.nomor_schedule) {
+				$('#periode_audit').html(response.nomor_schedule).trigger('change');
 			}
 
-			setTimeout(function(){
-				$('.nomorx').attr('readonly',true);
-			},300);
-		});
+			// auditor
+			if ($('#auditor').length && response.auditor) {
+				$('#auditor').val(response.auditor).trigger('change');
+			}
 
-		// view_auditee(response.auditee);
+			// department auditee
+			if ($('#id_department_auditee').length && response.id_department_auditee) {
+				const html = '<option value=""></option><option value="' + response.id_department_auditee + '">' + (response.department || '') + '</option>';
+				$('#id_department_auditee').html(html).val(response.id_department_auditee).trigger('change');
+			}
 
-	} else {
-		view_combo();
+			// Update dependent combo
+			if (typeof get_department === 'function') {
+				get_department();
+			}
+		} else {
+			// Mode create: load combo periode audit
+			if (typeof view_combo === 'function') {
+				view_combo();
+			}
+			if (typeof get_department === 'function') {
+				get_department();
+			}
+		}
+	} catch (e) {
+		console.error('formOpen1 error:', e);
 	}
 }
 function view_combo() {
@@ -675,13 +639,13 @@ function view_combo() {
     });
 }
 
-$('#periode_audit').change(function(){
-	$('#institusi_audit').val($(this).find(':selected').attr('data-nama_institusi'));
-	$('#tgl_mulai_audit').val($(this).find(':selected').attr('data-tanggal_mulai'));
-	$('#tgl_akhir_audit').val($(this).find(':selected').attr('data-tanggal_akhir'));
-	$('#tgl_closing_meeting').val($(this).find(':selected').attr('data-tgl_closing_meeting'));
-	get_auditee();
-});
+// $('#periode_audit').change(function(){
+// 	$('#institusi_audit').val($(this).find(':selected').attr('data-nama_institusi'));
+// 	$('#tgl_mulai_audit').val($(this).find(':selected').attr('data-tanggal_mulai'));
+// 	$('#tgl_akhir_audit').val($(this).find(':selected').attr('data-tanggal_akhir'));
+// 	$('#tgl_closing_meeting').val($(this).find(':selected').attr('data-tgl_closing_meeting'));
+// 	get_auditee();
+// });
 
 function addPasal(nomor,id_capa,isi_capa,tanggal_berlaku,file,lampiran, pic) {
 	var _nomor 	= typeof nomor == undefined ? '' : nomor;
@@ -805,108 +769,6 @@ function addPasal(nomor,id_capa,isi_capa,tanggal_berlaku,file,lampiran, pic) {
 
 
 	idx++;
-	initUploadFile();
-}
-
-function addFinding(id_finding_records,bobot_finding,file,lampiran, isi_finding) {
-	var _id_finding_records 	= typeof id_finding_records == undefined ? '' : id_finding_records;
-	var _bobot_finding 	= typeof bobot_finding == undefined ? '' : bobot_finding;
-	var _isi_finding 	= typeof isi_finding == undefined ? '' : isi_finding;
-	var _lampiran 	= typeof lampiran == undefined ? '' : lampiran;
-	var _file 	= typeof file == undefined ? '' : file;
-	var _token = "<?php echo encode_id([user('id'),(time() + 900)])?>";
-
-	
-	var today = new Date();
-	var date = today.getFullYear()+'-'+(today.getMonth()+1)+'-'+today.getDate();
-	var time = today.getHours() + ":" + today.getMinutes() + ":" + today.getSeconds();
-	var dateTime = date+' '+time;
-	
-
-	// $('#bobot_finding').trigger('change');
-	// select_value2 = $('#bobot_finding').html();
-
-
-	var konten = '<div class="card mb-2">'
-			
-		+ '<div class="card-body">'
-		+ '<input type="hidden" name="id_finding_records[]" id="id_finding_records'+idy+'" autocomplete="off" class="form-control id_capa" readonly>'
-		+ '<div class="form-group row">'
-			+ '<label class="col-form-label col-sm-3" for="bobot_finding'+idy+'">'+$('#btn-add-finding').attr('data-bobot_finding')+'</label>'
-			+ '<div class="col-sm-9">'
-			+ '<select class="form-control bobot_temuan" name="bobot_finding[]" id="bobot_finding'+idy+'" data-validation="required" aria-label="'+$('#bobot_finding').attr('aria-label')+'">'+select_value2+'</select> '
-			+ '</div>'
-		+ '</div>'
-		
-		+ '<div class="form-group row">'
-			+ '<label class="col-form-label col-sm-3" for="lampiran'+idy+'">'+$('#btn-add').attr('data-lampiran')+'</label>'
-			+ '<div class="col-sm-6">'
-				+ '<input type ="text" name="file_finding[]" id="file_finding'+idy+'" data-validation="" data-action ="'+base_url+'upload/file/datetime'+'" data-token ="'+_token+'" autocomplete="off" class="form-control input-file" value="" placeholder="maksimal 5MB">'
-				// + '<input type="text" name="file_finding'+'['+(_lampiran != undefined ? _lampiran : idy)+']" id="file_finding'+idy+'" data-validation="required" data-action="<?php echo base_url('upload/file/datetime'); ?>" data-token="<?php echo encode_id([user('id'),(time() + 900)]); ?>" autocomplete="off" class="form-control input-file" placeholder="<?php echo lang('maksimal'); ?> 51MB" value="'+(_file != undefined ? _file : '')+'">'
-				+ '</div>'
-
-			+ '<div class="input-group-append">'
-			+ '<a download href="<?= base_url('assets/uploads/finding_records/') ?>'+_file+'"><button class="btn btn-secondary btn-file" type="button"><?php echo lang('download'); ?></button></a>'
-			+ '</div>'
-			+ '</div>'
-
-		+ '<div class="form-group row">'
-		+ '<label class="col-form-label col-sm-3" for="isi_finding'+idy+'">'+$('#btn-add-finding').attr('data-isi_finding')+'</label>'
-		+ '<div class="col-sm-9">'
-		
-		+ '<input type="hidden" name="id_finding[]" id="id_finding'+idy+'" autocomplete="off" class="form-control id_finding" readonly>'
-			+ '<textarea name="isi_finding[]" id="isi_finding'+idy+'" class="form-control editor" data-validation="required" rows="3"></textarea>'
-			+ '</div>'
-		+ '</div>'
-		+ '</div>'
-
-		+ '<div class="card-footer">'
-			+ '<button type="button" class="btn btn-danger btn-remove-finding"><i class="fa-times"></i> '+lang.hapus+'</button>';
-		+ '</div>'
-	+ '</div>';
-	$('#additional-finding').html(konten);
-
-	var $t1 = $('#additional-finding .bobot_temuan:last-child');
-	$t1.select2({
-		dropdownParent : $t1.parent(),
-		placeholder : ''
-	});
-
-	var c_id = 'isi_finding'+idy;
-	CKEDITOR.inline( c_id ,{
-		toolbar : [
-			{ name: 'basicstyles', items: [ 'Bold', 'Italic', 'Underline', 'Strike', 'Subscript', 'Superscript' ] },
-			{ name: 'paragraph', items: [ 'NumberedList', 'BulletedList', '-', 'Outdent', 'Indent', '-', 'Blockquote', 'CreateDiv', '-', 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock', '-', 'BidiLtr', 'BidiRtl' ] },
-			{ name: 'links', items: [ 'Link', 'Unlink', 'Anchor' ] },
-			{ name: 'insert', items: [ 'Image', 'Table', 'HorizontalRule', 'SpecialChar'] },
-			'/',
-			{ name: 'styles', items: [ 'Styles', 'Format', 'Font', 'FontSize' ] },
-			{ name: 'colors', items: [ 'TextColor', 'BGColor' ] },
-			{ name: 'tools', items: [ 'Maximize', 'ShowBlocks' ] }
-		],
-		filebrowserImageBrowseUrl : base_url + 'assets/plugins/kcfinder/index.php?type=images',
-		width : 'auto',
-		height : '250',
-		language : $('meta[name="applang"]').attr('content')
-	});
-	CKEDITOR.instances[c_id].on('change', function() { 
-		var vdata = CKEDITOR.instances[c_id].getData();
-		$('#' + c_id).val(vdata);
-	});
-
-
-	if(_id_finding_records) $('#id_finding_records' + idy).val(_id_finding_records);
-	// select_value2 = $('#bobot_finding').html();
-	if(_bobot_finding) $('#bobot_finding' + idy).val(_bobot_finding).trigger('change');
-
-	if(_isi_finding) $('#isi_finding' + idy).val(_isi_finding);
-	if(_lampiran) $('#lampiran' + idy).val(_lampiran);
-	if(_file) $('#file_finding' + idy).val(_file);
-	if(_isi_finding) {
-		$('#isi_finding' + idy).val(_isi_finding);
-		CKEDITOR.instances['isi_finding'+idy].setData(decodeEntities(_isi_finding));
-	}
-	idy++;
 	initUploadFile();
 }
 

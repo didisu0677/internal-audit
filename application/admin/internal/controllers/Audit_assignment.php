@@ -2,6 +2,13 @@
 
 use FontLib\Table\Type\post;
 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Font;
+
 class Audit_assignment extends BE_Controller {
 
 	function __construct() {
@@ -55,7 +62,7 @@ class Audit_assignment extends BE_Controller {
 	function data() {
 		$id = post('id');
 		$query = get_data('tbl_annual_audit_plan a', [
-			'select' => 'aa.id, aa.kriteria, aa.pengujian, aa.hasil_review, aa.unconformity, aa.dampak, aa.root_cause, aa.recomendation, aa.finding, aa.bobot_finding, aa.status_finding, ag.year, a.id as id_audit_plan, a.id_audit_plan_group, dep.section_name as department,ak.id as id_aktivitas, ak.aktivitas, sa.id as id_sub_aktivitas, sa.sub_aktivitas, rc.id_risk, s.section_name as section, af.filename',
+			'select' => 'aa.id, aa.kriteria, aa.pengujian, aa.hasil_review, aa.unconfirmity, aa.dampak, aa.root_cause, aa.recomendation, aa.finding, aa.bobot_finding, aa.status_finding, aa.status, ag.year, a.id as id_audit_plan, a.id_audit_plan_group, dep.section_name as department,ak.id as id_aktivitas, ak.aktivitas, sa.id as id_sub_aktivitas, sa.sub_aktivitas, rc.id_risk, s.section_name as section, af.filename',
 			'join' => [
 				'tbl_audit_universe u on a.id_universe = u.id', 
 				'tbl_rcm rcm on u.id_rcm = rcm.id',
@@ -77,10 +84,13 @@ class Audit_assignment extends BE_Controller {
 		foreach($query as $row) {
 			$id_risk = json_decode($row['id_risk'],true);
 			$data_risk = get_data('tbl_risk_register','id',$id_risk)->result_array();
+			$kriteria = json_decode($row['kriteria'], true);
+			$data_kriteria = get_data('tbl_kriteria', 'id', $kriteria)->result_array();
 			$internal_control = get_data('tbl_internal_control','id_aktivitas',$row['id_aktivitas'])->result_array();
 			$row['internal_control'] = $internal_control;
 			$row['status_finding'] = get_data('tbl_status_finding_control','id',$row['status_finding'])->row_array()['description'] ?? '';
 			$row['bobot_finding'] = get_data('tbl_bobot_status_audit','id',$row['bobot_finding'])->row_array()['bobot'] ?? '';
+			$row['kriteria'] = $this->get_detail_kriteria($data_kriteria);
 			$row_data = $row;
 			$row_data['risk'] = $data_risk;
 			$clean_data[] = $row_data;
@@ -119,7 +129,10 @@ class Audit_assignment extends BE_Controller {
 		// render($response,'json');
 		$id_assignment = post('id');
 		$field = post('field');
-		$value = post('value');
+		$value = $this->input->post('value');
+		if($field == 'kriteria'){
+			$value = json_encode($value);
+		}
 		$data = [
 			$field => $value
 		];
@@ -147,7 +160,7 @@ class Audit_assignment extends BE_Controller {
 
 	function template() {
 		ini_set('memory_limit', '-1');
-		$arr = ['id_plan' => 'id_plan','id_risk_control' => 'id_risk_control','audit_start_date' => 'audit_start_date','audit_end_date' => 'audit_end_date','audit_closing_date' => 'audit_closing_date','auditor' => 'auditor','auditee' => 'auditee','review_result' => 'review_result','finding' => 'finding','bobot_finding' => 'bobot_finding','unconformity' => 'unconformity','risk_finding' => 'risk_finding','root_cause' => 'root_cause','recomendation' => 'recomendation','status_finding' => 'status_finding','capa' => 'capa','deadline_capa' => 'deadline_capa','pic_capa' => 'pic_capa'];
+		$arr = ['id_plan' => 'id_plan','id_risk_control' => 'id_risk_control','audit_start_date' => 'audit_start_date','audit_end_date' => 'audit_end_date','audit_closing_date' => 'audit_closing_date','auditor' => 'auditor','auditee' => 'auditee','review_result' => 'review_result','finding' => 'finding','bobot_finding' => 'bobot_finding','unconfirmity' => 'unconfirmity','risk_finding' => 'risk_finding','root_cause' => 'root_cause','recomendation' => 'recomendation','status_finding' => 'status_finding','capa' => 'capa','deadline_capa' => 'deadline_capa','pic_capa' => 'pic_capa'];
 		$config[] = [
 			'title' => 'template_import_audit_assignment',
 			'header' => $arr,
@@ -193,7 +206,7 @@ class Audit_assignment extends BE_Controller {
 	function import() {
 		ini_set('memory_limit', '-1');
 		$file = post('fileimport');
-		$col = ['id_plan','id_risk_control','audit_start_date','audit_end_date','audit_closing_date','auditor','auditee','review_result','finding','bobot_finding','unconformity','risk_finding','root_cause','recomendation','status_finding','capa','deadline_capa','pic_capa'];
+		$col = ['id_plan','id_risk_control','audit_start_date','audit_end_date','audit_closing_date','auditor','auditee','review_result','finding','bobot_finding','unconfirmity','risk_finding','root_cause','recomendation','status_finding','capa','deadline_capa','pic_capa'];
 		$this->load->library('simpleexcel');
 		$this->simpleexcel->define_column($col);
 		$jml = $this->simpleexcel->read($file);
@@ -219,7 +232,7 @@ class Audit_assignment extends BE_Controller {
 
 	function export() {
 		ini_set('memory_limit', '-1');
-		$arr = ['id_plan' => 'Id Plan','id_risk_control' => 'Id Risk Control','audit_start_date' => '-dAudit Start Date','audit_end_date' => '-dAudit End Date','audit_closing_date' => '-dAudit Closing Date','auditor' => 'Auditor','auditee' => 'Auditee','review_result' => 'Review Result','finding' => 'Finding','bobot_finding' => 'Bobot Finding','unconformity' => 'Unconformity','risk_finding' => 'Risk Finding','root_cause' => 'Root Cause','recomendation' => 'Recomendation','status_finding' => 'Status Finding','capa' => 'Capa','deadline_capa' => '-dDeadline Capa','pic_capa' => 'Pic Capa'];
+		$arr = ['id_plan' => 'Id Plan','id_risk_control' => 'Id Risk Control','audit_start_date' => '-dAudit Start Date','audit_end_date' => '-dAudit End Date','audit_closing_date' => '-dAudit Closing Date','auditor' => 'Auditor','auditee' => 'Auditee','review_result' => 'Review Result','finding' => 'Finding','bobot_finding' => 'Bobot Finding','unconfirmity' => 'unconfirmity','risk_finding' => 'Risk Finding','root_cause' => 'Root Cause','recomendation' => 'Recomendation','status_finding' => 'Status Finding','capa' => 'Capa','deadline_capa' => '-dDeadline Capa','pic_capa' => 'Pic Capa'];
 		$data = get_data('tbl_individual_audit_assignment')->result_array();
 		$config = [
 			'title' => 'data_audit_assignment',
@@ -253,28 +266,53 @@ class Audit_assignment extends BE_Controller {
 					'ap.id' => $id_audit_plan
 				]
 			])->row_array();
-			
 			$detail_schedule = get_detail_schedule_audit($plan['schedule_audit'] ?? '');
 			$schedule = !empty($detail_schedule) ? $detail_schedule['nomor'] : '';
+			$auditor = get_detail_auditor($plan['auditor']);
+			$divisi = get_detail_department($plan['id_department']);
+			$bobot = get_detail_bobot($row['bobot_finding']);
+
+			if(!empty($row['finding']) && empty($row['status_finding'])){
+				render([
+					'status' => 'info',
+					'message' => 'Pastikan status finding diisi jika ada finding!'
+				],'json');
+				return;
+			}
+
+			if(!empty($row['finding']) && empty($row['bobot_finding'])){
+				render([
+					'status' => 'info',
+					'message' => 'Pastikan bobot finding diisi jika ada finding!'
+				],'json');
+				return;
+			}
+			if(empty($detail_schedule)){
+				render([
+					'status' => 'info',
+					'message' => 'Pastikan Schedule Audit/Surat Tugas sudah terisi pada Annual Audit Plan!'
+				],'json');
+				return;
+			}
 			$data_finding[] = [
 				'id_assignment' => $row['id'],
 				'id_schedule' => $detail_schedule['id'],
 				'periode_audit' => $schedule,
 				'id_institusi_audit' => '1',
 				'auditor' => $plan['auditor'],
-				'nama_auditor' => get_detail_auditor($plan['auditor'])['nama'],
+				'nama_auditor' => $auditor ? $auditor['nama'] : '',
 				'tgl_mulai_audit' => $plan['start_date'],
 				'tgl_akhir_audit' => $plan['end_date'],
 				// 'auditee' => get_detail_auditee($plan['auditee'])['nama'],	
 				'auditee' => $plan['auditee'],
 				'site_auditee' => $plan['site_audit'],
 				'id_department_auditee' => $plan['id_department'],
-				'id_divisi' => get_detail_department($plan['id_department'])['level3'],
+				'id_divisi' => $divisi ? $divisi['level3'] : '',
 				'id_section_department' => $plan['id_section'],
 				'audit_area' => $plan['audit_area'],
 				'id_sub_aktivitas' => $plan['id_audit_area'],
 				'finding' => $row['finding'],
-				'bobot_finding' => get_detail_bobot($row['bobot_finding'])['bobot'],
+				'bobot_finding' => $bobot ? $bobot['bobot'] : '',
 				'status_finding_control' => $row['status_finding'],
 				'status_finding' => '0' 
 			];
@@ -283,7 +321,7 @@ class Audit_assignment extends BE_Controller {
 			if(empty($finding['finding'])) continue;
 			if(empty($finding['auditor']) || empty($finding['auditee'])){
 				render([
-					'status' => 'error',
+					'status' => 'info',
 					'message' => 'Pastikan Auditee dan Auditor tidak kosong pada Annual Audit Plan!'
 				],'json');
 				return;
@@ -382,4 +420,227 @@ class Audit_assignment extends BE_Controller {
 		readfile($path);
 		exit;
 	}
+
+	function get_detail_kriteria($input){
+		$kriteria = [];
+		foreach($input as $id){
+			$detail = get_data('tbl_kriteria', 'id', $id)->row_array()['detail'];
+	        $kriteria[] = '<p class="bg-light p-2 rounded">' . $detail . '</p>';
+			// $kriteria[] = get_data('tbl_kriteria', 'id', $id)->row_array()['detail'];
+		}
+		$string = implode(' ', $kriteria);
+		return $string;
+	}
+
+	function get_kriteria_string(){
+		$input = $this->input->post('data');
+		foreach($input as $id){
+			$detail = get_data('tbl_kriteria', 'id', $id)->row_array()['detail'];
+        	$kriteria[] = '<p class="bg-light p-2 rounded">' . $detail . '</p>';
+			// $kriteria[] = get_data('tbl_kriteria', 'id', $id)->row_array()['detail'];
+		}
+		$string = implode(' ', $kriteria);
+		render ($string,'json');
+	}
+
+	function get_detail_assignment(){
+		$input = post('id');
+		$data = get_data('tbl_individual_audit_assignment','id',$input)->row_array();
+		render($data, 'json');
+	}
+
+	function download_report(){
+		ini_set('memory_limit', '-1');
+		$id_audit_plan_group = get('id_audit_plan_group');
+		
+		$data = get_data('tbl_annual_audit_plan a', [
+			'select' => 'ag.start_date, ag.end_date, ag.auditee, ag.auditor, aa.root_cause, aa.recomendation, aa.unconfirmity, aa.finding, aa.bobot_finding, a.id as id_audit_plan, a.id_audit_plan_group, ak.id as id_aktivitas, ak.aktivitas, sa.id as id_sub_aktivitas, rc.id_risk, s.section_name as section, dep.section_name as department',
+			'join' => [
+				'tbl_audit_universe u on a.id_universe = u.id', 
+				'tbl_rcm rcm on u.id_rcm = rcm.id',
+				'tbl_risk_control rc on rcm.id_risk_control = rc.id',
+				'tbl_m_audit_section s on rcm.id_section = s.id',
+				'tbl_m_audit_section dep on s.level4 = dep.id',
+				'tbl_sub_aktivitas sa on rcm.id_sub_aktivitas = sa.id',
+				'tbl_aktivitas ak on sa.id_aktivitas = ak.id',
+				'tbl_annual_audit_plan_group ag on ag.id = a.id_audit_plan_group',
+				'tbl_individual_audit_assignment aa on aa.id_audit_plan = a.id',
+				'tbl_individual_audit_assignment_files af on af.id_audit_assignment = aa.id type left'
+			],		
+			'where' => [
+				'a.id_audit_plan_group' => $id_audit_plan_group
+			],
+			'order_by' => 'dep.urutan'
+		])->result_array();
+		foreach($data as $item) {
+			$auditor = get_detail_auditor($item['auditor']);
+			$item['auditor'] = $auditor ? $auditor['nama'] : '';
+
+			$auditee = get_detail_auditee($item['auditee']);
+			$item['auditee'] = $auditee ? $auditee['nama'] : '';
+
+			$item['bobot_finding'] = get_data('tbl_bobot_status_audit','id',$item['bobot_finding'])->row_array()['bobot'] ?? '';
+			$id_risk = json_decode($item['id_risk'],true);
+			$data_risk = get_data('tbl_risk_register','id',$id_risk)->result_array();
+			$internal_control = get_data('tbl_internal_control','id_aktivitas',$item['id_aktivitas'])->result_array();
+			$item['internal_control'] = '> ' . implode('<br>> ', array_column($internal_control, 'internal_control'));
+			$item['risk'] = '> '. implode('<br>> ', array_column($data_risk, 'risk'));
+			$row_data = $item;
+			$clean_data[] = $row_data;
+		}
+		$spreadsheet = new Spreadsheet();
+		$sheetIndex = 0;
+
+		foreach ($clean_data as $row) {
+
+			// Buat sheet baru kecuali pertama
+			if ($sheetIndex == 0) {
+				$sheet = $spreadsheet->getActiveSheet();
+			} else {
+				$sheet = $spreadsheet->createSheet();
+			}
+
+			$sheet->setTitle('Temuan ' . ($sheetIndex + 1));
+
+			// ================= JUDUL =================
+			$sheet->setCellValue('A2', 'DETIL TEMUAN AUDIT');
+			$sheet->mergeCells('A2:F2');
+			$sheet->getStyle('A2')->getFont()->setBold(true)->setSize(14);
+			$sheet->getStyle('A2')->getAlignment()->setHorizontal('center');
+
+			// ================= INFO =================
+			$sheet->setCellValue('A4', 'Tanggal audit');
+			$sheet->setCellValue('B4', ': ' . date('d F Y', strtotime($row['start_date'])) . ' - ' . date('d F Y', strtotime($row['end_date'])));
+
+			$sheet->setCellValue('A5', 'Entitas');
+			$sheet->setCellValue('B5', ': ' . $row['aktivitas']);
+
+			$sheet->setCellValue('D4', 'Auditee');
+			$sheet->setCellValue('E4', ': ' . $row['auditee']);
+
+			$sheet->setCellValue('D5', 'Auditor');
+			$sheet->setCellValue('E5', ': ' . $row['auditor']);
+
+			// ================= HEADER =================
+			$sheet->setCellValue('A7', $row['department']);
+			$sheet->mergeCells('A7:C7');
+
+			$sheet->setCellValue('D7', 'Bobot : ' . ($row['bobot_finding'] ?? ''));
+			$sheet->mergeCells('D7:F7');
+
+			// ================= HEADER TABEL ATAS =================
+			$sheet->setCellValue('A8', 'Finding');
+			$sheet->mergeCells('A8:B8');
+
+			$sheet->setCellValue('C8', 'Internal Control Existing');
+			$sheet->mergeCells('C8:D8');
+
+			$sheet->setCellValue('E8', 'Non-Conformance');
+			$sheet->mergeCells('E8:F8');
+
+			// ================= ISI TABEL ATAS =================
+			$sheet->mergeCells('A9:B14');
+			$sheet->mergeCells('C9:D14');
+			$sheet->mergeCells('E9:F14');
+
+			$sheet->setCellValue('A9', $this->html_to_excel_text($row['finding']));
+			$sheet->setCellValue('C9', $this->html_to_excel_text($row['internal_control']));
+			$sheet->setCellValue('E9', $this->html_to_excel_text($row['unconfirmity']));
+
+			// ================= HEADER TABEL BAWAH =================
+			$sheet->setCellValue('A15', 'Risiko');
+			$sheet->mergeCells('A15:B15');
+
+			$sheet->setCellValue('C15', 'Root Cause');
+			$sheet->mergeCells('C15:D15');
+
+			$sheet->setCellValue('E15', 'Recommendation');
+			$sheet->mergeCells('E15:F15');
+
+			// ================= ISI TABEL BAWAH =================
+			$sheet->mergeCells('A16:B22');
+			$sheet->mergeCells('C16:D22');
+			$sheet->mergeCells('E16:F22');
+
+			$sheet->setCellValue('A16', $this->html_to_excel_text($row['risk']));
+			$sheet->setCellValue('C16', $this->html_to_excel_text($row['root_cause']));
+			$sheet->setCellValue('E16', $this->html_to_excel_text($row['recomendation']));
+
+			// ================= STYLE =================
+			$sheet->getStyle('A8:F8')->getFont()->setBold(true);
+			$sheet->getStyle('A15:F15')->getFont()->setBold(true);
+
+			$sheet->getStyle('A8:F22')->getAlignment()
+				->setWrapText(true)
+				->setVertical('top');
+
+			// Border
+			$sheet->getStyle('A7:F22')->getBorders()->getAllBorders()->setBorderStyle('thin');
+
+			// Lebar kolom
+			foreach (['A'=>20,'B'=>20,'C'=>25,'D'=>25,'E'=>25,'F'=>25] as $col=>$width) {
+				$sheet->getColumnDimension($col)->setWidth($width);
+			}
+
+			// Print setting (1 halaman)
+			$sheet->getPageSetup()
+				->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4)
+				->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_PORTRAIT)
+				->setFitToWidth(1)
+				->setFitToHeight(1);
+
+			$sheetIndex++;
+		}
+
+		// ================= DOWNLOAD =================
+		$filename = 'Detil_Temuan_Audit.xlsx';
+		header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+		header("Content-Disposition: attachment; filename=\"$filename\"");
+		header('Cache-Control: max-age=0');
+
+		$writer = new Xlsx($spreadsheet);
+		$writer->save('php://output');
+		exit;
+	}
+
+	function html_to_excel_text($html){
+		if (empty($html)) {
+			return '';
+		}
+
+		// Decode HTML entity
+		$html = html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+		// Normalisasi newline
+		$html = str_replace(["\r\n", "\r"], "\n", $html);
+
+		// <br> → newline
+		$html = preg_replace('/<br\s*\/?>/i', "\n", $html);
+
+		// </p> → newline
+		$html = preg_replace('/<\/p>/i', "\n", $html);
+
+		// <li> → bullet
+		$html = preg_replace('/<li>/i', "• ", $html);
+		$html = preg_replace('/<\/li>/i', "\n", $html);
+
+		// Hapus <ul>, <ol>, <p>
+		$html = preg_replace('/<\/?(ul|ol|p)>/i', '', $html);
+
+		// Bullet pakai ">"
+		$html = preg_replace('/^\s*>\s*/m', '• ', $html);
+
+		// Hapus semua tag HTML tersisa
+		$html = strip_tags($html);
+
+		// Rapikan spasi berlebih
+		$html = preg_replace("/[ \t]+/", ' ', $html);
+
+		// Rapikan newline (maks 1 baris kosong)
+		$html = preg_replace("/\n{3,}/", "\n\n", $html);
+
+		return trim($html);
+	}
+
+
 }

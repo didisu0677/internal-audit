@@ -72,7 +72,12 @@
 																		<i class="fas fa-check me-1"></i>
 																		Mark Complete
 																	</button>
-																<?php endif; ?>
+																<?php else :  ?>
+																	<button class="btn btn-danger btn-sm float-right download-report" type="button" data-id-plangroup="<?=$deptData['id_audit_plan_group']?>">
+																		<i class="fas fa-download me-1"></i>
+																		Download
+																	</button>
+																<?php endif?>
 															</div>
 																<div class="collapse" id="dept-collapse<?=$year?>-<?=md5($dept)?>">
 																	<div class="table-responsive" style="max-height: 70vh; overflow-y: auto;">
@@ -89,7 +94,7 @@
 																					<th class="border-0 text-muted small bg-light">Hasil Review</th>
 																					<th class="border-0 text-muted small bg-light">Finding</th>
 																					<th class="border-0 text-muted small bg-light">Bobot Finding</th>
-																					<th class="border-0 text-muted small bg-light">Unconformity</th>
+																					<th class="border-0 text-muted small bg-light">Unconfirmity</th>
 																					<th class="border-0 text-muted small bg-light">Dampak</th>
 																					<th class="border-0 text-muted small bg-light">Root Cause</th>
 																					<th class="border-0 text-muted small bg-light">Recommendation</th>
@@ -176,6 +181,32 @@ modal_open('modal-status-finding','Edit Status Finding','modal-md');
 			echo '</div>';
 modal_close();
 
+
+modal_open('modal-kriteria','Edit Kriteria','modal-md');
+	modal_body();
+		col_init(3,9);
+		input('hidden','id','id');
+		input('hidden','field_name','field_name');
+		select2('Pilih', 'type', 'required', [
+			[
+				'key' => 'new',
+				'val' => 'Buat Kriteria Baru'
+			],[
+				'key' => 'exist',
+				'val' => 'Pilih Kriteria'
+			]
+		],'key', 'val');
+		echo '<div class="d-none" id="kriteria-box">';
+			select2('Kriteria', 'kriteria[]', 'required', get_list_kriteria(), 'id', 'detail' , '','multiple');
+		echo '</div>';
+		echo '<div class="form-group row">';
+				echo '<div class="col-md-12 text-center">';
+					echo '<button type="button" class="btn btn-primary mr-2" id="btn_simpan">'.lang('simpan').'</button>';
+					echo '<button type="button" class="btn btn-secondary mr-2" id="btn_batal">'.lang('batal').'</button>';
+				echo '</div>';
+			echo '</div>';
+modal_close();
+
 modal_open('modal-attachment','Attachment Management','modal-xl');
 	modal_body();
 		form_open(base_url('internal/audit_assignment/attach_file'),'post','form-attachment');
@@ -210,6 +241,7 @@ modal_close();
 	let planGroupId = null;
 	let idSelectedFile = null;
 	let idSelectedAssignment = null;
+	let currentAttachmentStatus = null;
 
 	// AJAX filter switch similar to Annual Audit Plan
 	$(document).on('click', '.filter-switch', function(e){
@@ -327,12 +359,14 @@ modal_close();
 		
 		$(document).on('click', '.editable:not(.editable-status)', function() {
 			if (isEditing) return;
-			
+			if ($(this).closest('tr').hasClass('disabled-row')) return; // jika history, tidak bisa di edit
+
 			const $cell = $(this);
 			const field = $cell.data('field');
 			const rowId = $cell.closest('tr').data('id');
 			originalValue = $cell.html().trim();
-			
+
+
 			// Set modal data
 			$('#modal-form').find('[name="id"]').val(rowId);
 			$('#modal-form').find('[name="field_name"]').val(field);
@@ -345,21 +379,33 @@ modal_close();
 			$('#modal-form').modal('show');
 		});
 
-		$(document).on('click', '.bobot, .status-finding', function() {
+		$(document).on('click', '.bobot, .status-finding, .kriteria', function() {
 			if (isEditing) return;
-			
+			if ($(this).closest('tr').hasClass('disabled-row')) return; // jika history, tidak bisa di edit
+
 			const $cell = $(this);
 			const field = $cell.data('field');
 			const rowId = $cell.closest('tr').data('id');
 
-			let modalType = '#modal-bobot';
-			if(field != 'bobot_finding'){
+			let modalType;
+			if(field == 'bobot_finding'){
+				modalType = '#modal-bobot'
+			}else if(field == 'status_finding'){
 				modalType = '#modal-status-finding';
+			}else{
+				modalType = '#modal-kriteria';
 			}
-			
+			// Reset Value ketika modal di show
+			$(modalType).find('input, textarea').val('');
+
+			// Reset select biasa (tanpa Select2)
+			$(modalType).find('select:not(.select2)').val('');
+
+			// Reset semua Select2
+			$(modalType).find('select.select2').val(null).trigger('change');
+
 			$(modalType).find('[name="id"]').val(rowId);
 			$(modalType).find('[name="field_name"]').val(field);
-			
 			
 			$(modalType).modal('show');
 		});
@@ -381,7 +427,10 @@ modal_close();
 					? modal.find('[name="bobot_finding"]').val()
 					: modal.find('[name="status_finding"]').length
 						? modal.find('[name="status_finding"]').val()
-						: CKEDITOR.instances['field-editor'].getData()
+						: modal.find('[name="kriteria[]"]').length
+							// ? await getDetailKriteria(modal.find('[name="kriteria[]"]').val())
+							? modal.find('[name="kriteria[]"]').val()
+							: CKEDITOR.instances['field-editor'].getData()
 			};
 
 			let response = await $.ajax({
@@ -398,6 +447,9 @@ modal_close();
 				}else if(modal.is('#modal-status-finding')){
 					cellClass = '.status-finding';
 					formData.value = await get_status_finding_name(formData.value)
+				}else{
+					cellClass = '.kriteria';
+					formData.value = await getDetailKriteria(formData.value)
 				}
 			    const $cell = $(`tr[data-id="${formData.id}"] ${cellClass}[data-field="${formData.field}"]`);
 				$cell.html(formData.value);
@@ -445,11 +497,30 @@ modal_close();
 			$toggle.find('i').removeClass('fa-chevron-up').addClass('fa-chevron-down');
 		});
 
-		$(document).on('click', '.attachment', function() {
+		$(document).on('click', '.attachment', async function() {
 			idSelectedAssignment = $(this).data('id');
-			generateListAttachment();
+			let res = await $.ajax({
+				url: base_url + 'internal/audit_assignment/get_detail_assignment',
+				data: { id: idSelectedAssignment },
+				type: 'POST'
+			});
+			
+			currentAttachmentStatus = res.status || null;
+			await generateListAttachment(currentAttachmentStatus);
 			$('#modal-attachment').find('[name="id"]').val(idSelectedAssignment);
-			$('#modal-attachment').modal('show');
+			$('#modal-attachment').modal('show');	
+
+			if(res.status == 'history'){
+				$('#btn-add-attachment').hide();
+				$('#modal-attachment').find('[type="submit"]').hide();
+				$('#modal-attachment').find('[type="reset"]').hide();
+				$('.row-container-attachments').hide();
+			}else{
+				$('#btn-add-attachment').show();
+				$('#modal-attachment').find('[type="submit"]').show();
+				$('#modal-attachment').find('[type="reset"]').show();
+				$('.row-container-attachments').show();
+			}	
 		});
 	});
 
@@ -459,17 +530,43 @@ modal_close();
 			cConfirm.open('Are you sure you want to mark this department as complete?', 'markCompleted');
 		});
 
+		$(document).on('click', '.download-report', function() {
+			planGroupId = $(this).data('id-plangroup');
+			if (!planGroupId) return;
+			window.open(base_url + 'internal/audit_assignment/download_report?id_audit_plan_group=' + planGroupId, '_blank');
+		});
+
 		$(document).on('click', '#download-file', function() {
 			const fileId = $(this).data('id-file');
 			if (!fileId) return;
 			window.open(base_url + 'internal/audit_assignment/download_file?id=' + fileId, '_blank');
 		});
 
-		$(document).on('click', '#delete-file', function() {
+		$(document).on('click', '.delete-file', function() {
 			let id = $(this).data('id-file');
 			idSelectedFile = id;
 			cConfirm.open('Are you sure you want to delete this file?', 'deleteFile');
 		});
+
+		$(document).on('change', '#type', function(){
+			let val = $(this).val();
+			$('#kriteria').val('');
+			if(val == 'exist'){
+				$('#kriteria-box').removeClass('d-none');
+			}else if(val == 'new'){
+				$('#kriteria-box').addClass('d-none');
+				window.open(base_url + 'settings/m_kriteria', '_blank');
+			}
+		});
+
+		async function getDetailKriteria(data){
+			let res = await $.ajax({
+				url: base_url + 'internal/audit_assignment/get_kriteria_string',
+				type: 'POST',
+				data: {data:data}
+			});
+			return res;
+		}
 
 		function deleteFile() {
 			$.ajax({
@@ -504,7 +601,7 @@ modal_close();
 					if (res.status === 'success') {
 						cAlert.open(res.message, 'success', 'reload_page');
 					} else {
-						cAlert.open(res.message, 'error');
+						cAlert.open(res.message, res.status);
 					}
 				},
 				error: function() {
@@ -512,8 +609,9 @@ modal_close();
 				}
 			});
 		}
-		function generateListAttachment(){
+		function generateListAttachment(status){
 			rowId = idSelectedAssignment;
+			const isHistory = (typeof status !== 'undefined' && status !== null) ? (status === 'history') : (currentAttachmentStatus === 'history');
 			$.ajax({
 				url: base_url + 'internal/audit_assignment/get_attachments',
 				type: 'POST',
@@ -543,16 +641,16 @@ modal_close();
 												<button type="button" class="btn btn-sm btn-primary btn-icon-only mr-2" id="download-file" title="Download File" data-id-file="${file.id_file}">
 													<i class="fas fa-download"></i>
 												</button>
-												<button type="button" class="btn btn-sm btn-danger btn-icon-only" id="delete-file" title="Delete File" data-id-file="${file.id_file}">
+												${isHistory ? '' : `<button type="button" class="btn btn-sm btn-danger btn-icon-only delete-file" title="Delete File" data-id-file="${file.id_file}">
 													<i class="fas fa-trash"></i>
-												</button>
+												</button>`}
 											</td>`	
 										})
 									html += `</tbody>
 								</table>
 							</div>
 						</div>
-					</div>`
+					</div>`;
 					$('#list-attachments').html(html);
 				}
 			});
@@ -582,7 +680,9 @@ modal_close();
 						</tr>`;
 					} else {
 						res.forEach(function(item, index) {
-							html += `<tr data-id="${item.id}">
+						    const disableClass = item.status === 'history' ? ' disabled-row' : '';
+
+							html += `<tr data-id="${item.id}" class="${disableClass}">
 								<td class="align-middle text-center" style="width: 120px; min-width: 120px;" data-field="section_name">${item.section || ''}</td>
 								<td class="align-middle text-center" style="width: 200px; min-width: 200px;" data-field="aktivitas">${item.aktivitas || ''}</td>
 								<td class="align-middle text-center" style="width: 150px; min-width: 150px;" data-field="audit_area">${item.sub_aktivitas || ''}</td>
@@ -604,16 +704,16 @@ modal_close();
 										</div>`;
 									});
 								html += `</td>
-								<td class="align-middle editable" style="width: 300px; min-width: 180px;" data-field="kriteria">${item.kriteria || ''}</td>
-								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="pengujian">${item.pengujian || ''}</td>
-								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="hasil_review">${item.hasil_review || ''}</td>
-								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="finding">${item.finding || ''}</td>
-								<td class="align-middle bobot" style="width: 300px; min-width: 180px;" data-field="bobot_finding">${item.bobot_finding || ''}</td>
-								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="unconformity">${item.unconformity || ''}</td>
-								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="dampak">${item.dampak || ''}</td>
-								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="root_cause">${item.root_cause || ''}</td>
-								<td class="align-middle editable" style="width: 600px; min-width: 350px;" data-field="recomendation">${item.recomendation || ''}</td>
-								<td class="align-middle status-finding" style="width: 300px; min-width: 180px;" data-field="status_finding">${item.status_finding || ''}</td>
+								<td class="align-middle kriteria ${disableClass}" style="width: 300px; min-width: 180px;" data-field="kriteria">${item.kriteria || ''}</td>
+								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="pengujian">${item.pengujian || ''}</td>
+								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="hasil_review">${item.hasil_review || ''}</td>
+								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="finding">${item.finding || ''}</td>
+								<td class="align-middle bobot ${disableClass}" style="width: 300px; min-width: 180px;" data-field="bobot_finding">${item.bobot_finding || ''}</td>
+								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="unconfirmity">${item.unconfirmity || ''}</td>
+								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="dampak">${item.dampak || ''}</td>
+								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="root_cause">${item.root_cause || ''}</td>
+								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="recomendation">${item.recomendation || ''}</td>
+								<td class="align-middle status-finding ${disableClass}" style="width: 300px; min-width: 180px;" data-field="status_finding">${item.status_finding || ''}</td>
 								<td class="align-middle attachment" style="width: 150px; min-width: 150px;" data-id="${item.id}">
 									${item.filename ? `<span class='text-primary'>Lihat Data</span>` : `<span class="text-muted">No file</span>`}
 								</td>

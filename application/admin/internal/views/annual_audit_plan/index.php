@@ -967,10 +967,10 @@
 			data: {id:id, reason:reason},
 			dataType: 'json',
 			success: function(res){
-				if(res.status) {
+				if(res.status == 'success') {
 					cAlert.open('Audit plan canceled successfully.', 'success', 'reloadPage');
 				} else {
-					cAlert.open('Audit plan canceled failed.', 'error');
+					cAlert.open(res.message, res.status);
 				}
 			}
 		});

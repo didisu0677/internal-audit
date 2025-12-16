@@ -202,8 +202,8 @@ class Finding_records extends BE_Controller {
 
 		}else{
 
-			$dept = get_data('tbl_detail_auditee a',[
-				'select' => 'a.nip,a.id_department,a.id_section',
+			$dept = get_data('tbl_auditee a',[
+				'select' => 'a.nip,a.id_department,a.id_section, a.nama',
 				'join' => 'tbl_user b on a.nip = b.username type LEFT',
 				'where' => [
 					'a.nip' => user('username') 
@@ -256,12 +256,22 @@ class Finding_records extends BE_Controller {
 	}
 
 	function get_data() {
-		$data = get_data('tbl_finding_records a',[
-			'select' => 'a.*',
-			'where' => [
-				'a.id' => post('id')
+		$data = get_data('tbl_finding_records fr',[
+			'select' => 'fr.*, sa.nomor as nomor_schedule, a.nama as auditee, b.section_name as section, ia.nama_institusi as institusi_audit',
+			'join'   =>  [
+				'tbl_schedule_audit sa on fr.id_schedule = sa.id type LEFT',
+				'tbl_institusi_audit ia on sa.id_institusi_audit = ia.id type LEFT',
+				'tbl_auditee a on fr.auditee = a.id type LEFT',
+				'tbl_m_audit_section b on fr.id_section_department = b.id type LEFT'
 			],
-			])->row_array();
+			'where' => [
+				'fr.id' => post('id')
+			],
+		])->row_array();
+
+		// $auditee = get_detail_auditee($data['auditee']) ?? 0;
+		// $data['auditee_name'] = $auditee ? $auditee['nama'] : '';
+		
 
 			// $data = get_data('tbl_m_finding a',[
 			// 	'select' => 'a.*,b.department',
@@ -274,18 +284,18 @@ class Finding_records extends BE_Controller {
 			// $data['auditor'] = $data['id_auditor'];
 
 		
-		$data['detail'] = get_data('tbl_finding_records fr',[
-			'select' => 'fr.*, frf.filename',
-			'join' => 'tbl_finding_record_files frf on fr.id = frf.id_finding_record type LEFT',
-			'where' => [
-				// 'id_m_finding' => $x['id_m_finding']
-				'id_section_department' => $data['id_section_department'],
-				'auditee' => $data['auditee'],
-				'auditor' => $data['auditor'],
-				'periode_audit' => $data['periode_audit'],
-				'DATE_FORMAT(create_at, "%d-%m-%Y %H:%i") =' => date('d-m-Y H:i', strtotime($data['create_at']))
-			]
-		])->result();
+		// $data['detail'] = get_data('tbl_finding_records fr',[
+		// 	'select' => 'fr.*, frf.filename',
+		// 	'join' => 'tbl_finding_record_files frf on fr.id = frf.id_finding_record type LEFT',
+		// 	'where' => [
+		// 		// 'id_m_finding' => $x['id_m_finding']
+		// 		'id_section_department' => $data['id_section_department'],
+		// 		'auditee' => $data['auditee'],
+		// 		'auditor' => $data['auditor'],
+		// 		'periode_audit' => $data['periode_audit'],
+		// 		'DATE_FORMAT(create_at, "%d-%m-%Y %H:%i") =' => date('d-m-Y H:i', strtotime($data['create_at']))
+		// 	]
+		// ])->result();
 
 		$cb_schedule  = get_data('tbl_schedule_audit a',[
 			'select' => 'a.*,b.nama_institusi',
@@ -824,4 +834,9 @@ class Finding_records extends BE_Controller {
 		$this->simpleexcel->export();
 	}
 
+	function getData(){
+		$id = post('id');
+		$data = get_data('tbl_finding_records', 'id', $id)->row_array();
+		render($data,'json');
+	}
 }

@@ -184,7 +184,8 @@ class Annual_audit_plan extends BE_Controller {
 		])->result_array();
 
 		$data['expense_type'] = get_data('tbl_expense_type', 'is_active', 1)->result_array();
-		$data['schedule_audit'] = get_data('tbl_schedule_audit', 'id', $data['schedule_audit'])->row_array()['id'];
+		$schedule_audit = get_data('tbl_schedule_audit', 'id', $data['schedule_audit'])->row_array();
+		$data['schedule_audit'] = $schedule_audit ? $schedule_audit['id']: '';
 		render($data,'json');
 	}
 
@@ -365,7 +366,7 @@ class Annual_audit_plan extends BE_Controller {
 	function cancelPlan(){
 		$id = post('id');
 		$reason = post('reason');
-
+		
 		if(empty($reason)){
 			$response = [
 				'status' => 'error',
@@ -390,6 +391,21 @@ class Annual_audit_plan extends BE_Controller {
 		];
 
 		$save = save_data('tbl_annual_audit_plan_group', $data);
+		
+		$audit_plan = get_data('tbl_annual_audit_plan ap', [
+			'join' => [
+				'tbl_individual_audit_assignment iaa on ap.id = iaa.id_audit_plan'
+			],
+			'where' => [
+				'ap.id_audit_plan_group' => $id
+			]
+		])->result_array();
+
+		foreach($audit_plan as $ap){
+			update_data('tbl_individual_audit_assignment', [
+				'status' => 'canceled'
+			], 'id', $ap['id']);
+		}
 		
 		if($save){
 			$response = [
