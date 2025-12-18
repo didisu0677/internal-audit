@@ -228,12 +228,12 @@ class Annual_audit_plan extends BE_Controller {
 		if(!empty($expense_type)){
 			foreach($expense_type as $i => $type){
 				if(empty($type)){
-					$response = [
-						'status' => 'error',
-						'message' => 'Tipe expense tidak boleh kosong'
-					];
-					render($response, 'json');
-					return;
+					// $response = [
+					// 	'status' => 'error',
+					// 	'message' => 'Tipe expense tidak boleh kosong'
+					// ];
+					// render($response, 'json');
+					// return;
 				}
 				if(!isset($expense_amount[$i]) || empty($expense_amount[$i]) || (int)$expense_amount[$i] <= 0){
 					$response = [
