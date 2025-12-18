@@ -235,22 +235,22 @@ class Annual_audit_plan extends BE_Controller {
 					// render($response, 'json');
 					// return;
 				}
-				if(!isset($expense_amount[$i]) || empty($expense_amount[$i]) || (int)$expense_amount[$i] <= 0){
-					$response = [
-						'status' => 'error',
-						'message' => 'Amount pada expense item '.$type.' harus diisi dan lebih dari 0'
-					];
-					render($response, 'json');
-					return;
-				}
-				if(!isset($expense_day[$i]) || empty($expense_day[$i]) || (int)$expense_day[$i] <= 0){
-					$response = [
-						'status' => 'error',
-						'message' => 'Days pada expense item '.$type.' harus diisi dan lebih dari 0'
-					];
-					render($response, 'json');
-					return;
-				}
+				// if(!isset($expense_amount[$i]) || empty($expense_amount[$i]) || (int)$expense_amount[$i] <= 0){
+					// $response = [
+					// 	'status' => 'error',
+					// 	'message' => 'Amount pada expense item '.$type.' harus diisi dan lebih dari 0'
+					// ];
+					// render($response, 'json');
+					// return;
+				// }
+				// if(!isset($expense_day[$i]) || empty($expense_day[$i]) || (int)$expense_day[$i] <= 0){
+				// 	$response = [
+				// 		'status' => 'error',
+				// 		'message' => 'Days pada expense item '.$type.' harus diisi dan lebih dari 0'
+				// 	];
+				// 	render($response, 'json');
+				// 	return;
+				// }
 				$insertExpense = [
 					'id_audit_plan_group' => $id_audit_plan_group,
 					'expense_type' => $type,
@@ -451,22 +451,22 @@ class Annual_audit_plan extends BE_Controller {
 			// 	render($response, 'json');
 			// 	return;
 			// }
-			if(!isset($amount[$i]) || empty($amount[$i]) || (int)$amount[$i] <= 0){
-				$response = [
-					'status' => 'error',
-					'message' => 'Amount pada expense item '.$type.' harus diisi dan lebih dari 0'
-				];
-				render($response, 'json');
-				return;
-			}
-			if(!isset($day[$i]) || empty($day[$i]) || (int)$day[$i] <= 0){
-				$response = [
-					'status' => 'error',
-					'message' => 'Days pada expense item '.$type.' harus diisi dan lebih dari 0'
-				];
-				render($response, 'json');
-				return;
-			}
+			// if(!isset($amount[$i]) || empty($amount[$i]) || (int)$amount[$i] <= 0){
+				// $response = [
+				// 	'status' => 'error',
+				// 	'message' => 'Amount pada expense item '.$type.' harus diisi dan lebih dari 0'
+				// ];
+				// render($response, 'json');
+				// return;
+			// }
+			// if(!isset($day[$i]) || empty($day[$i]) || (int)$day[$i] <= 0){
+				// $response = [
+				// 	'status' => 'error',
+				// 	'message' => 'Days pada expense item '.$type.' harus diisi dan lebih dari 0'
+				// ];
+				// render($response, 'json');
+				// return;
+			// }
 
 			$insertExpense = [
 				'id_audit_plan_group' => $id_plan_group,
