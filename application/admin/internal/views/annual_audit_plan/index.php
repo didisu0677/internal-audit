@@ -292,7 +292,7 @@
 							<div class='card border-0 shadow-sm'>
 								<div class='card-body p-3'>
 									<label class='form-label small text-muted'>Activity Type</label>
-									<select class='form-control form-control-sm mb-2 w-25' name='activity_type' id='activity_type' required>
+									<select class='form-control form-control-sm mb-2 w-25' name='activity_type' id='activity_type'>
 										<option value='' selected>-- Select Activity Type --</option>
 										<option value='full'>Full</option>
 										<option value='partial'>Partial</option>

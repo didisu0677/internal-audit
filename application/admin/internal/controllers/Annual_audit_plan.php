@@ -224,46 +224,45 @@ class Annual_audit_plan extends BE_Controller {
 			])->result_array();
 		if($cek_duration){
 			delete_data('tbl_audit_plan_duration', 'id_audit_plan_group', $id_audit_plan_group);
-
 		}
-
-		foreach($expense_type as $i => $type){
-			if(empty($type)){
-				$response = [
-					'status' => 'error',
-					'message' => 'Tipe expense tidak boleh kosong'
+		if(!empty($expense_type)){
+			foreach($expense_type as $i => $type){
+				if(empty($type)){
+					$response = [
+						'status' => 'error',
+						'message' => 'Tipe expense tidak boleh kosong'
+					];
+					render($response, 'json');
+					return;
+				}
+				if(!isset($expense_amount[$i]) || empty($expense_amount[$i]) || (int)$expense_amount[$i] <= 0){
+					$response = [
+						'status' => 'error',
+						'message' => 'Amount pada expense item '.$type.' harus diisi dan lebih dari 0'
+					];
+					render($response, 'json');
+					return;
+				}
+				if(!isset($expense_day[$i]) || empty($expense_day[$i]) || (int)$expense_day[$i] <= 0){
+					$response = [
+						'status' => 'error',
+						'message' => 'Days pada expense item '.$type.' harus diisi dan lebih dari 0'
+					];
+					render($response, 'json');
+					return;
+				}
+				$insertExpense = [
+					'id_audit_plan_group' => $id_audit_plan_group,
+					'expense_type' => $type,
+					'category' => 'est',
+					'days' => (int)$expense_day[$i],
+					'amount' => (int)$expense_amount[$i],
+					'note' => isset($expense_note[$i]) ? $expense_note[$i] : '',
 				];
-				render($response, 'json');
-				return;
+				
+				save_data('tbl_audit_plan_expense', $insertExpense);
 			}
-			if(!isset($expense_amount[$i]) || empty($expense_amount[$i]) || (int)$expense_amount[$i] <= 0){
-				$response = [
-					'status' => 'error',
-					'message' => 'Amount pada expense item '.$type.' harus diisi dan lebih dari 0'
-				];
-				render($response, 'json');
-				return;
-			}
-			if(!isset($expense_day[$i]) || empty($expense_day[$i]) || (int)$expense_day[$i] <= 0){
-				$response = [
-					'status' => 'error',
-					'message' => 'Days pada expense item '.$type.' harus diisi dan lebih dari 0'
-				];
-				render($response, 'json');
-				return;
-			}
-			$insertExpense = [
-				'id_audit_plan_group' => $id_audit_plan_group,
-				'expense_type' => $type,
-				'category' => 'est',
-				'days' => (int)$expense_day[$i],
-				'amount' => (int)$expense_amount[$i],
-				'note' => isset($expense_note[$i]) ? $expense_note[$i] : '',
-			];
-			
-			save_data('tbl_audit_plan_expense', $insertExpense);
 		}
-
 		$total_durasi = 0;
 		foreach($activity as $i => $act){
 			if(empty($act)){
