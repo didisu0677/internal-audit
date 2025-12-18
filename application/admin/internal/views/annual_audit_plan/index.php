@@ -292,7 +292,7 @@
 							<div class='card border-0 shadow-sm'>
 								<div class='card-body p-3'>
 									<label class='form-label small text-muted'>Activity Type</label>
-									<select class='form-control form-control-sm mb-2 w-25' name='activity_type' id='activity_type'>
+									<select class='form-control form-control-sm mb-2 w-25' name='activity_type' id='activity_type' required>
 										<option value='' selected>-- Select Activity Type --</option>
 										<option value='full'>Full</option>
 										<option value='partial'>Partial</option>
@@ -1115,7 +1115,7 @@
 				<div class='expense-est-row mb-2'>
 					<div class='row align-items-center'>
 						<div class='col-2'>
-							<select class='form-control form-control-sm' name='expense_type[]' required>
+							<select class='form-control form-control-sm' name='expense_type[]'>
 								<option value=''>-- Select Expense Item --</option>`;
 								$.each(res, function(j, v){
 									let selected = item.expense_type == v.id ? 'selected' : '';
@@ -1124,16 +1124,16 @@
 							html += `</select>
 						</div>
 						<div class='col-2'>
-							<input type='text' class='form-control money form-control-sm expense' name='expense_amount[]' placeholder='Amount' min='0' value='${item.amount}' required>
+							<input type='text' class='form-control money form-control-sm expense' name='expense_amount[]' placeholder='Amount' min='0' value='${item.amount}'>
 						</div>
 						<div class='col-1'>
-							<input type='number' class='form-control form-control-sm day-input' name='expense_day[]' placeholder='Days' min='0' value='${item.days}' required>
+							<input type='number' class='form-control form-control-sm day-input' name='expense_day[]' placeholder='Days' min='0' value='${item.days}'>
 						</div>
 						<div class='col-2'>
-							<input type='text' class='form-control money form-control-sm expense-est-input' name='total_amount[]' placeholder='Total Amount' min='0' value='${item.amount * item.days}' required>
+							<input type='text' class='form-control money form-control-sm expense-est-input' name='total_amount[]' placeholder='Total Amount' min='0' value='${item.amount * item.days}'>
 						</div>
 						<div class='col-4'>
-							<input type='text' class='form-control form-control-sm note-input' name='expense_note[]' placeholder='Note' value='${item.note}' required>
+							<input type='text' class='form-control form-control-sm note-input' name='expense_note[]' placeholder='Note' value='${item.note}'>
 						</div>
 						<div class='col-1'>
 							<button type='button' class='btn btn-sm btn-outline-danger btn-icon-only remove-expense-est' >
