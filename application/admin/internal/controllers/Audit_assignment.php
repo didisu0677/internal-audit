@@ -8,6 +8,8 @@ use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Font;
+use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\IOFactory;
 
 class Audit_assignment extends BE_Controller {
 
@@ -62,7 +64,7 @@ class Audit_assignment extends BE_Controller {
 	function data() {
 		$id = post('id');
 		$query = get_data('tbl_annual_audit_plan a', [
-			'select' => 'aa.id, aa.kriteria, aa.pengujian, aa.hasil_review, aa.unconfirmity, aa.dampak, aa.root_cause, aa.recomendation, aa.finding, aa.bobot_finding, aa.status_finding, aa.status, ag.year, a.id as id_audit_plan, a.id_audit_plan_group, dep.section_name as department,ak.id as id_aktivitas, ak.aktivitas, sa.id as id_sub_aktivitas, sa.sub_aktivitas, rc.id_risk, s.section_name as section, af.filename',
+			'select' => 'aa.id, aa.kriteria, aa.pengujian, aa.hasil_review, aa.unconfirmity, aa.dampak, aa.root_cause, aa.recomendation, aa.finding, aa.bobot_finding, aa.status_finding, aa.status, ag.year, a.id as id_audit_plan, a.id_audit_plan_group, dep.section_name as department,ak.id as id_aktivitas, ak.aktivitas, sa.id as id_sub_aktivitas, sa.sub_aktivitas, rc.id_risk, s.section_name as section',
 			'join' => [
 				'tbl_audit_universe u on a.id_universe = u.id', 
 				'tbl_rcm rcm on u.id_rcm = rcm.id',
@@ -73,7 +75,7 @@ class Audit_assignment extends BE_Controller {
 				'tbl_aktivitas ak on sa.id_aktivitas = ak.id',
 				'tbl_annual_audit_plan_group ag on ag.id = a.id_audit_plan_group',
 				'tbl_individual_audit_assignment aa on aa.id_audit_plan = a.id',
-				'tbl_individual_audit_assignment_files af on af.id_audit_assignment = aa.id type left'
+				// 'tbl_individual_audit_assignment_files af on af.id_audit_assignment = aa.id type left'
 			],		
 			'where' => [
 				'a.id_audit_plan_group' => $id
@@ -87,6 +89,7 @@ class Audit_assignment extends BE_Controller {
 			$kriteria = json_decode($row['kriteria'], true);
 			$data_kriteria = get_data('tbl_kriteria', 'id', $kriteria)->result_array();
 			$internal_control = get_data('tbl_internal_control','id_aktivitas',$row['id_aktivitas'])->result_array();
+			$row['filename'] = get_data('tbl_individual_audit_assignment_files','id_audit_assignment',$row['id'])->row_array(); // cek aja minimal kalo ada 1 file
 			$row['internal_control'] = $internal_control;
 			$row['status_finding'] = get_data('tbl_status_finding_control','id',$row['status_finding'])->row_array()['description'] ?? '';
 			$row['bobot_finding'] = get_data('tbl_bobot_status_audit','id',$row['bobot_finding'])->row_array()['bobot'] ?? '';
@@ -272,13 +275,6 @@ class Audit_assignment extends BE_Controller {
 			$divisi = get_detail_department($plan['id_department']);
 			$bobot = get_detail_bobot($row['bobot_finding']);
 			
-			if($plan['status'] != 'completed'){
-				render([
-					'status' => 'info',
-					'message' => 'Pastikan status Annual Audit Plan sudah "Completed" sebelum menandai Assignment sebagai Completed!'
-				],'json');
-				return;
-			}
 			if(!empty($row['finding']) && empty($row['status_finding'])){
 				render([
 					'status' => 'info',
@@ -301,6 +297,7 @@ class Audit_assignment extends BE_Controller {
 				],'json');
 				return;
 			}
+
 			$data_finding[] = [
 				'id_assignment' => $row['id'],
 				'id_schedule' => $detail_schedule['id'],
@@ -330,6 +327,14 @@ class Audit_assignment extends BE_Controller {
 				render([
 					'status' => 'info',
 					'message' => 'Pastikan Auditee dan Auditor tidak kosong pada Annual Audit Plan!'
+				],'json');
+				return;
+			}
+			
+			if($plan['status'] != 'completed'){
+				render([
+					'status' => 'info',
+					'message' => 'Pastikan status Annual Audit Plan sudah "Completed" sebelum menandai Assignment sebagai Completed!'
 				],'json');
 				return;
 			}
@@ -471,14 +476,15 @@ class Audit_assignment extends BE_Controller {
 				'tbl_sub_aktivitas sa on rcm.id_sub_aktivitas = sa.id',
 				'tbl_aktivitas ak on sa.id_aktivitas = ak.id',
 				'tbl_annual_audit_plan_group ag on ag.id = a.id_audit_plan_group',
-				'tbl_individual_audit_assignment aa on aa.id_audit_plan = a.id',
-				'tbl_individual_audit_assignment_files af on af.id_audit_assignment = aa.id type left'
+				'tbl_individual_audit_assignment aa on aa.id_audit_plan = a.id'
 			],		
 			'where' => [
 				'a.id_audit_plan_group' => $id_audit_plan_group
 			],
 			'order_by' => 'dep.urutan'
 		])->result_array();
+		
+		$clean_data = [];
 		foreach($data as $item) {
 			$auditor = get_detail_auditor($item['auditor']);
 			$item['auditor'] = $auditor ? $auditor['nama'] : '';
@@ -496,107 +502,118 @@ class Audit_assignment extends BE_Controller {
 			$clean_data[] = $row_data;
 		}
 		$spreadsheet = new Spreadsheet();
-		$sheetIndex = 0;
+		$sheet = $spreadsheet->getActiveSheet();
+		$sheet->setTitle('Detil Temuan Audit');
+
+		// Lebar kolom (sekali saja)
+		foreach (['A'=>20,'B'=>20,'C'=>25,'D'=>25,'E'=>25,'F'=>25] as $col=>$width) {
+			$sheet->getColumnDimension($col)->setWidth($width);
+		}
+
+		// Print setting (1 halaman per blok saat dicetak skala lebar)
+		$sheet->getPageSetup()
+			->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4)
+			->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_PORTRAIT)
+			->setFitToWidth(1)
+			->setFitToHeight(0);
+
+		$startRow = 2; // baris awal blok pertama (meniru A2 sebelumnya)
+		$blockHeight = 21; // baris 2..22 inklusif
+		$gap = 1; // satu baris kosong antar blok
 
 		foreach ($clean_data as $row) {
-
-			// Buat sheet baru kecuali pertama
-			if ($sheetIndex == 0) {
-				$sheet = $spreadsheet->getActiveSheet();
-			} else {
-				$sheet = $spreadsheet->createSheet();
-			}
-
-			$sheet->setTitle('Temuan ' . ($sheetIndex + 1));
+			// Hitung baris-baris relatif
+			$rTitle = $startRow;               // A2
+			$rInfo1 = $startRow + 2;           // A4/D4
+			$rInfo2 = $startRow + 3;           // A5/D5
+			$rHeader = $startRow + 5;          // A7/D7
+			$rTopHead = $startRow + 6;         // A8..F8
+			$rTopStart = $startRow + 7;        // A9.. (isi atas)
+			$rTopEnd = $startRow + 12;         // ..B14/C14/E14
+			$rBottomHead = $startRow + 13;     // A15..F15
+			$rBottomStart = $startRow + 14;    // A16..F16
+			$rBottomEnd = $startRow + 20;      // ..A22..F22
 
 			// ================= JUDUL =================
-			$sheet->setCellValue('A2', 'DETIL TEMUAN AUDIT');
-			$sheet->mergeCells('A2:F2');
-			$sheet->getStyle('A2')->getFont()->setBold(true)->setSize(14);
-			$sheet->getStyle('A2')->getAlignment()->setHorizontal('center');
+			$sheet->setCellValue("A{$rTitle}", 'DETIL TEMUAN AUDIT');
+			$sheet->mergeCells("A{$rTitle}:F{$rTitle}");
+			$sheet->getStyle("A{$rTitle}")->getFont()->setBold(true)->setSize(14);
+			$sheet->getStyle("A{$rTitle}")->getAlignment()->setHorizontal('center');
 
 			// ================= INFO =================
-			$sheet->setCellValue('A4', 'Tanggal audit');
-			$sheet->setCellValue('B4', ': ' . date('d F Y', strtotime($row['start_date'])) . ' - ' . date('d F Y', strtotime($row['end_date'])));
+			$sheet->setCellValue("A{$rInfo1}", 'Tanggal audit');
+			$sheet->setCellValue("B{$rInfo1}", ': ' . date('d F Y', strtotime($row['start_date'])) . ' - ' . date('d F Y', strtotime($row['end_date'])));
 
-			$sheet->setCellValue('A5', 'Entitas');
-			$sheet->setCellValue('B5', ': ' . $row['aktivitas']);
+			$sheet->setCellValue("A{$rInfo2}", 'Entitas');
+			$sheet->setCellValue("B{$rInfo2}", ': ' . $row['aktivitas']);
 
-			$sheet->setCellValue('D4', 'Auditee');
-			$sheet->setCellValue('E4', ': ' . $row['auditee']);
+			$sheet->setCellValue("D{$rInfo1}", 'Auditee');
+			$sheet->setCellValue("E{$rInfo1}", ': ' . $row['auditee']);
 
-			$sheet->setCellValue('D5', 'Auditor');
-			$sheet->setCellValue('E5', ': ' . $row['auditor']);
+			$sheet->setCellValue("D{$rInfo2}", 'Auditor');
+			$sheet->setCellValue("E{$rInfo2}", ': ' . $row['auditor']);
 
 			// ================= HEADER =================
-			$sheet->setCellValue('A7', $row['department']);
-			$sheet->mergeCells('A7:C7');
+			$sheet->setCellValue("A{$rHeader}", $row['department']);
+			$sheet->mergeCells("A{$rHeader}:C{$rHeader}");
 
-			$sheet->setCellValue('D7', 'Bobot : ' . ($row['bobot_finding'] ?? ''));
-			$sheet->mergeCells('D7:F7');
+			$sheet->setCellValue("D{$rHeader}", 'Bobot : ' . ($row['bobot_finding'] ?? ''));
+			$sheet->mergeCells("D{$rHeader}:F{$rHeader}");
 
 			// ================= HEADER TABEL ATAS =================
-			$sheet->setCellValue('A8', 'Finding');
-			$sheet->mergeCells('A8:B8');
+			$sheet->setCellValue("A{$rTopHead}", 'Finding');
+			$sheet->mergeCells("A{$rTopHead}:B{$rTopHead}");
 
-			$sheet->setCellValue('C8', 'Internal Control Existing');
-			$sheet->mergeCells('C8:D8');
+			$sheet->setCellValue("C{$rTopHead}", 'Internal Control Existing');
+			$sheet->mergeCells("C{$rTopHead}:D{$rTopHead}");
 
-			$sheet->setCellValue('E8', 'Non-Conformance');
-			$sheet->mergeCells('E8:F8');
+			$sheet->setCellValue("E{$rTopHead}", 'Non-Conformance');
+			$sheet->mergeCells("E{$rTopHead}:F{$rTopHead}");
 
 			// ================= ISI TABEL ATAS =================
-			$sheet->mergeCells('A9:B14');
-			$sheet->mergeCells('C9:D14');
-			$sheet->mergeCells('E9:F14');
+			$sheet->mergeCells("A{$rTopStart}:B{$rTopEnd}");
+			$sheet->mergeCells("C{$rTopStart}:D{$rTopEnd}");
+			$sheet->mergeCells("E{$rTopStart}:F{$rTopEnd}");
 
-			$sheet->setCellValue('A9', $this->html_to_excel_text($row['finding']));
-			$sheet->setCellValue('C9', $this->html_to_excel_text($row['internal_control']));
-			$sheet->setCellValue('E9', $this->html_to_excel_text($row['unconfirmity']));
+			$sheet->setCellValue("A{$rTopStart}", $this->html_to_excel_text($row['finding']));
+			$sheet->setCellValue("C{$rTopStart}", $this->html_to_excel_text($row['internal_control']));
+			$sheet->setCellValue("E{$rTopStart}", $this->html_to_excel_text($row['unconfirmity']));
 
 			// ================= HEADER TABEL BAWAH =================
-			$sheet->setCellValue('A15', 'Risiko');
-			$sheet->mergeCells('A15:B15');
+			$sheet->setCellValue("A{$rBottomHead}", 'Risiko');
+			$sheet->mergeCells("A{$rBottomHead}:B{$rBottomHead}");
 
-			$sheet->setCellValue('C15', 'Root Cause');
-			$sheet->mergeCells('C15:D15');
+			$sheet->setCellValue("C{$rBottomHead}", 'Root Cause');
+			$sheet->mergeCells("C{$rBottomHead}:D{$rBottomHead}");
 
-			$sheet->setCellValue('E15', 'Recommendation');
-			$sheet->mergeCells('E15:F15');
+			$sheet->setCellValue("E{$rBottomHead}", 'Recommendation');
+			$sheet->mergeCells("E{$rBottomHead}:F{$rBottomHead}");
 
 			// ================= ISI TABEL BAWAH =================
-			$sheet->mergeCells('A16:B22');
-			$sheet->mergeCells('C16:D22');
-			$sheet->mergeCells('E16:F22');
+			$sheet->mergeCells("A{$rBottomStart}:B{$rBottomEnd}");
+			$sheet->mergeCells("C{$rBottomStart}:D{$rBottomEnd}");
+			$sheet->mergeCells("E{$rBottomStart}:F{$rBottomEnd}");
 
-			$sheet->setCellValue('A16', $this->html_to_excel_text($row['risk']));
-			$sheet->setCellValue('C16', $this->html_to_excel_text($row['root_cause']));
-			$sheet->setCellValue('E16', $this->html_to_excel_text($row['recomendation']));
+			$sheet->setCellValue("A{$rBottomStart}", $this->html_to_excel_text($row['risk']));
+			$sheet->setCellValue("C{$rBottomStart}", $this->html_to_excel_text($row['root_cause']));
+			$sheet->setCellValue("E{$rBottomStart}", $this->html_to_excel_text($row['recomendation']));
 
 			// ================= STYLE =================
-			$sheet->getStyle('A8:F8')->getFont()->setBold(true);
-			$sheet->getStyle('A15:F15')->getFont()->setBold(true);
+			$sheet->getStyle("A{$rTopHead}:F{$rTopHead}")->getFont()->setBold(true);
+			$sheet->getStyle("A{$rBottomHead}:F{$rBottomHead}")->getFont()->setBold(true);
 
-			$sheet->getStyle('A8:F22')->getAlignment()
+			$sheet->getStyle("A{$rTopHead}:F{$rBottomEnd}")->getAlignment()
 				->setWrapText(true)
 				->setVertical('top');
 
-			// Border
-			$sheet->getStyle('A7:F22')->getBorders()->getAllBorders()->setBorderStyle('thin');
+			// Border untuk keseluruhan blok tabel (dari header tabel hingga akhir)
+			$sheet->getStyle("A{$rHeader}:F{$rBottomEnd}")->getBorders()->getAllBorders()->setBorderStyle('thin');
 
-			// Lebar kolom
-			foreach (['A'=>20,'B'=>20,'C'=>25,'D'=>25,'E'=>25,'F'=>25] as $col=>$width) {
-				$sheet->getColumnDimension($col)->setWidth($width);
-			}
+			// Page break opsional per blok saat print
+			$sheet->setBreak("A" . ($rBottomEnd + 2), \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet::BREAK_ROW);
 
-			// Print setting (1 halaman)
-			$sheet->getPageSetup()
-				->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4)
-				->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_PORTRAIT)
-				->setFitToWidth(1)
-				->setFitToHeight(1);
-
-			$sheetIndex++;
+			// Geser ke blok berikutnya
+			$startRow += ($blockHeight + $gap);
 		}
 
 		// ================= DOWNLOAD =================
@@ -606,6 +623,147 @@ class Audit_assignment extends BE_Controller {
 		header('Cache-Control: max-age=0');
 
 		$writer = new Xlsx($spreadsheet);
+		$writer->save('php://output');
+		exit;
+	}
+
+	public function download_report_docx(){
+		ini_set('memory_limit', '-1');
+		$id_audit_plan_group = get('id_audit_plan_group');
+
+		// Safety check if PhpWord not installed
+		if (!class_exists('PhpOffice\\PhpWord\\PhpWord')) {
+			header('HTTP/1.1 500 Internal Server Error');
+			echo 'PhpWord library is not installed. Run: composer require phpoffice/phpword';
+			exit;
+		}
+
+		$data = get_data('tbl_annual_audit_plan a', [
+			'select' => 'ag.start_date, ag.end_date, ag.auditee, ag.auditor, aa.root_cause, aa.recomendation, aa.unconfirmity, aa.finding, aa.bobot_finding, a.id as id_audit_plan, a.id_audit_plan_group, ak.id as id_aktivitas, ak.aktivitas, sa.id as id_sub_aktivitas, rc.id_risk, s.section_name as section, dep.section_name as department',
+			'join' => [
+				'tbl_audit_universe u on a.id_universe = u.id', 
+				'tbl_rcm rcm on u.id_rcm = rcm.id',
+				'tbl_risk_control rc on rcm.id_risk_control = rc.id',
+				'tbl_m_audit_section s on rcm.id_section = s.id',
+				'tbl_m_audit_section dep on s.level4 = dep.id',
+				'tbl_sub_aktivitas sa on rcm.id_sub_aktivitas = sa.id',
+				'tbl_aktivitas ak on sa.id_aktivitas = ak.id',
+				'tbl_annual_audit_plan_group ag on ag.id = a.id_audit_plan_group',
+				'tbl_individual_audit_assignment aa on aa.id_audit_plan = a.id'
+			],		
+			'where' => [
+				'a.id_audit_plan_group' => $id_audit_plan_group
+			],
+			'order_by' => 'dep.urutan'
+		])->result_array();
+
+		$clean_data = [];
+		foreach($data as $item) {
+			$auditor = get_detail_auditor($item['auditor']);
+			$item['auditor'] = $auditor ? $auditor['nama'] : '';
+
+			$auditee = get_detail_auditee($item['auditee']);
+			$item['auditee'] = $auditee ? $auditee['nama'] : '';
+
+			$item['bobot_finding'] = get_data('tbl_bobot_status_audit','id',$item['bobot_finding'])->row_array()['bobot'] ?? '';
+			$id_risk = json_decode($item['id_risk'],true);
+			$data_risk = get_data('tbl_risk_register','id',$id_risk)->result_array();
+			$internal_control = get_data('tbl_internal_control','id_aktivitas',$item['id_aktivitas'])->result_array();
+			$item['internal_control'] = '> ' . implode("\n> ", array_column($internal_control, 'internal_control'));
+			$item['risk'] = '> '. implode("\n> ", array_column($data_risk, 'risk'));
+			$clean_data[] = $item;
+		}
+
+		$phpWord = new PhpWord();
+		// Set a clean, consistent default font for better readability
+		$phpWord->setDefaultFontName('Calibri');
+		$phpWord->setDefaultFontSize(11);
+		$section = $phpWord->addSection([
+			'pageSizeW' => 11906, 'pageSizeH' => 16838, // A4 portrait
+			'marginLeft' => 720, 'marginRight' => 720, 'marginTop' => 720, 'marginBottom' => 720
+		]);
+
+		// Compute usable content width and standardized column widths
+		$contentWidth = 11906 - (720 + 720); // page width - margins
+		$colEqual = intdiv($contentWidth, 3);
+		$colWidths = [$colEqual, $colEqual, $contentWidth - 2 * $colEqual];
+
+		$tableStyle = ['borderSize' => 6, 'borderColor' => '000000', 'cellMargin' => 120, 'width' => $contentWidth];
+		$headerCellStyle = ['bgColor' => 'F2F2F2', 'valign' => 'center'];
+		$cellStyle = ['valign' => 'top'];
+		$phpWord->addTableStyle('BlockTable', $tableStyle);
+		$phpWord->addTableStyle('InfoTable', ['borderSize' => 0, 'cellMargin' => 80, 'width' => $contentWidth]);
+
+		foreach ($clean_data as $i => $row) {
+			// Title
+			$section->addText('DETIL TEMUAN AUDIT', ['bold' => true, 'size' => 14], ['alignment' => 'center', 'spaceAfter' => 200]);
+
+			// Info (aligned label/value pairs)
+			$info = $section->addTable('InfoTable');
+			$infoLabelWidth = 2200;
+			$infoValueWidth = $contentWidth - $infoLabelWidth;
+			$bold = ['bold' => true];
+
+			$info->addRow();
+			$info->addCell($infoLabelWidth)->addText('Tanggal audit', $bold);
+			$info->addCell($infoValueWidth)->addText(': ' . date('d F Y', strtotime($row['start_date'])) . ' - ' . date('d F Y', strtotime($row['end_date'])));
+
+			$info->addRow();
+			$info->addCell($infoLabelWidth)->addText('Entitas', $bold);
+			$info->addCell($infoValueWidth)->addText(': ' . ($row['aktivitas'] ?? ''));
+
+			$info->addRow();
+			$info->addCell($infoLabelWidth)->addText('Auditee', $bold);
+			$info->addCell($infoValueWidth)->addText(': ' . ($row['auditee'] ?? ''));
+
+			$info->addRow();
+			$info->addCell($infoLabelWidth)->addText('Auditor', $bold);
+			$info->addCell($infoValueWidth)->addText(': ' . ($row['auditor'] ?? ''));
+
+			// Department + Bobot line
+			$meta = $section->addTable('InfoTable');
+			$meta->addRow();
+			$meta->addCell(intdiv($contentWidth, 2))->addText($row['department'] ?? '');
+			$meta->addCell($contentWidth - intdiv($contentWidth, 2))->addText('Bobot: ' . ($row['bobot_finding'] ?? ''), $bold, ['alignment' => 'right']);
+
+			$section->addTextBreak(1);
+
+			// Tabel atas (Finding/Control/Non-Conformance)
+			$t1 = $section->addTable('BlockTable');
+			$t1->addRow();
+			$t1->addCell($colWidths[0], $headerCellStyle)->addText('Finding', $bold);
+			$t1->addCell($colWidths[1], $headerCellStyle)->addText('Internal Control Existing', $bold);
+			$t1->addCell($colWidths[2], $headerCellStyle)->addText('Non-Conformance', $bold);
+			$t1->addRow();
+			$t1->addCell($colWidths[0], $cellStyle)->addText($this->html_to_excel_text($row['finding'] ?? ''), [], ['spaceAfter' => 0]);
+			$t1->addCell($colWidths[1], $cellStyle)->addText($this->html_to_excel_text($row['internal_control'] ?? ''), [], ['spaceAfter' => 0]);
+			$t1->addCell($colWidths[2], $cellStyle)->addText($this->html_to_excel_text($row['unconfirmity'] ?? ''), [], ['spaceAfter' => 0]);
+
+			$section->addTextBreak(1);
+
+			// Tabel bawah (Risk/Root Cause/Recommendation)
+			$t2 = $section->addTable('BlockTable');
+			$t2->addRow();
+			$t2->addCell($colWidths[0], $headerCellStyle)->addText('Risiko', $bold);
+			$t2->addCell($colWidths[1], $headerCellStyle)->addText('Root Cause', $bold);
+			$t2->addCell($colWidths[2], $headerCellStyle)->addText('Recommendation', $bold);
+			$t2->addRow();
+			$t2->addCell($colWidths[0], $cellStyle)->addText($this->html_to_excel_text($row['risk'] ?? ''), [], ['spaceAfter' => 0]);
+			$t2->addCell($colWidths[1], $cellStyle)->addText($this->html_to_excel_text($row['root_cause'] ?? ''), [], ['spaceAfter' => 0]);
+			$t2->addCell($colWidths[2], $cellStyle)->addText($this->html_to_excel_text($row['recomendation'] ?? ''), [], ['spaceAfter' => 0]);
+
+			if ($i < count($clean_data) - 1) {
+				$section->addPageBreak();
+			}
+		}
+
+		$filename = 'Detil_Temuan_Audit.docx';
+		header('Content-Description: File Transfer');
+		header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+		header('Content-Disposition: attachment; filename="'.$filename.'"');
+		header('Cache-Control: max-age=0');
+
+		$writer = IOFactory::createWriter($phpWord, 'Word2007');
 		$writer->save('php://output');
 		exit;
 	}

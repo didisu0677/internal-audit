@@ -374,7 +374,7 @@
 										<div class='expense-real-row mb-2'>
 											<div class='row align-items-center'>
 												<div class='col-2'>
-													<select class='form-control form-control-sm' name='expense_real_type[]' required>
+													<select class='form-control form-control-sm' name='expense_real_type[]'>
 														<option value=''>-- Select Expense Item --</option>";
 														foreach($expense_item as $item){
 															echo "<option value='".$item['id']."'>".$item['name']."</option>";
@@ -382,16 +382,16 @@
 													echo "</select>
 												</div>
 												<div class='col-2'>
-													<input type='text' class='form-control form-control-sm expense money' name='expense_real_amount[]' placeholder='Amount' min='0' required>
+													<input type='text' class='form-control form-control-sm expense money' name='expense_real_amount[]' placeholder='Amount' min='0'>
 												</div>
 												<div class='col-1'>
-													<input type='number' class='form-control form-control-sm day-input day-real-input' name='expense_real_day[]' placeholder='Days' min='0' required>
+													<input type='number' class='form-control form-control-sm day-input day-real-input' name='expense_real_day[]' placeholder='Days' min='0'>
 												</div>
 												<div class='col-2'>
-													<input type='text' class='form-control form-control-sm expense-real-input money' name='total_real_amount[]' placeholder='Total Amount' min='0' required>
+													<input type='text' class='form-control form-control-sm expense-real-input money' name='total_real_amount[]' placeholder='Total Amount' min='0'>
 												</div>
 												<div class='col-4'>
-													<input type='text' class='form-control form-control-sm' name='expense_real_note[]' placeholder='Note' required>
+													<input type='text' class='form-control form-control-sm' name='expense_real_note[]' placeholder='Note'>
 												</div>
 												<div class='col-1'>
 													<button type='button' class='btn btn-sm btn-outline-danger btn-icon-only remove-expense-real' style='display:none;'>
@@ -472,7 +472,7 @@
 				echo "<div id='detail-cancel-body'></div>";
 	modal_close();
 
-	modal_open('mAddPlan', 'Add Annual Audit Plan', '', '');
+	modal_open('mAddPlan', 'Add Annual Audit Plan', 'modal-lg', '');
 		modal_body();
 			form_open(base_url('internal/annual_audit_plan/add_plan'), 'post', 'formAddPlan');
 				input('hidden', 'year_plan', 'year_plan', '', 'readonly');		
@@ -1101,14 +1101,7 @@
 					</div>
 					<div class='col-4'>
 						<input type='text' class='form-control form-control-sm note-input' name='expense_note[]' placeholder='Note'>
-					</div>
-					<div class='col-1'>
-						<button type='button' class='btn btn-sm btn-outline-danger btn-icon-only remove-expense-est' >
-							<i class='fas fa-trash'></i>
-						</button>
-					</div>
-				</div>
-			</div>`;	
+					</div>`;
 		}else{
 			$.each(data, function(i, item){
 				html += `
@@ -1134,16 +1127,16 @@
 						</div>
 						<div class='col-4'>
 							<input type='text' class='form-control form-control-sm note-input' name='expense_note[]' placeholder='Note' value='${item.note}'>
-						</div>
-						<div class='col-1'>
-							<button type='button' class='btn btn-sm btn-outline-danger btn-icon-only remove-expense-est' >
-								<i class='fas fa-trash'></i>
-							</button>
-						</div>
-					</div>
-				</div>`;	
+						</div>`	
 			});
 		}
+		html += `<div class='col-1'>
+						<button type='button' class='btn btn-sm btn-outline-danger btn-icon-only remove-expense-est d-none' >
+							<i class='fas fa-trash'></i>
+						</button>
+					</div>
+				</div>
+			</div>`;	
 		$('#expense-est-container').html(html);
 		$('#expense-est-footer').remove();
 		
@@ -1159,8 +1152,7 @@
 				</div>
 			</div>`
 		$('#expense-est-container').after(footer);
-		money_init();
-		
+		money_init();		
     } catch (err) {
         console.error("Gagal load expense item:", err);
     }

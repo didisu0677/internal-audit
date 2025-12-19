@@ -73,10 +73,16 @@
 																		Mark Complete
 																	</button>
 																<?php else :  ?>
-																	<button class="btn btn-danger btn-sm float-right download-report" type="button" data-id-plangroup="<?=$deptData['id_audit_plan_group']?>">
-																		<i class="fas fa-download me-1"></i>
-																		Download
-																	</button>
+																	<div class="btn-group float-right" role="group">
+																		<button class="btn btn-danger btn-sm download-report" type="button" data-id-plangroup="<?=$deptData['id_audit_plan_group']?>">
+																			<i class="fas fa-file-excel me-1"></i>
+																			Excel
+																		</button>
+																		<button class="btn btn-primary btn-sm download-report-docx" type="button" data-id-plangroup="<?=$deptData['id_audit_plan_group']?>" style="margin-left:6px;">
+																			<i class="fas fa-file-word me-1"></i>
+																			DOCX
+																		</button>
+																	</div>
 																<?php endif?>
 															</div>
 																<div class="collapse" id="dept-collapse<?=$year?>-<?=md5($dept)?>">
@@ -225,7 +231,7 @@ modal_open('modal-attachment','Attachment Management','modal-xl');
 					<input type="text" name="original_name[]" class="form-control form-control-sm" placeholder="Optional display name">
 				</div>
 			</div>';
-			fileupload('File','file[]','required','data-accept="xls|xlsx|doc|docx"');
+			fileupload('File','file[]','required','data-accept="xls|xlsx|doc|docx|jpeg|jpg|png|pdf"');
 		echo '</div>
 		<div id="list-attachments"></div>
 		</div>
@@ -432,7 +438,7 @@ modal_close();
 							? modal.find('[name="kriteria[]"]').val()
 							: CKEDITOR.instances['field-editor'].getData()
 			};
-
+			
 			let response = await $.ajax({
 				url: base_url + 'internal/audit_assignment/save',
 				type: 'POST',
@@ -447,7 +453,7 @@ modal_close();
 				}else if(modal.is('#modal-status-finding')){
 					cellClass = '.status-finding';
 					formData.value = await get_status_finding_name(formData.value)
-				}else{
+				}else if(modal.is('#modal-kriteria')){
 					cellClass = '.kriteria';
 					formData.value = await getDetailKriteria(formData.value)
 				}
@@ -534,6 +540,12 @@ modal_close();
 			planGroupId = $(this).data('id-plangroup');
 			if (!planGroupId) return;
 			window.open(base_url + 'internal/audit_assignment/download_report?id_audit_plan_group=' + planGroupId, '_blank');
+		});
+
+		$(document).on('click', '.download-report-docx', function() {
+			planGroupId = $(this).data('id-plangroup');
+			if (!planGroupId) return;
+			window.open(base_url + 'internal/audit_assignment/download_report_docx?id_audit_plan_group=' + planGroupId, '_blank');
 		});
 
 		$(document).on('click', '#download-file', function() {
