@@ -22,7 +22,7 @@
 			<thead>
 				<tr>
 					<th style="display:none"></th>
-					<!-- <th><?= lang('no'); ?></th> -->
+					<th width="1px" style="white-space: nowrap;"></th>
 					<th><?= lang('auditor'); ?></th>
 					<th><?= lang('tgl_mulai_audit'); ?></th>
 					<th><?= lang('auditee'); ?></th>
@@ -46,7 +46,7 @@
 				foreach($data as $val):?>
 				<tr>
 					<td style="display:none"><?= $val['id'] ?></td> <!-- hidden ID -->
-					<!-- <td width="1" class="text-center"><?= $no++ ?></td> -->
+					<td width="1" class="text-center"><?= empty($val['id_assignment']) ? '*' : '' ?></td>
 					<td width="1" class="text-nowrap"><?= $val['nama_auditor'] ?></td>
 					<td width="1" class="text-nowrap"><?= $val['tgl_mulai_audit']?></td>
 					<td width="1" class="text-nowrap"><?= $val['auditee']?></td>
