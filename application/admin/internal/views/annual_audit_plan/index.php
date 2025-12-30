@@ -54,9 +54,11 @@
 														</div>
 													</div>
 												</button>
+												<?php if($activeFilter=='plan'): ?>
 												<button class="btn btn-light btn-sm ml-3 add-plan" type="button" data-year="<?=$year?>" title="Add New Plan">
 													<i class="fas fa-plus mr-2"></i>Add Plan
 												</button>
+												<?php endif; ?>
 											</div>
 										</div>
 										
