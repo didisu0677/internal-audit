@@ -187,6 +187,10 @@
 		let periode = $('#periode').val();
 		let auditee = $('#auditee').val();
 
+		if(periode == '' || auditee.length == 0){
+			cAlert.open('Periode dan Auditee wajib diisi!', 'info');
+			return;
+		}
 		$.ajax({
 			url: base_url + 'internal/kuisioner/send_kuisioner',
 			type: 'post',
