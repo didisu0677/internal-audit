@@ -438,7 +438,23 @@ modal_close();
 							? modal.find('[name="kriteria[]"]').val()
 							: CKEDITOR.instances['field-editor'].getData()
 			};
-			
+			if(formData.field == 'kriteria'){
+				if(formData.value == null || formData.value.length == 0){
+					cAlert.open('Please select at least one Kriteria!', 'info');
+					return;
+				}
+			}
+
+			if(formData.field == 'bobot_finding' && (formData.value == null || formData.value == '')){
+				cAlert.open('Please select Bobot Finding!', 'info');
+				return;
+			}
+
+			if(formData.field == 'status_finding' && (formData.value == null || formData.value == '')){
+				cAlert.open('Please select Status Finding Control!', 'info');
+				return;
+			}
+
 			let response = await $.ajax({
 				url: base_url + 'internal/audit_assignment/save',
 				type: 'POST',
