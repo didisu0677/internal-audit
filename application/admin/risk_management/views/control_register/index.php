@@ -181,9 +181,7 @@ modal_close();
 			{ data: 'tanggal_pnp', width: '5%' },
 			{ data: 'id', 
 				render: function(data,type,row) {
-					return `<button type="button" id="btn-edit" class="btn btn-sm btn-warning btn-icon-only" data-id="${data}"><i class="fa-pencil"></i></button>
-							<button type="button" id="btn-delete" class="btn btn-sm btn-danger btn-icon-only" data-id="${data}"><i class="fa-trash"></i></button>
-					`;
+					return `<button type="button" id="btn-edit" class="btn btn-sm btn-warning btn-icon-only" data-id="${data}"><i class="fa-pencil"></i></button>`;
 				}, width: '1%', className: 'text-nowrap'
 			}
 		]
