@@ -52,3 +52,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 $route['default_controller'] 	= 'auth';
 $route['404_override'] 			= 'errors/page_not_found';
 $route['translate_uri_dashes'] 	= FALSE;
+
+$route['internal-audit/help/(:any)'] = 'help/$1';
+$route['internal-audit/help/(:any)/(:any)'] = 'help/$1/$2';
+$route['internal-audit/help/(:any)/(:any)/(:any)'] = 'help/$1/$2/$3';
+$route['internal-audit/help/(:any)/(:any)/(:any)/(:any)'] = 'help/$1/$2/$3/$4';

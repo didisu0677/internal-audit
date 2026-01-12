@@ -88,7 +88,7 @@ class Audit_assignment extends BE_Controller {
 			$data_risk = get_data('tbl_risk_register','id',$id_risk)->result_array();
 			$kriteria = json_decode($row['kriteria'], true);
 			$data_kriteria = get_data('tbl_kriteria', 'id', $kriteria)->result_array();
-			$internal_control = get_data('tbl_internal_control','id_aktivitas',$row['id_aktivitas'])->result_array();
+			$internal_control = get_data('tbl_internal_control','id_sub_aktivitas',$row['id_sub_aktivitas'])->result_array();
 			$row['filename'] = get_data('tbl_individual_audit_assignment_files','id_audit_assignment',$row['id'])->row_array(); // cek aja minimal kalo ada 1 file
 			$row['internal_control'] = $internal_control;
 			$row['status_finding'] = get_data('tbl_status_finding_control','id',$row['status_finding'])->row_array()['description'] ?? '';
@@ -98,7 +98,6 @@ class Audit_assignment extends BE_Controller {
 			$row_data['risk'] = $data_risk;
 			$clean_data[] = $row_data;
 		}
-		
 		render($clean_data,'json');
 	}
 

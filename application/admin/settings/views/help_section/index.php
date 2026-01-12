@@ -19,7 +19,7 @@
 				th('type','','data-content="type"');
 				th('name','','data-content="name"');
 				th('description','','data-content="description"');
-				th('attachment','','data-content="file_attachment"');
+				// th('attachment','','data-content="file_attachment"');
 				th('link','','data-content="link"');
 				th(lang('aktif').'?','text-center','data-content="is_active" data-type="boolean"');
 				th('&nbsp;','','width="30" data-content="action_button"');
@@ -33,11 +33,11 @@ modal_open('modal-form','','modal-lg','data-openCallback="formOpen"');
 			col_init(3,9);
 			input('hidden','id','id');
 			select2('Type','type','required', $type,'key','value');
-
+			
 			input('text', 'Name', 'name', 'required');
 			textarea('Description', 'description');
-			fileupload('File Attachment', 'file_attachment', '', '');
-			input('text', 'Link', 'link');
+			input('text', 'Link Youtube', 'link', 'required');
+			// fileupload('File Attachment', 'file_attachment', '', '');
 			toggle(lang('aktif').'?','is_active');
 			form_button(lang('simpan'),lang('batal'));
 		form_close();
@@ -46,6 +46,16 @@ modal_close();
 ?>
 
 <script>
+
+	// $(document).on('click', '.type', function() {
+	// 	var value = $(this).val();  // Get selected value
+	// 	var text = $(this).find('option:selected').text();  // Get selected text
+
+	// 	console.log('aaa');
+	// 	console.log(type);
+	// 	console.log(text);
+		
+	// });
 
 	// $('#id_department1').change(function(){
 	// 	getSection();

@@ -1,5 +1,7 @@
 <?php
 header('X-Frame-Options: SAMEORIGIN');
+require __DIR__ . '/vendor/autoload.php';
+
 /**
  * CodeIgniter
  *
