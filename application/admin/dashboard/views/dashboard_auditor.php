@@ -276,6 +276,7 @@
   let riskControlPie = null;
   let riskControlBar = null;
   let questionerGauge = null;
+  let questionerBar = null;
 
 
   $(document).ready(function () {
@@ -955,10 +956,22 @@ function generateCapaPlanProgress() {
   }
 
   function generateQuestionerGauge() {
+    let tahun =  $('#year').val();
     $.ajax({
       url: base_url + 'dashboard/get_data_questioner_gauge',
       type: 'post',
+      data: {
+        year: tahun
+      },
       success: function (res) {
+        // Destroy existing chart instances before creating new ones
+        if (questionerGauge) {
+          questionerGauge.destroy();
+        }
+        if (questionerBar) {
+          questionerBar.destroy();
+        }
+
         const ctx = document.getElementById('question_gauge').getContext('2d');
 
         let value = parseFloat(res.total_average) ;
@@ -978,7 +991,7 @@ function generateCapaPlanProgress() {
           txtClass = 'text-success';
         }
 
-        new Chart(ctx, {
+        questionerGauge = new Chart(ctx, {
           type: 'doughnut',
           data: {
             datasets: [{
@@ -1043,7 +1056,7 @@ function generateCapaPlanProgress() {
           else return '#4caf50';
         });
 
-        new Chart(ctxBar, {
+        questionerBar = new Chart(ctxBar, {
           type: 'bar',
           data: {
             labels: labels, 
