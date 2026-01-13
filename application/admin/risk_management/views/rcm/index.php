@@ -184,8 +184,9 @@ async function formOpen() {
 
 	$('#id_rk').val(response.id_risk_control);
 	$('#result tbody').html('');
-	$('#result2 tbody').html('')
-	$('#result3 tbody').html('')
+	$('#result2 tbody').html('');
+	$('#result3 tbody').html('');
+
 	if(typeof response.id != 'undefined') {
 		bobot = response.bobot;
 		$('total_score').val(response.total_score);
@@ -200,7 +201,6 @@ async function formOpen() {
 
 		for (const v of response.risk) {
 			detail = await get_detail(response.id_risk_control, v.id);
-			console.log(detail);
 			add_itemrisk();
 			let f = $('#result2 tbody tr').last();
 			f.find('.id_risk').val(v.id);
@@ -234,8 +234,28 @@ $(document).on('click','.btn-add-riskitem',function(){
 	add_itemrisk();
 });
 
+// $(document).on('click','.btn-removerisk',function(){
+// 	$(this).closest('tr').remove();
+// });
+
+
 $(document).on('click','.btn-removerisk',function(){
-	$(this).closest('tr').remove();
+	let $row = $(this).closest('tr');
+	let id_section = $('#id_section').val();
+	let id_sub_aktivitas = $('#id_aktivitas').val();
+	let id_risk = $row.find('.id_risk').val();
+
+	$.ajax({
+		url: base_url + 'risk_management/rcm/delete_risk',
+		type: 'post',
+		data: {
+			id_section:id_section, id_sub_aktivitas:id_sub_aktivitas, id_risk:id_risk
+		},
+		success: function(res){
+			$row.remove();
+			cAlert.open(res.message, res.status);
+		}
+	})
 });
 
 function add_itemrisk() {

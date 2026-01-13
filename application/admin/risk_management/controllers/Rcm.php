@@ -665,4 +665,43 @@ class Rcm extends BE_Controller {
 		])->row_array();
 		render($data,'json');
 	}
+
+	function delete_risk(){
+		$id_section = $this->input->post('id_section');
+		$id_sub_aktivitas = $this->input->post('id_sub_aktivitas');
+		$id_risk = post('id_risk');
+		
+		foreach($id_section as $sec){
+			foreach($id_sub_aktivitas as $akt){
+				$data = get_data('tbl_rcm',[
+					'where' => [
+						'id_section' => $sec,
+						'id_sub_aktivitas' => $akt,
+					]
+				])->row_array();
+
+				$risk_control = get_data('tbl_risk_control','id',$data['id_risk_control'])->row_array();
+				$existing_risks = json_decode($risk_control['id_risk'], true);
+				if(($key = array_search($id_risk, $existing_risks)) !== false) {
+					unset($existing_risks[$key]);
+				}
+				$update = update_data('tbl_risk_control',['id_risk' => json_encode(array_values($existing_risks))],['id' => $data['id_risk_control']]);
+				if($update){
+					$delete= get_data('tbl_risk_control_detail', [
+						'where' => [
+							'id_risk_control' => $data['id_risk_control'],
+							'id_risk' => $id_risk
+						]
+					])->row_array();
+					if($delete){
+						delete_data('tbl_risk_control_detail','id',$delete['id']);
+					}
+				}
+			}
+		}
+		render([
+			'status' => 'success',
+			'message' => 'Risk berhasil dihapus dari RCM'
+		],'json');
+	}
 }
