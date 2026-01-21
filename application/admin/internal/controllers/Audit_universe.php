@@ -172,16 +172,13 @@ class Audit_universe extends BE_Controller {
 				]
 			])->row_array();
 			if($audit_universe){
-				$id_risk = json_decode($audit_universe['id_risk'], true);
-				
-				foreach($id_risk as $id){
 					$risk = get_data('tbl_risk_register a',[
 						'select' => 'a.*, b.id as id_bobot, b.status_audit, b.description',
 						'join' => [
 							'tbl_bobot_status_audit b on a.bobot = b.id'
 						],
 						'where' => [
-							'a.id' => $id
+							'a.id' => $row
 						]
 					])->row_array();
 					$start_date = null;
@@ -211,10 +208,7 @@ class Audit_universe extends BE_Controller {
 						'id_audit_plan_group' => $id_group['id'],
 					];
 					save_data('tbl_annual_audit_plan', $data_audit_plan);
-
-				}
 			}
-		
 		}
 		render([
 			'status' => 'success',
