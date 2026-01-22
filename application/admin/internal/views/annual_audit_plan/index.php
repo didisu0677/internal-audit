@@ -177,6 +177,7 @@
 																<table class="table table-hover mb-0">
 																	<thead class="bg-light">
 																		<tr>
+																			<th></th>
 																			<th class="border-0 text-muted small">Aktivitas</th>
 																			<th class="border-0 text-muted small">Audit Area</th>
 																			<th class="border-0 text-muted small">Resiko</th>
@@ -197,12 +198,13 @@
 																			$count = count($detail['aktivitas']);
 																			foreach($detail['aktivitas'] as $i => $activity) : ?>
 																			<tr>
+																				<td class="align-middle text-nowrap" width="1px"><button class="btn btn-sm btn-danger btn-icon-only btn-delete-plan" data-id_plan="<?=$activity['id_audit_plan']?>">X</button></td>
 																				<td class="align-middle text-nowrap" width="1px"><?= $activity['aktivitas'] ?></td>
 																				<td class="align-middle text-nowrap" width="1px"><?= $activity['sub_aktivitas'] ?></td>
 																				<td class="align-middle text-nowrap" width="1px">
 																					<div class="d-flex flex-wrap">
 																						<?php foreach($activity['risk'] as $risk) : ?>
-																							<span class="badge badge-light border mr-1 mb-1 p-2"><?=$risk['risk']?></span>
+																							<span class="badge badge-light border mr-1 mb-1 p-2"><?=$risk['risk']?> - <?=$risk['bobot_text']?></span>
 																						<?php endforeach ?>
 																					</div>
 																				</td>
@@ -710,7 +712,6 @@
 				calculateTotalExpenseEst();
 			}
 		});
-
 		
 		// Add activity row
 		$(document).on('click','#add-activity', function() {
@@ -957,6 +958,27 @@
 			row.find('.end-date').val('');
 		}
 	});
+	let temp_id_plan;
+	$(document).on('click', '.btn-delete-plan', function(){
+		temp_id_plan = $(this).data('id_plan');
+		cConfirm.open('Are you sure you want to delete this audit plan?', 'handle_delete_plan');
+	});
+
+		function handle_delete_plan(){
+			$.ajax({
+				url: base_url + 'internal/annual_audit_plan/deletePlan',
+				type: 'post',
+				data: {id_plan:temp_id_plan},
+				dataType: 'json',
+				success: function(res){
+					if(res.status == 'success') {
+						cAlert.open('Audit plan deleted successfully.', 'success', 'reloadPage');
+					} else {
+						cAlert.open('Failed to delete audit plan.', 'error');
+					}
+				}
+			})
+		}
 
 
 	function confirmCancel(){

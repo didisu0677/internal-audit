@@ -73,7 +73,16 @@ class Annual_audit_plan extends BE_Controller {
 			$id_risk = json_decode($v['id_risk'], true);
 			if(is_array($id_risk)){
 				foreach($id_risk as $id){
-					$risk = get_data('tbl_risk_register', 'id', $id)->row_array();
+					$risk = get_data('tbl_risk_register rr', [
+					'select' => 'rr.*, bsa.bobot as bobot_text, bsa.status_audit, bsa.description',
+					'join' =>[
+						'tbl_risk_control_detail rcd on rr.id = rcd.id_risk',
+						'tbl_bobot_status_audit bsa on rr.bobot = bsa.id'
+					],
+					'where' => [
+							'rr.id' => $id
+						]
+					])->row_array();
 					if($risk){
 						$data_clean[$v['year']][$v['label_department']]['data']['aktivitas'][$lastIndex]['risk'][] = $risk;
 					}
@@ -315,6 +324,23 @@ class Annual_audit_plan extends BE_Controller {
 				'message' => 'Data berhasil disimpan'
 			];
 		
+		render($response, 'json');
+	}
+
+	function deletePlan(){
+		$id_plan = post('id_plan');
+		$delete = delete_data('tbl_annual_audit_plan', 'id', $id_plan);
+		if($delete){
+			$response = [
+				'status' => 'success',
+				'message' => 'Plan berhasil dihapus'
+			];
+		}else{
+			$response = [
+				'status' => 'error',
+				'message' => 'Plan gagal dihapus'
+			];
+		}
 		render($response, 'json');
 	}
 

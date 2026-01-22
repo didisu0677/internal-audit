@@ -2300,7 +2300,7 @@ function get_active_user(){
 
 function get_detail_all_audit_universe(){
     $data = get_data('tbl_audit_universe au', [
-        'select' => 'au.id, concat(a.aktivitas, " - " ,sa.sub_aktivitas, " - ", rr.risk, " - ", bsa.bobot) as val',
+        'select' => 'au.id, concat(mas.section_name, " - ", a.aktivitas, " - " ,sa.sub_aktivitas, " - ", rr.risk, " - ", bsa.bobot) as val',
         'join' => [
             'tbl_rcm rcm on au.id_rcm = rcm.id',
             'tbl_m_audit_section mas on rcm.id_section = mas.id',
