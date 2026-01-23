@@ -140,4 +140,67 @@ class Cron extends MY_Controller {
 		    }
         }
 	}
+
+    function sync_employee_auditee()
+    {
+        set_time_limit(-1);
+        ini_set('memory_limit', '-1');
+        $apiDB = $this->load->database('api', TRUE);
+
+        // Ambil hanya golongan tertentu
+        $data_api = $apiDB
+            ->where_not_in('golongan', ['02', '03', '04', '06', '06F', '07', '07F', 'FACT10', 'FACT20'])
+            ->get('raw_employee')
+            ->result_array();
+
+        if (empty($data_api)) {
+            return;
+        }
+       
+        $count = 0;
+        foreach ($data_api as $v) {
+            $user = get_data('tbl_user', 'kode', $v['nip'])->row_array();
+
+            // ==========================
+            // CASE: USER SUDAH ADA
+            // ==========================
+            if ($user) {
+                if (!empty($v['tanggal_keluar'])) {
+                    update_data('tbl_user', [
+                        'is_active' => 0
+                    ], 'kode', $v['nip']);
+                }
+            }
+
+            if (!empty($v['tanggal_keluar'])) {
+                continue; // jangan insert kalau sudah keluar
+            }
+            
+            $insert = [
+                'id'        => $user['id'] ?? null,
+                'id_group'  => 38,
+                'kode'      => $v['nip'],
+                'nama'      => $v['nama'] ?? '',
+                'username'  => $v['nip'],
+                'password'  => password_hash('p455w0rd', PASSWORD_DEFAULT),
+                'email'     => $v['email'] ?? null,
+                'is_active' => 1
+            ];
+
+            $id_user = save_data('tbl_user', $insert);
+            $cek = get_data('tbl_auditee', 'id_user', $id_user['id'])->row_array();
+            $auditee = [
+                    'id'        => $cek['id'] ?? null,
+                    'id_user'   => $id_user['id'],
+                    'nip'       => $v['nip'],
+                    'nama'      => $v['nama'],
+                    'email'     => $v['email'] ?? null,
+                    'is_active' => 1
+                ];
+            save_data('tbl_auditee', $auditee);
+            $count++;              
+            
+        }
+        echo "Total new auditee added: " . $count;
+    }
 }
