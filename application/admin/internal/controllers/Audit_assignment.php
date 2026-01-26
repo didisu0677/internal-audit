@@ -434,25 +434,13 @@ class Audit_assignment extends BE_Controller {
 
 	function get_detail_kriteria($input){
 		$kriteria = [];
-		foreach($input as $id){
-			$detail = get_data('tbl_kriteria', 'id', $id)->row_array()['detail'];
-	        $kriteria[] = '<p class="bg-light p-2 rounded">' . $detail . '</p>';
-			// $kriteria[] = get_data('tbl_kriteria', 'id', $id)->row_array()['detail'];
+
+		foreach($input as $row){
+			$kriteria[] = '<p class="bg-light p-2 rounded">' . $row['detail'] . '</p>';
 		}
-		$string = implode(' ', $kriteria);
-		return $string;
+		return implode(' ', $kriteria);
 	}
 
-	function get_kriteria_string(){
-		$input = $this->input->post('data');
-		foreach($input as $id){
-			$detail = get_data('tbl_kriteria', 'id', $id)->row_array()['detail'];
-        	$kriteria[] = '<p class="bg-light p-2 rounded">' . $detail . '</p>';
-			// $kriteria[] = get_data('tbl_kriteria', 'id', $id)->row_array()['detail'];
-		}
-		$string = implode(' ', $kriteria);
-		render ($string,'json');
-	}
 
 	function get_detail_assignment(){
 		$input = post('id');
