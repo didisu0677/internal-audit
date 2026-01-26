@@ -80,7 +80,7 @@ class Audit_assignment extends BE_Controller {
 			'where' => [
 				'a.id_audit_plan_group' => $id
 			],
-			'order_by' => 'dep.urutan'
+			'order_by' => 'sa.sub_aktivitas'
 		])->result_array();
 		$clean_data = [];
 		foreach($query as $row) {
