@@ -80,6 +80,11 @@
             <h6 class="font-weight-bold text-dark mb-0">STATUS FINDING CONTROL</h6>
           </div>
           <div class="row">
+            <div class="col-md-12">
+              <div id="finding_legend" class="mb-3" style="display: flex; justify-content: center; flex-wrap: wrap; gap: 8px;"></div>
+            </div>
+          </div>
+          <div class="row">
             <div class="col-md-8">
               <div style="overflow-x:auto; width:100%;">
                 <div style="width: max-content; min-width:100%;">
@@ -87,8 +92,8 @@
                 </div>
               </div>
             </div>
-            <div class="col-md-4">
-              <div style="height: 200px;">
+            <div class="col-md-4 d-flex align-items-center">
+              <div style="height: 200px; width: 100%;">
                 <canvas id="findingPie"></canvas>
               </div>
             </div>
@@ -165,6 +170,11 @@
             <h6 class="font-weight-bold text-dark mb-0">RISK MONITORING</h6>
           </div>
           <div class="row">
+            <div class="col-md-12">
+              <div id="risk_legend" class="mb-3" style="display: flex; justify-content: center; flex-wrap: wrap; gap: 8px;"></div>
+            </div>
+          </div>
+          <div class="row">
             <div class="col-md-8">
               <div style="overflow-x:auto; width:100%;">
                 <div style="width: max-content; min-width:100%;">
@@ -172,8 +182,8 @@
                 </div>
               </div>
             </div>
-            <div class="col-md-4">
-              <div style="height: 200px;">
+            <div class="col-md-4 d-flex align-items-center">
+              <div style="height: 200px; width: 100%;">
                 <canvas id="riskPie"></canvas>
               </div>
             </div>
@@ -749,7 +759,7 @@ function generateCapaPlanProgress() {
                   return pct ? pct.toFixed(1) + '%' : '';
                 }
               },
-              legend: { position: 'top' },
+              legend: { display: false },
               tooltip: {
                 callbacks: {
                   label: (ctx) => {
@@ -759,8 +769,7 @@ function generateCapaPlanProgress() {
                     return `${ctx.dataset.label} : ${ctx.raw} (${pct}%)`;
                   }
                 }
-              },
-              legend: { position: 'top' }
+              }
             },
             scales: {
               x: {
@@ -782,6 +791,20 @@ function generateCapaPlanProgress() {
             }
           }
         });
+
+        // Generate custom legend for Finding Control Bar
+        let findingLegendHTML = '';
+        const findingLabels = ['Implementasi tidak sesuai', 'Design kurang efektif', 'Design tidak ditemukan'];
+        const findingColors = [COLOR_MAP[0], COLOR_MAP[1], COLOR_MAP[2]];
+        findingLabels.forEach((label, i) => {
+          findingLegendHTML += `
+            <div style="display: flex; align-items: center; padding: 6px 12px; background: #f8f9fa; border-radius: 8px; font-size: 11px;">
+              <div style="width: 16px; height: 16px; background: ${findingColors[i]}; border-radius: 4px; margin-right: 8px;"></div>
+              <span style="font-weight: 500; color: #495057; white-space: nowrap;">${label}</span>
+            </div>
+          `;
+        });
+        $('#finding_legend').html(findingLegendHTML);
       }
     })
   }
@@ -905,7 +928,7 @@ function generateCapaPlanProgress() {
           options: {
             responsive: false,
             plugins: {
-              legend: { position: 'top' },
+              legend: { display: false },
               datalabels: {
                 anchor: 'center',
                 align: 'center',
@@ -951,6 +974,20 @@ function generateCapaPlanProgress() {
             }
           }
         });
+
+        // Generate custom legend for Risk Monitoring Bar
+        let riskLegendHTML = '';
+        const riskLabels = ['Improvement', 'Critical', 'Major', 'Moderate', 'Minor'];
+        const riskColors = [COLOR_MAP[3], COLOR_MAP[4], COLOR_MAP[5], COLOR_MAP[6], COLOR_MAP[7]];
+        riskLabels.forEach((label, i) => {
+          riskLegendHTML += `
+            <div style="display: flex; align-items: center; padding: 6px 12px; background: #f8f9fa; border-radius: 8px; font-size: 11px;">
+              <div style="width: 16px; height: 16px; background: ${riskColors[i]}; border-radius: 4px; margin-right: 8px;"></div>
+              <span style="font-weight: 500; color: #495057; white-space: nowrap;">${label}</span>
+            </div>
+          `;
+        });
+        $('#risk_legend').html(riskLegendHTML);
       }
     })
   }
