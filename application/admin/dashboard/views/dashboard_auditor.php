@@ -113,7 +113,7 @@
             </div>
           </div>
           <h6 class="font-weight-bold text-dark mb-3">QUESTIONER RESULT</h6>
-          <div style="overflow-x:auto; width:100%;">
+          <div style="width:100%;">
             <div style="width: max-content; min-width:100%;">
               <canvas id="question_gauge" style="height:100px;"></canvas>
               <h2 class="display-4 font-weight-bold" id="question_result"></h2>
