@@ -794,5 +794,19 @@ class Audit_assignment extends BE_Controller {
 		return trim($html);
 	}
 
+	function get_kriteria_string() {
+		$data = post('data');
+		// Pastikan data berupa array id kriteria
+		if (!is_array($data)) {
+			$data = json_decode($data, true);
+		}
+		if (!$data || !is_array($data)) {
+			render('', 'json');
+			return;
+		}
+		$result = get_data('tbl_kriteria', 'id', $data)->result_array();
+		$string = $this->get_detail_kriteria($result);
+		render($string, 'json');
+	}
 
 }
