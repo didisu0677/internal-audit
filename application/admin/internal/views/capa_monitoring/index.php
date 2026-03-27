@@ -1,3 +1,8 @@
+<style>
+	.filter-panel.active {
+    width: 50% !important;
+}
+</style>
 <div class="content-header">
 	<div class="main-container position-relative">
 		<div class="header-info">

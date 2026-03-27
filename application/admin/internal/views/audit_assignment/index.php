@@ -188,7 +188,7 @@ modal_open('modal-status-finding','Edit Status Finding','modal-md');
 modal_close();
 
 
-modal_open('modal-kriteria','Edit Kriteria','modal-md');
+modal_open('modal-kriteria','Edit Kriteria','modal-lg');
 	modal_body();
 		col_init(3,9);
 		input('hidden','id','id');
