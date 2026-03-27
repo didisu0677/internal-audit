@@ -169,6 +169,10 @@ $(document).ready(function () {
 	$('#form')[0].reset();
 });	
 
+$(document).on('click', '.btn-export', function(){
+	window.open(base_url + 'risk_management/rcm/export', '_blank');
+});
+
 
 // $(document).on('click','.btn-save',function(){
 // 	$('#form-control').submit();

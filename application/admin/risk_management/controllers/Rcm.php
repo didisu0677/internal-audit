@@ -63,88 +63,95 @@ class Rcm extends BE_Controller {
 	// }
 
 	function data() {
-	$risk_list = [];
-	$control_list = [];
-	$keterangan = [];
+		render(['data' => $this->get_rcm_rows()],'json');
+	}
 
-	$grup = get_data('tbl_rcm a', [
-		'select' => '
-			a.*,
-			b2.section_name as location,
-			b3.section_name as divisi,
-			b4.section_name as department,
-			b5.section_name as section,
-			c.id_aktivitas, c.sub_aktivitas,
-			e.aktivitas
-		',
-		'join' => [
-			'tbl_m_audit_section b on a.id_section = b.id type LEFT',
-			'tbl_m_audit_section b1 on b.level1 = b1.id type LEFT',
-			'tbl_m_audit_section b2 on b.level2 = b2.id type LEFT',
-			'tbl_m_audit_section b3 on b.level3 = b3.id type LEFT',
-			'tbl_m_audit_section b4 on b.level4 = b4.id type LEFT',
-			'tbl_m_audit_section b5 on b.level5 = b5.id type LEFT',
-			'tbl_sub_aktivitas c on a.id_sub_aktivitas = c.id type LEFT',
-			'tbl_aktivitas e on c.id_aktivitas = e.id type LEFT',
-			'tbl_risk_control d on a.id_risk_control = d.id type LEFT',
-		],
-		'order_by' => 'b4.urutan, department, e.aktivitas, c.sub_aktivitas',
-	])->result_array();
-	
-	foreach($grup as $val){
-		// ambil id_risk dari detail
-		$risk_control = get_data('tbl_risk_control a', [
-			'select' => 'b.*, concat(c.risk," - ", d.bobot) as risk , c.keterangan',
+	private function get_rcm_rows($is_export = false) {
+		$risk_list = [];
+		$control_list = [];
+		$keterangan = [];
+
+		$grup = get_data('tbl_rcm a', [
+			'select' => '
+				a.*, 
+				b2.section_name as location,
+				b3.section_name as divisi,
+				b4.section_name as department,
+				b5.section_name as section,
+				c.id_aktivitas, c.sub_aktivitas,
+				e.aktivitas
+			',
 			'join' => [
-				'tbl_risk_control_detail b on a.id = b.id_risk_control',
-				'tbl_risk_register c on b.id_risk = c.id',
-				'tbl_bobot_status_audit d on b.bobot = d.id',
-			],	
-			'where' => [
-				'a.id' => $val['id_risk_control']
-			]
-		])->result_array();
-		
-		foreach($risk_control as $r) {
-			$risk_list[$val['id_risk_control']][] = $r['risk'];
-			$keterangan[$val['id_risk_control']][] = $r['keterangan'];
-		}
-
-		// ambil internal control
-		$control = get_data('tbl_internal_control a', [
-			'select' => 'a.id_internal_control as id,b.internal_control',
-			'join' => 'tbl_m_internal_control b on a.id_internal_control = b.id',
-			'where' => [
-				'a.is_active' => 1,
-				'a.id_aktivitas' => $val['id_aktivitas'],
-				'a.id_sub_aktivitas' => $val['id_sub_aktivitas'],
-			]
+				'tbl_m_audit_section b on a.id_section = b.id type LEFT',
+				'tbl_m_audit_section b1 on b.level1 = b1.id type LEFT',
+				'tbl_m_audit_section b2 on b.level2 = b2.id type LEFT',
+				'tbl_m_audit_section b3 on b.level3 = b3.id type LEFT',
+				'tbl_m_audit_section b4 on b.level4 = b4.id type LEFT',
+				'tbl_m_audit_section b5 on b.level5 = b5.id type LEFT',
+				'tbl_sub_aktivitas c on a.id_sub_aktivitas = c.id type LEFT',
+				'tbl_aktivitas e on c.id_aktivitas = e.id type LEFT',
+				'tbl_risk_control d on a.id_risk_control = d.id type LEFT',
+			],
+			'order_by' => 'b4.urutan, department, e.aktivitas, c.sub_aktivitas',
 		])->result_array();
 
-		foreach($control as $v1) {
-			$control_list[$val['id']][] = $v1['internal_control'];
+		foreach($grup as $val) {
+			$risk_control = get_data('tbl_risk_control a', [
+				'select' => 'b.*, concat(c.risk," - ", d.bobot) as risk, c.keterangan',
+				'join' => [
+					'tbl_risk_control_detail b on a.id = b.id_risk_control',
+					'tbl_risk_register c on b.id_risk = c.id',
+					'tbl_bobot_status_audit d on b.bobot = d.id',
+				],
+				'where' => [
+					'a.id' => $val['id_risk_control']
+				]
+			])->result_array();
+
+			foreach($risk_control as $risk_item) {
+				$risk_list[$val['id_risk_control']][] = $risk_item['risk'];
+				$keterangan[$val['id_risk_control']][] = $risk_item['keterangan'];
+			}
+
+			$control = get_data('tbl_internal_control a', [
+				'select' => 'a.id_internal_control as id,b.internal_control',
+				'join' => 'tbl_m_internal_control b on a.id_internal_control = b.id',
+				'where' => [
+					'a.is_active' => 1,
+					'a.id_aktivitas' => $val['id_aktivitas'],
+					'a.id_sub_aktivitas' => $val['id_sub_aktivitas'],
+				]
+			])->result_array();
+
+			foreach($control as $control_item) {
+				$control_list[$val['id']][] = $control_item['internal_control'];
+			}
 		}
-	}
 
-	$rows = [];
-	foreach($grup as $m0) {
-		$rows[] = [
-			'location'        => $m0['location'],
-			'divisi'          => $m0['divisi'],
-			'department'      => $m0['department'],
-			'section'         => $m0['section'],
-			'aktivitas'       => $m0['aktivitas'],
-			'sub_aktivitas'   => $m0['sub_aktivitas'],
-			'risk'            => isset($risk_list[$m0['id_risk_control']]) ? $this->bg_array($risk_list[$m0['id_risk_control']]) : '',
-			'internal_control'=> isset($control_list[$m0['id']]) ? $this->bg_array($control_list[$m0['id']]) : '',
-			'keterangan'      => isset($keterangan[$m0['id_risk_control']]) ? $this->bg_array($keterangan[$m0['id_risk_control']]) : '',
-			'aksi'            => '<button class="btn btn-warning btn-sm btn-input btn-icon-only" data-key="edit" data-id="'.$m0['id'].'"><i class="fa-edit"></i></button>
-			                       <button class="btn btn-danger btn-sm btn-delete btn-icon-only" data-key="delete" data-id="'.$m0['id'].'"><i class="fa-trash-alt"></i></button>'
-		];
-	}
+		$rows = [];
+		foreach($grup as $item) {
+			$row = [
+				'location' => $item['location'],
+				'divisi' => $item['divisi'],
+				'department' => $item['department'],
+				'section' => $item['section'],
+				'aktivitas' => $item['aktivitas'],
+				'sub_aktivitas' => $item['sub_aktivitas'],
+				'risk' => isset($risk_list[$item['id_risk_control']]) ? $this->format_rcm_items($risk_list[$item['id_risk_control']], $is_export) : '',
+				'internal_control' => isset($control_list[$item['id']]) ? $this->format_rcm_items($control_list[$item['id']], $is_export) : '',
+				'keterangan' => isset($keterangan[$item['id_risk_control']]) ? $this->format_rcm_items($keterangan[$item['id_risk_control']], $is_export) : '',
+			];
 
-	render(['data' => $rows],'json');
-}
+			if(!$is_export) {
+				$row['aksi'] = '<button class="btn btn-warning btn-sm btn-input btn-icon-only" data-key="edit" data-id="'.$item['id'].'"><i class="fa-edit"></i></button>
+				               <button class="btn btn-danger btn-sm btn-delete btn-icon-only" data-key="delete" data-id="'.$item['id'].'"><i class="fa-trash-alt"></i></button>';
+			}
+
+			$rows[] = $row;
+		}
+
+		return $rows;
+	}
 
 
 	function bg_array($arr){
@@ -152,7 +159,15 @@ class Rcm extends BE_Controller {
 		foreach($arr as $v){
 			$html[] = '<p class="bg-light" style="border-radius: 10px; padding:10px">'.$v.'</p>';
 		}
-    	return implode("", $html);
+	    	return implode("", $html);
+	}
+
+	private function format_rcm_items($arr, $is_export = false) {
+		if($is_export) {
+			return implode(' | ', $arr);
+		}
+
+		return $this->bg_array($arr);
 	}
 
 	function get_data() {
@@ -593,8 +608,18 @@ class Rcm extends BE_Controller {
 
 	function export() {
 		ini_set('memory_limit', '-1');
-		$arr = ['parent_id' => 'Parent Id','id_company' => 'Id Company','id_location' => 'Id Location','id_divisi' => 'Id Divisi','id_department' => 'Id Department','id_section' => 'Id Section','aktivitas' => 'aktivitas','audit_area' => 'Audit Area','type_aktivitas' => 'Type aktivitas','is_active' => 'Aktif'];
-		$data = get_data('tbl_m_aktivitas')->result_array();
+		$arr = [
+			'location' => 'Lokasi',
+			'divisi' => 'Divisi',
+			'department' => 'Department',
+			'section' => 'Section',
+			'aktivitas' => 'Aktivitas',
+			'sub_aktivitas' => 'Audit Area',
+			'risk' => 'Risk',
+			'internal_control' => 'Internal Control',
+			'keterangan' => 'Keterangan',
+		];
+		$data = $this->get_rcm_rows(true);
 		$config = [
 			'title' => 'data_rcm',
 			'data' => $data,
