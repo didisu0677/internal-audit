@@ -127,6 +127,9 @@ modal_close();
 	function formOpen() {
 		$('#aktivitas_id_data').val('');
 		$('#id_aktivitas').val(0);
+		$('#id_sub_aktivitas').val('');
+		$('#id_audit_area').val('');
+		$('#audit_area').val('');
 		$('#aktivitas_id_data').prop('readonly', false);
 		$('#audit_area').prop('readonly', false);
 		is_edit = true;

@@ -69,19 +69,21 @@ class Control_register extends BE_Controller {
 		$penerbit = post('penerbit');
 		$tgl_pnp = post('tgl_pnp');
 
-
 		if(!empty($ctrl_existing)) {
 			$response = save_data('tbl_aktivitas',$data_a,post(':validation'));
 			if($response['status'] == 'success') {
-
-				$sub = save_data('tbl_sub_aktivitas',[
-					'id' => $data['id_sub_aktivitas'],
-					'id_aktivitas' => $response['id'],
-					'sub_aktivitas' => $data['audit_area'],
-					'is_active' => 1
-				]);
+				if(empty($data['id_sub_aktivitas'])){
+					$sub = insert_data('tbl_sub_aktivitas',[
+						'id_aktivitas' => $response['id'],
+						'sub_aktivitas' => $data['audit_area'],
+						'is_active' => 1
+					]);
+				}else{
+					$sub = [
+						'id' => $data['id_sub_aktivitas']
+					];
+				}
 			}
-			
 			
 			$res_vc = [];
 			if(is_array($ctrl_existing)){

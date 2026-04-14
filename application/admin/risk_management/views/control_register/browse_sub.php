@@ -32,7 +32,8 @@ function rmData() {
 			// console.log(response);
 			// console.log(idRm);
 			// get_detail($('#info1').text());
-			
+						
+			window.opener.document.getElementById('id_sub_aktivitas').value = response.id_sub_aktivitas;
 			window.opener.document.getElementById('id_audit_area').value = response.id_sub_aktivitas;
 			window.opener.document.getElementById('audit_area').value = response.sub_aktivitas;
 			window.opener.document.getElementById('audit_area').readOnly = true;
