@@ -444,7 +444,7 @@ class Audit_assignment extends BE_Controller {
 		$kriteria = [];
 
 		foreach($input as $row){
-			$kriteria[] = '<p class="bg-light p-2 rounded">' . $row['detail'] . '</p>';
+			$kriteria[] = '<p class="bg-light p-2 rounded" data-description="'.$row['detail'].'">' . $row['reff_name'] . '</p>';
 		}
 		return implode(' ', $kriteria);
 	}

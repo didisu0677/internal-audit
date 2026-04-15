@@ -781,6 +781,12 @@ modal_close();
 						});
 					}
 					tbody.html(html);
+
+					// Init tooltips for kriteria descriptions
+					tbody.find('[data-description]').each(function(){
+						$(this).attr('title', $(this).data('description'))
+							   .tooltip({ placement: 'top', trigger: 'hover', container: 'body' });
+					});
 				
 					// Update counter with number of assignments loaded
 					badge.removeClass('badge-secondary').addClass('badge-info').text(res.length + ' item' + (res.length!==1?'s':''));
