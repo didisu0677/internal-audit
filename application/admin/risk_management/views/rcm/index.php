@@ -280,19 +280,21 @@ function add_itemrisk() {
 
 
 $(document).on('keyup','.score_dampak',function(){
-	const dampak = $('#score_dampak'+(index1-1)).val();
-	const kemungkinan = $('#score_kemungkinan'+(index1-1)).val();
+	var $row = $(this).closest('tr');
+	const dampak = $(this).val();
+	const kemungkinan = $row.find('.score_kemungkinan').val();
 	const score = getScore(dampak, kemungkinan);
 	console.log(score);
-	$('#bobot_risk'+(index1-1)).val(score).trigger('change');
+	$row.find('.bobot_risk').val(score).trigger('change');
 });
 
 $(document).on('keyup','.score_kemungkinan',function(){
-	const dampak = $('#score_dampak'+(index1-1)).val();
-	const kemungkinan = $('#score_kemungkinan'+(index1-1)).val();
+	var $row = $(this).closest('tr');
+	const dampak = $row.find('.score_dampak').val();
+	const kemungkinan = $(this).val();
 	const score = getScore(dampak, kemungkinan);
 	console.log(score);
-	$('#bobot_risk'+(index1-1)).val(score).trigger('change');
+	$row.find('.bobot_risk').val(score).trigger('change');
 });
 
 
