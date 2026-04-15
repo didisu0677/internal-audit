@@ -705,6 +705,10 @@ class Rcm extends BE_Controller {
 					]
 				])->row_array();
 
+				if(empty($data)){
+					continue;
+				}
+				
 				$risk_control = get_data('tbl_risk_control','id',$data['id_risk_control'])->row_array();
 				$existing_risks = json_decode($risk_control['id_risk'], true);
 				if(($key = array_search($id_risk, $existing_risks)) !== false) {
