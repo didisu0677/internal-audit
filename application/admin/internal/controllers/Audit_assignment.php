@@ -64,7 +64,7 @@ class Audit_assignment extends BE_Controller {
 	function data() {
 		$id = post('id');
 		$query = get_data('tbl_annual_audit_plan a', [
-			'select' => 'aa.id, aa.kriteria, aa.pengujian, aa.hasil_review, aa.unconfirmity, aa.dampak, aa.root_cause, aa.recomendation, aa.finding, aa.bobot_finding, aa.status_finding, aa.status, ag.year, a.id as id_audit_plan, a.id_audit_plan_group, dep.section_name as department,ak.id as id_aktivitas, ak.aktivitas, sa.id as id_sub_aktivitas, sa.sub_aktivitas, rc.id_risk, s.section_name as section',
+			'select' => 'aa.id, aa.kriteria, aa.pengujian, aa.hasil_review, aa.unconfirmity, aa.dampak, aa.root_cause, aa.recomendation, aa.finding, aa.bobot_dampak, aa.bobot_kemungkinan, aa.bobot_finding, aa.status_finding, aa.status, ag.year, a.id as id_audit_plan, a.id_audit_plan_group, dep.section_name as department,ak.id as id_aktivitas, ak.aktivitas, sa.id as id_sub_aktivitas, sa.sub_aktivitas, rc.id_risk, s.section_name as section',
 			'join' => [
 				'tbl_audit_universe u on a.id_universe = u.id', 
 				'tbl_rcm rcm on u.id_rcm = rcm.id',
@@ -82,6 +82,7 @@ class Audit_assignment extends BE_Controller {
 			],
 			'order_by' => 'sa.sub_aktivitas'
 		])->result_array();
+
 		$clean_data = [];
 		foreach($query as $row) {
 			$id_risk = json_decode($row['id_risk'],true);
@@ -92,7 +93,6 @@ class Audit_assignment extends BE_Controller {
 			$row['filename'] = get_data('tbl_individual_audit_assignment_files','id_audit_assignment',$row['id'])->row_array(); // cek aja minimal kalo ada 1 file
 			$row['internal_control'] = $internal_control;
 			$row['status_finding'] = get_data('tbl_status_finding_control','id',$row['status_finding'])->row_array()['description'] ?? '';
-			$row['bobot_finding'] = get_data('tbl_bobot_status_audit','id',$row['bobot_finding'])->row_array()['bobot'] ?? '';
 			$row['kriteria'] = $this->get_detail_kriteria($data_kriteria);
 			$row_data = $row;
 			$row_data['risk'] = $data_risk;
@@ -127,18 +127,26 @@ class Audit_assignment extends BE_Controller {
 	}
 
 	function save() {
-		// $response = save_data('tbl_individual_audit_assignment',post(),post(':validation'));
-		// render($response,'json');
 		$id_assignment = post('id');
 		$field = post('field');
 		$value = $this->input->post('value');
+		
 		if($field == 'kriteria'){
 			$value = json_encode($value);
 		}
+		
 		$data = [
 			$field => $value
 		];
-
+		
+		if($field == 'bobot_finding'){
+			$value = json_decode($value, true);
+			$data = [
+				'bobot_kemungkinan' => $value['kemungkinan'],
+				'bobot_dampak'		=> $value['dampak'],
+				'bobot_finding'		=> $value['score']
+			];
+		}
 		$resp = update_data('tbl_individual_audit_assignment',$data, 'id', $id_assignment);
 		
 		if($resp){

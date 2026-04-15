@@ -164,8 +164,17 @@ modal_open('modal-bobot','Edit Bobot Finding','modal-md');
 		col_init(3,9);
 		input('hidden','id','id');
 		input('hidden','field_name','field_name');
-		select2('Bobot Finding', 'bobot_finding', 'required', get_list_bobot(), 'id', 'bobot');
-		echo '<div class="form-group row">';
+		input('number', 'Kemungkinan', 'bobot_kemungkinan', 'required','','oninput="if(this.value.length > 0) { this.value = this.value.slice(0,1); if(this.value > 6) this.value = 6; if(this.value < 1) this.value = 1; } previewBobot();"');
+		echo '<div class="form-group row"><div class="col-md-9 offset-md-3"><small class="text-muted"><i class="fas fa-info-circle mr-1"></i>Min 1, Maks 6</small></div></div>';
+		input('number', 'Dampak', 'bobot_dampak', 'required','','oninput="if(this.value.length > 0) { this.value = this.value.slice(0,1); if(this.value > 6) this.value = 6; if(this.value < 1) this.value = 1; } previewBobot();"');
+		echo '<div class="form-group row"><div class="col-md-9 offset-md-3"><small class="text-muted"><i class="fas fa-info-circle mr-1"></i>Min 1, Maks 6</small></div></div>';
+		echo '<div class="form-group row" id="bobot-preview-row" style="display:none">';
+			echo '<label class="col-md-3 col-form-label">Bobot Finding</label>';
+			echo '<div class="col-md-9 d-flex align-items-center">';
+				echo '<span id="bobot-preview-badge" class="badge badge-pill badge-secondary px-3 py-2" style="font-size:0.9rem"></span>';
+			echo '</div>';
+		echo '</div>';
+		echo '<div class="form-group row mt-3">';
 				echo '<div class="col-md-12 text-center">';
 					echo '<button type="button" class="btn btn-primary mr-2" id="btn_simpan">'.lang('simpan').'</button>';
 					echo '<button type="button" class="btn btn-secondary mr-2" id="btn_batal">'.lang('batal').'</button>';
@@ -403,6 +412,7 @@ modal_close();
 			}
 			// Reset Value ketika modal di show
 			$(modalType).find('input, textarea').val('');
+			$('#bobot-preview-row').hide();
 
 			// Reset select biasa (tanpa Select2)
 			$(modalType).find('select:not(.select2)').val('');
@@ -412,7 +422,16 @@ modal_close();
 
 			$(modalType).find('[name="id"]').val(rowId);
 			$(modalType).find('[name="field_name"]').val(field);
-			
+
+			// Pre-fill kemungkinan & dampak jika modal bobot
+			if(field == 'bobot_finding'){
+				const k = $cell.data('kemungkinan');
+				const d = $cell.data('dampak');
+				if(k){ $(modalType).find('[name="bobot_kemungkinan"]').val(k); }
+				if(d){ $(modalType).find('[name="bobot_dampak"]').val(d); }
+				if(k && d){ previewBobot(); }
+			}
+
 			$(modalType).modal('show');
 		});
 
@@ -425,12 +444,16 @@ modal_close();
 			e.preventDefault();
 
 			const modal = $(this).closest('.modal');
-
+			
 			const formData = {
 				id: modal.find('[name="id"]').val(),
 				field: modal.find('[name="field_name"]').val(),
-				value: modal.find('[name="bobot_finding"]').length
-					? modal.find('[name="bobot_finding"]').val()
+				value: modal.is('#modal-bobot')
+					? (function(){
+						const k = modal.find('[name="bobot_kemungkinan"]').val();
+						const d = modal.find('[name="bobot_dampak"]').val();
+						return JSON.stringify({ kemungkinan: k, dampak: d, score: getScore(k, d) });
+					})()
 					: modal.find('[name="status_finding"]').length
 						? modal.find('[name="status_finding"]').val()
 						: modal.find('[name="kriteria[]"]').length
@@ -445,9 +468,12 @@ modal_close();
 				}
 			}
 
-			if(formData.field == 'bobot_finding' && (formData.value == null || formData.value == '')){
-				cAlert.open('Please select Bobot Finding!', 'info');
-				return;
+			if(modal.is('#modal-bobot')){
+				const parsed = JSON.parse(formData.value);
+				if(!parsed.kemungkinan || !parsed.dampak || parsed.score === 'Unknown'){
+					cAlert.open('Isi Kemungkinan dan Dampak dengan nilai 1–6!', 'info');
+					return;
+				}
 			}
 
 			if(formData.field == 'status_finding' && (formData.value == null || formData.value == '')){
@@ -465,7 +491,9 @@ modal_close();
 			if (response.status === 'success') {
 				if(modal.is('#modal-bobot')){
 					cellClass = '.bobot';
-					formData.value = await get_bobot_name(formData.value)
+					const parsed = JSON.parse(formData.value);
+					const bobotName = await get_bobot_name(parsed.score);
+					formData.value = renderBobotBadge(parsed.kemungkinan, parsed.dampak, parsed.score, bobotName);
 				}else if(modal.is('#modal-status-finding')){
 					cellClass = '.status-finding';
 					formData.value = await get_status_finding_name(formData.value)
@@ -736,7 +764,11 @@ modal_close();
 								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="pengujian">${item.pengujian || ''}</td>
 								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="hasil_review">${item.hasil_review || ''}</td>
 								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="finding">${item.finding || ''}</td>
-								<td class="align-middle bobot ${disableClass}" style="width: 300px; min-width: 180px;" data-field="bobot_finding">${item.bobot_finding || ''}</td>
+								<td class="align-middle bobot ${disableClass}" style="width: 300px; min-width: 180px;" data-field="bobot_finding" data-kemungkinan="${item.bobot_kemungkinan || ''}" data-dampak="${item.bobot_dampak || ''}">${
+								item.bobot_finding
+									? renderBobotBadge(item.bobot_kemungkinan || '', item.bobot_dampak || '', getScore(item.bobot_kemungkinan, item.bobot_dampak))
+									: ''
+							}</td>
 								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="unconfirmity">${item.unconfirmity || ''}</td>
 								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="dampak">${item.dampak || ''}</td>
 								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="root_cause">${item.root_cause || ''}</td>
@@ -860,6 +892,34 @@ modal_close();
 			}
 		});
 					
+		function bobotLabel(score){
+			const map = { '4': 'Critical', '3': 'Major', '2': 'Moderate', '1': 'Minor' };
+			return map[String(score)] || score;
+		}
+
+		function renderBobotBadge(kemungkinan, dampak, score, label){
+			const colorMap = { '4': 'danger', '3': 'warning', '2': 'info', '1': 'success' };
+			const color = colorMap[String(score)] || 'secondary';
+			const displayLabel = label || bobotLabel(score);
+			return `<small class="text-muted d-block">Kemungkinan: ${kemungkinan} | Dampak: ${dampak}</small>`
+				 + `<span class="badge badge-${color}">${displayLabel}</span>`;
+		}
+
+		function previewBobot(){
+			const k = $('#modal-bobot [name="bobot_kemungkinan"]').val();
+			const d = $('#modal-bobot [name="bobot_dampak"]').val();
+			if(!k || !d){ $('#bobot-preview-row').hide(); return; }
+			const score = getScore(k, d);
+			if(score === 'Unknown'){ $('#bobot-preview-row').hide(); return; }
+			const colorMap = { '4': 'danger', '3': 'warning', '2': 'info', '1': 'success' };
+			const color = colorMap[score] || 'secondary';
+			$('#bobot-preview-badge')
+				.removeClass('badge-danger badge-warning badge-info badge-success badge-secondary')
+				.addClass('badge-' + color)
+				.text(bobotLabel(score));
+			$('#bobot-preview-row').show();
+		}
+
 		async function get_bobot_name(id){
 			let data = await $.ajax({
 				url: base_url + 'internal/audit_assignment/get_bobot_name',
@@ -880,4 +940,47 @@ modal_close();
 			return status.description || '';
 		}
 	
+const scoreMatrix = {
+  "6,6": "4",
+  "6,5": "4",
+  "6,4": "3",
+  "6,3": "3",
+  "6,2": "2",
+  "6,1": "1",
+  "5,6": "4",
+  "5,5": "3",
+  "5,4": "3",
+  "5,3": "2",
+  "5,2": "2",
+  "5,1": "1",
+  "4,6": "3",
+  "4,5": "3",
+  "4,4": "2",
+  "4,3": "2",
+  "4,2": "2",
+  "4,1": "1",
+  "3,6": "3",
+  "3,5": "2",
+  "3,4": "2",
+  "3,3": "2",
+  "3,2": "1",
+  "3,1": "1",
+  "2,6": "2",
+  "2,5": "2",
+  "2,4": "2",
+  "2,3": "1",
+  "2,2": "1",
+  "2,1": "1",
+  "1,6": "2",
+  "1,5": "1",
+  "1,4": "1",
+  "1,3": "1",
+  "1,2": "1",
+  "1,1": "1",
+};
+
+function getScore(kemungkinan, dampak) {
+  const key = `${kemungkinan},${dampak}`;
+  return scoreMatrix[key] || "Unknown"; // fallback kalau kombinasi tidak terdaftar
+}
 </script>
