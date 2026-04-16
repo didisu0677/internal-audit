@@ -506,6 +506,19 @@ modal_close();
 		closeActiveDepartmentTheater();
 	});
 
+	// When any Bootstrap modal opens, step the overlay behind it so the modal is reachable.
+	// Restore when the modal fully closes.
+	$(document).on('show.bs.modal', '.modal', function() {
+		$('#dept-fs-overlay').css('z-index', 1039);
+		$('#dept-fs-backdrop').css('z-index', 1038);
+	});
+	$(document).on('hidden.bs.modal', '.modal', function() {
+		if ($('#dept-fs-overlay').hasClass('is-open')) {
+			$('#dept-fs-overlay').css('z-index', '');
+			$('#dept-fs-backdrop').css('z-index', '');
+		}
+	});
+
 	$(document).on('keydown', function(e) {
 		if (e.key !== 'Escape') return;
 		if (!$('#dept-fs-overlay').hasClass('is-open')) return;
