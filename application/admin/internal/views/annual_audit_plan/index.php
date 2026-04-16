@@ -315,7 +315,7 @@
 									</div>
 								</div>
 							</div>
-							<h6 class='text-muted mb-3 mt-3'>Surat Tugas</h6>
+							<h6 class='text-muted mb-3 mt-3'>Audit Assignment Letter</h6>
 							<div class='card border-0 shadow-sm'>
 								<div class='card-body p-3'>
 									<select class='form-control form-control-sm mb-2 select2' name='schedule_audit' id='schedule_audit' style='width:100% !important' required>
@@ -422,7 +422,7 @@
 			form_close();
 	modal_close();
 
-	modal_open('mDetailDuration', 'Detail Duration');
+	modal_open('mDetailDuration', 'Detail Duration', 'modal-lg');
 		modal_body();
 			col_init(3,9);
 				echo "
@@ -653,6 +653,85 @@
 		$('#mCompleted').modal('show');
 	})
 
+	function parseInputDate(value) {
+		if (!value || typeof value !== 'string') {
+			return null;
+		}
+
+		const parts = value.split('-');
+		if (parts.length !== 3) {
+			return null;
+		}
+
+		const year = parseInt(parts[0], 10);
+		const month = parseInt(parts[1], 10);
+		const day = parseInt(parts[2], 10);
+		const date = new Date(year, month - 1, day);
+
+		if (Number.isNaN(date.getTime())) {
+			return null;
+		}
+
+		return date;
+	}
+
+	function formatInputDate(date) {
+		const year = date.getFullYear();
+		const month = String(date.getMonth() + 1).padStart(2, '0');
+		const day = String(date.getDate()).padStart(2, '0');
+		return `${year}-${month}-${day}`;
+	}
+
+	function getScheduledDates(startDateValue, durationValue) {
+		const duration = parseInt(durationValue, 10) || 0;
+		const startDate = parseInputDate(startDateValue);
+
+		if (!startDate || duration <= 0) {
+			return [];
+		}
+
+		const dates = [];
+		const current = new Date(startDate.getTime());
+		let remainingDays = duration;
+
+		dates.push(formatInputDate(current));
+
+		while (remainingDays > 1) {
+			current.setDate(current.getDate() + 1);
+
+			if (current.getDay() !== 0 && current.getDay() !== 6) {
+				dates.push(formatInputDate(current));
+				remainingDays--;
+			}
+		}
+
+		return dates;
+	}
+
+	function getActivityDurationTotal(activities) {
+		const scheduledDates = new Set();
+		let unscheduledTotal = 0;
+
+		$.each(activities, function(_, item) {
+			const duration = parseInt(item.duration_day, 10) || 0;
+
+			if (duration <= 0) {
+				return;
+			}
+
+			if (!item.start_date) {
+				unscheduledTotal += duration;
+				return;
+			}
+
+			getScheduledDates(item.start_date, duration).forEach(function(dateValue) {
+				scheduledDates.add(dateValue);
+			});
+		});
+
+		return scheduledDates.size + unscheduledTotal;
+	}
+
 	$(document).ready(function() {
 		// Auto expand nearest year collapse on load
 		(function autoOpenNearestYear(){
@@ -763,7 +842,7 @@
 		});
 		
 		// Calculate totals
-		$(document).on('input', '.duration-input', calculateTotalDuration);
+		$(document).on('change input', '.start-date, .duration-input', calculateTotalDuration);
 		$(document).on('input', '.expense-est-input', calculateTotalExpenseEst);
 		$(document).on('input', '.expense-real-input', calculateTotalExpenseReal);
 		
@@ -777,10 +856,16 @@
 		}
 		
 		function calculateTotalDuration() {
-			let total = 0;
-			$('.duration-input').each(function() {
-				total += parseInt($(this).val()) || 0;
+			const activities = [];
+
+			$('.activity-row').each(function() {
+				activities.push({
+					start_date: $(this).find('.start-date').val(),
+					duration_day: $(this).find('.duration-input').val()
+				});
 			});
+
+			const total = getActivityDurationTotal(activities);
 			$('#total-duration').text(total);
 		}
 		
@@ -943,16 +1028,15 @@
 	$(document).on('change input', '.start-date, .duration-input', function () {
 		let row = $(this).closest('.activity-row');
 		let startDate = row.find('.start-date').val();
-		let duration = parseInt(row.find('.duration-input').val());
+		let duration = parseInt(row.find('.duration-input').val(),10);
 
 		if (startDate && duration && duration > 0) {
-			let start = new Date(startDate);
+			let start = parseInputDate(startDate);
 
 			// hitung end date dengan skip weekend
 			let end = workdays(start, duration);
 
-			// format yyyy-mm-dd
-			let endDate = end.toISOString().split('T')[0];
+			let endDate = formatInputDate(end);
 			row.find('.end-date').val(endDate);
 		} else {
 			row.find('.end-date').val('');
@@ -1043,9 +1127,8 @@
 
 	function generateActivityItem(data){
 		let html = '';
-		let duration = 0;
+		let duration = getActivityDurationTotal(data);
 		$.each(data, function (index, item) {
-			duration += parseInt(item.duration_day)
 			html += `
 				<div class='activity-row mb-2'>
 					<div class='row align-items-center mb-2'>
