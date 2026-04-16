@@ -51,7 +51,7 @@
 											<div class="collapse" id="year-collapse<?=$year?>" data-year="<?=$year?>">
 												<div class="card-body p-0">
 													<?php foreach($departments as $dept => $deptData): ?>
-														<div class="border-bottom">
+														<div class="border-bottom department-panel">
 															<div class="p-3 bg-light font-weight-bold">
 																<button class="btn btn-link text-decoration-none text-dark p-0 font-weight-bold dept-toggle flex-grow-1 text-left" 
 																			type="button" 
@@ -86,7 +86,7 @@
 																<?php endif?>
 															</div>
 																<div class="collapse" id="dept-collapse<?=$year?>-<?=md5($dept)?>">
-																	<div class="table-responsive" style="max-height: 70vh; overflow-y: auto;">
+																	<div class="table-responsive department-focus-target" style="overflow-y: auto;">
 																		<table class="table table-hover table-bordered mb-0">
 																			<thead class="bg-light text-center sticky-top">
 																				<tr>
@@ -136,6 +136,122 @@
 		</div>
 	</div>
 </div>
+<style>
+	/* ── Department panel (normal/in-DOM state) ─── */
+	.department-panel {
+		position: relative;
+		overflow: visible;
+		transition: opacity .28s ease;
+	}
+	.department-panel.is-focus-muted { opacity: .45; }
+
+	/* ── Table wrapper (normal state) ─── */
+	.department-focus-target {
+		scroll-margin-top: 110px;
+		max-height: 70vh;
+		overflow-y: auto;
+		transition: box-shadow .28s ease;
+	}
+	.department-focus-target.focus-pulse {
+		box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.18) inset;
+	}
+	.department-focus-target table { background: #fff; }
+
+	/* ── Body-level fullscreen overlay (appended to <body> by JS) ─── */
+	#dept-fs-overlay {
+		display: none;
+		position: fixed;  /* direct child of body — guaranteed root stacking context */
+		inset: 0;
+		z-index: 1060;    /* above navbar (1030), sidebar, everything */
+		background: #fff;
+		overflow: hidden;
+		animation: dept-fs-open .2s ease both;
+	}
+	#dept-fs-overlay.is-open { display: flex; flex-direction: column; }
+
+	#dept-fs-backdrop {
+		display: none;
+		position: fixed;
+		inset: 0;
+		z-index: 1059;    /* just below overlay */
+		background: rgba(15, 23, 42, 0.55);
+		pointer-events: none; /* never block clicks */
+	}
+	#dept-fs-backdrop.is-visible { display: block; }
+
+	@keyframes dept-fs-open {
+		from { opacity: 0; transform: scale(.98); }
+		to   { opacity: 1; transform: scale(1);   }
+	}
+
+	/* Panel rendered INSIDE the overlay — reset all position/transform */
+	#dept-fs-overlay .department-panel {
+		position: static !important;
+		display: flex;
+		flex-direction: column;
+		flex: 1 1 0;
+		min-height: 0;
+		overflow: hidden;
+		width: 100% !important;
+		margin: 0 !important;
+		transform: none !important;
+		border-radius: 0 !important;
+		background: #fff;
+	}
+	#dept-fs-overlay .department-panel > .p-3.bg-light {
+		flex-shrink: 0;
+		border-radius: 0 !important;
+		padding-right: 60px !important;
+		border-bottom: 1px solid rgba(0,0,0,.08);
+		position: relative;
+	}
+	#dept-fs-overlay .department-panel > .collapse {
+		flex: 1 1 0;
+		min-height: 0;
+		overflow: hidden;
+		display: flex !important;   /* override Bootstrap display:block */
+		flex-direction: column;
+	}
+	#dept-fs-overlay .department-focus-target {
+		flex: 1 1 0;
+		max-height: none !important;
+		overflow-y: auto;
+		border-radius: 0;
+	}
+
+	/* ── X close button ─── */
+	.dept-theater-close {
+		position: absolute;
+		top: 50%;
+		right: 16px;
+		transform: translateY(-50%);
+		z-index: 10;
+		width: 34px;
+		height: 34px;
+		border-radius: 50%;
+		border: 1px solid rgba(0,0,0,.15);
+		background: #fff;
+		color: #495057;
+		font-size: 15px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		cursor: pointer;
+		transition: background .18s, color .18s, border-color .18s;
+		box-shadow: 0 2px 6px rgba(0,0,0,.1);
+		padding: 0;
+		line-height: 1;
+	}
+	.dept-theater-close:hover {
+		background: #dc3545;
+		color: #fff;
+		border-color: #dc3545;
+	}
+
+	@media (max-width: 767.98px) {
+		.department-panel.is-focus-muted { opacity: .8; }
+	}
+</style>
 <?php 
 modal_open('modal-form','', 'modal-lg' );
 	modal_body();
@@ -257,6 +373,108 @@ modal_close();
 	let idSelectedFile = null;
 	let idSelectedAssignment = null;
 	let currentAttachmentStatus = null;
+	let focusPulseTimer = null;
+	let activeFocusedGroupId = null;
+	let activeFocusedCollapseId = null;
+
+	function setTheaterMode(isActive) {
+		$('#dept-fs-backdrop').toggleClass('is-visible', isActive);
+	}
+
+	function returnPanelFromOverlay() {
+		const $panel = $('#dept-fs-overlay .department-panel');
+		if (!$panel.length) return;
+		const $ph = $panel.data('dept-placeholder');
+		if ($ph && $ph.length) {
+			$panel.detach().insertAfter($ph);
+			$ph.remove();
+			$panel.removeData('dept-placeholder');
+		} else {
+			$panel.detach(); // fallback — panel lost position, shouldn't happen
+		}
+		$panel.removeClass('is-focused');
+		$panel.find('.dept-theater-close').remove();
+		$('#dept-fs-overlay').removeClass('is-open').attr('aria-hidden', 'true').empty();
+	}
+
+	function closeActiveDepartmentTheater() {
+		// Move panel back to DOM FIRST before collapsing
+		returnPanelFromOverlay();
+
+		if (!activeFocusedCollapseId) {
+			clearDepartmentFocus();
+			return;
+		}
+		const $activeCollapse = $('#' + activeFocusedCollapseId);
+		if ($activeCollapse.length && $activeCollapse.hasClass('show')) {
+			$activeCollapse.collapse('hide');
+		} else {
+			clearDepartmentFocus();
+		}
+	}
+
+	function clearDepartmentFocus() {
+		clearTimeout(focusPulseTimer);
+		activeFocusedGroupId = null;
+		activeFocusedCollapseId = null;
+		setTheaterMode(false);
+		// If overlay still open (e.g. called directly), return panel first
+		if ($('#dept-fs-overlay').hasClass('is-open')) {
+			returnPanelFromOverlay();
+		}
+		$('.department-panel').removeClass('is-focused is-focus-muted');
+		$('.department-focus-target').removeClass('focus-pulse');
+		$('.dept-theater-close').remove();
+	}
+
+	function openDepartmentFullscreen(groupId) {
+		// If already showing this dept, nothing to do
+		if (activeFocusedGroupId === groupId && $('#dept-fs-overlay').hasClass('is-open')) return;
+
+		const $tbody = $(`.department-data[data-group-id="${groupId}"]`);
+		const $panel = $tbody.closest('.department-panel');
+		if (!$tbody.length || !$panel.length) return;
+
+		clearTimeout(focusPulseTimer);
+		// Close any previously open overlay first
+		if ($('#dept-fs-overlay').hasClass('is-open')) returnPanelFromOverlay();
+
+		// Placeholder keeps the panel's original DOM position for restore
+		const $ph = $('<div class="dept-panel-placeholder" style="display:none;height:0;"></div>');
+		$panel.before($ph);
+		$panel.data('dept-placeholder', $ph);
+
+		// Dim all other panels
+		$('.department-panel').not($panel).addClass('is-focus-muted').removeClass('is-focused');
+
+		// Move panel into body-level overlay (detach preserves ALL event handlers)
+		$panel.detach().appendTo($('#dept-fs-overlay'));
+		$panel.addClass('is-focused');
+
+		// Ensure collapse is open while inside overlay
+		const $collapse = $panel.find('.collapse[id^="dept-collapse"]');
+		$collapse.addClass('show').css('display', '');
+
+		activeFocusedGroupId = groupId;
+		activeFocusedCollapseId = $collapse.attr('id') || null;
+		setTheaterMode(true);
+
+		// Show overlay
+		$('#dept-fs-overlay').addClass('is-open').removeAttr('aria-hidden');
+
+		// Inject X close button
+		$panel.find('.dept-theater-close').remove();
+		$panel.find('> .p-3.bg-light').append(
+			'<button class="dept-theater-close" title="Tutup (Esc)" aria-label="Tutup"><i class="fas fa-times"></i></button>'
+		);
+
+		// Pulse on table wrapper
+		const $focusTarget = $panel.find('.department-focus-target').first();
+		$focusTarget.addClass('focus-pulse');
+		focusPulseTimer = setTimeout(function() {
+			$focusTarget.removeClass('focus-pulse');
+		}, 1400);
+	}
 
 	// AJAX filter switch similar to Annual Audit Plan
 	$(document).on('click', '.filter-switch', function(e){
@@ -281,9 +499,25 @@ modal_close();
 	// Rebinding after AJAX replace
 	$(document).on('content:rebind', function(){
 		$('.year-toggle .fas').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+		clearDepartmentFocus();
+	});
+
+	$(document).on('click', '.dept-theater-close', function() {
+		closeActiveDepartmentTheater();
+	});
+
+	$(document).on('keydown', function(e) {
+		if (e.key !== 'Escape') return;
+		if (!$('#dept-fs-overlay').hasClass('is-open')) return;
+		if ($('.modal.show').length) return;
+		closeActiveDepartmentTheater();
 	});
 
 	$(document).ready(function() {
+		// Create body-level fullscreen overlay + backdrop (direct children of <body>
+		// to guarantee root stacking context — same pattern as Bootstrap Modal)
+		$('body').append('<div id="dept-fs-overlay" aria-hidden="true"></div><div id="dept-fs-backdrop" aria-hidden="true"></div>');
+
 		// Auto expand nearest year collapse on load (current year or closest)
 		(function autoOpenNearestYear(){
 			var nowYear = (new Date()).getFullYear();
@@ -331,12 +565,15 @@ modal_close();
 			const $collapse = $('#' + targetCollapse);
 			const $tbody = $collapse.find('.department-data');
 			const groupId = $tbody.data('group-id');
+			const $yearCollapse = $button.closest('[id^="year-collapse"]');
 
 			// Pastikan element ditemukan
 			if (!groupId) return;
 
+			$yearCollapse.find('.collapse[id^="dept-collapse"]').not($collapse).collapse('hide');
+
 			// Load data hanya kalau belum pernah dimuat atau kosong
-			if (!$tbody.data('loaded')) {
+			if (!$tbody.data('loaded') && !$tbody.data('loading')) {
 				loadDepartmentData(groupId, $tbody);
 			}
 		});
@@ -347,11 +584,29 @@ modal_close();
 			let toggle = $(`[data-target="#${this.id}"]`);
 			toggle.find('.fas').removeClass('fa-chevron-down').addClass('fa-chevron-up');
 			toggle.attr('aria-expanded','true');
+
+			// Only activate theater focus for dept collapses, never for year collapses
+			// (year collapse contains hidden dept-data in DOM which would falsely trigger theater mode)
+			if (!this.id || !this.id.startsWith('dept-collapse')) return;
+
+			const groupId = $(this).find('.department-data').data('group-id');
+			if (groupId) {
+				openDepartmentFullscreen(groupId);
+			}
 		});
 		$(document).on('hidden.bs.collapse', '.collapse', function(){
 			let toggle = $(`[data-target="#${this.id}"]`);
 			toggle.find('.fas').removeClass('fa-chevron-up').addClass('fa-chevron-down');
 			toggle.attr('aria-expanded','false');
+
+			if ($(this).is('[id^="year-collapse"]')) {
+				clearDepartmentFocus();
+				return;
+			}
+
+			if ($(this).find('.department-data').length && !$('.collapse[id^="dept-collapse"].show').length) {
+				clearDepartmentFocus();
+			}
 		});
 		CKEDITOR.replace("field-editor", {
 			height: 250,
@@ -370,7 +625,6 @@ modal_close();
 
 		let isEditing = false;
 		let originalValue = '';
-		let loadedDepartments = [];
 		
 		$(document).on('click', '.editable:not(.editable-status)', function() {
 			if (isEditing) return;
@@ -516,37 +770,6 @@ modal_close();
 			}
 		});
 		
-		// Handle accordion expand/collapse and load data
-		$('.dept-toggle').on('click', function() {
-			// Only proceed if not editing
-			if (isEditing) return false;
-			
-			const $button = $(this);
-			const $icon = $button.find('i');
-			const target = $button.attr('aria-controls');
-			
-			// Find the actual assignment ID from the data attribute
-			const actualAssignId = $(this).closest('.card').find('.department-data').data('group-id');
-
-			if (actualAssignId && !loadedDepartments.includes(actualAssignId)) {
-				loadDepartmentData(actualAssignId);
-				loadedDepartments.push(actualAssignId);
-			}
-		});
-		
-		// Handle accordion collapse events for icon update
-		$(document).on('shown.bs.collapse', '.collapse', function() {
-			const collapseId = $(this).attr('id');
-			const $toggle = $(`[aria-controls="${collapseId}"]`);
-			$toggle.find('i').removeClass('fa-chevron-down').addClass('fa-chevron-up');
-		});
-		
-		$(document).on('hidden.bs.collapse', '.collapse', function() {
-			const collapseId = $(this).attr('id');
-			const $toggle = $(`[aria-controls="${collapseId}"]`);
-			$toggle.find('i').removeClass('fa-chevron-up').addClass('fa-chevron-down');
-		});
-
 		$(document).on('click', '.attachment', async function() {
 			idSelectedAssignment = $(this).data('id');
 			let res = await $.ajax({
@@ -715,6 +938,9 @@ modal_close();
 		function loadDepartmentData(groupId) {
 			const tbody = $(`.department-data[data-group-id="${groupId}"]`);
 			const badge = tbody.closest('.card').find('.assignment-count');
+
+			if (!tbody.length || tbody.data('loading')) return;
+			tbody.data('loading', true);
 			
 			// Show loading state
 			badge.removeClass('badge-info').addClass('badge-secondary');
@@ -781,6 +1007,7 @@ modal_close();
 						});
 					}
 					tbody.html(html);
+					tbody.data('loaded', true);
 
 					// Init tooltips for kriteria descriptions
 					tbody.find('[data-description]').each(function(){
@@ -788,8 +1015,15 @@ modal_close();
 							   .tooltip({ placement: 'top', trigger: 'hover', container: 'body' });
 					});
 				
+					if (activeFocusedGroupId !== groupId || !$('#dept-fs-overlay').hasClass('is-open')) {
+					openDepartmentFullscreen(groupId);
+				}
+				
 					// Update counter with number of assignments loaded
 					badge.removeClass('badge-secondary').addClass('badge-info').text(res.length + ' item' + (res.length!==1?'s':''));
+				},
+				complete: function() {
+					tbody.data('loading', false);
 				}
 			})
 		}
