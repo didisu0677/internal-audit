@@ -18,6 +18,7 @@
 				th('checkbox','text-center','width="30" data-content="id"');
 				th(lang('aktivitas'),'','data-content="aktivitas" data-table="tbl_aktivitas"');
 				th(lang('sub_aktivitas'),'','data-content="sub_aktivitas"');
+				th('Sequence', '', 'data-content="sequence"');
 				th(lang('aktif').'?','text-center','data-content="is_active" data-type="boolean"');
 				th('&nbsp;','','width="30" data-content="action_button"');
 	table_close();
@@ -31,6 +32,7 @@ modal_open('modal-form');
 			input('hidden','id','id');
 			select2(lang('aktivitas'),'id_aktivitas','required',$aktivitas,'id','aktivitas');
 			input('text',lang('sub_aktivitas'),'sub_aktivitas');
+			input('number','Sequence', 'sequence');
 			toggle(lang('aktif').'?','is_active');
 			form_button(lang('simpan'),lang('batal'));
 		form_close();
