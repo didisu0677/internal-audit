@@ -64,7 +64,7 @@ class Audit_assignment extends BE_Controller {
 	function data() {
 		$id = post('id');
 		$query = get_data('tbl_annual_audit_plan a', [
-			'select' => 'aa.*, ag.year, a.id as id_audit_plan, a.id_audit_plan_group, dep.section_name as department,ak.id as id_aktivitas, ak.aktivitas, sa.id as id_sub_aktivitas, sa.sub_aktivitas, rc.id_risk, s.section_name as section',
+			'select' => 'aa.*, ag.year, a.id as id_audit_plan, a.id_audit_plan_group, dep.section_name as department,ak.id as id_aktivitas, ak.aktivitas, sa.id as id_sub_aktivitas, sa.sub_aktivitas, sa.sequence, rc.id_risk, s.section_name as section',
 			'join' => [
 				'tbl_audit_universe u on a.id_universe = u.id', 
 				'tbl_rcm rcm on u.id_rcm = rcm.id',
@@ -80,7 +80,7 @@ class Audit_assignment extends BE_Controller {
 			'where' => [
 				'a.id_audit_plan_group' => $id
 			],
-			'order_by' => 'sa.sub_aktivitas'
+			'order_by' => 'sa.sequence, sa.sub_aktivitas'
 		])->result_array();
 
 		$clean_data = [];
