@@ -92,7 +92,7 @@ class Rcm extends BE_Controller {
 				'tbl_aktivitas e on c.id_aktivitas = e.id type LEFT',
 				'tbl_risk_control d on a.id_risk_control = d.id type LEFT',
 			],
-			'order_by' => 'b4.urutan, department, e.aktivitas, c.sub_aktivitas',
+			'order_by' => 'b4.urutan, department, e.aktivitas, c.sequence, c.sub_aktivitas',
 		])->result_array();
 
 		foreach($grup as $val) {

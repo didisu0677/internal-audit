@@ -18,7 +18,7 @@ class Audit_universe extends BE_Controller {
 				'tbl_m_audit_section s3 on s.level3 = s3.id',
 				'tbl_m_audit_section s4 on s.level4 = s4.id',
 			],
-			'order_by' => 'u.initial_audit, s4.urutan',
+			'order_by' => 'u.initial_audit, s4.urutan, sa.sequence',
 			'sort' => 'asc',
 		])->result_array();
 		
@@ -160,11 +160,11 @@ class Audit_universe extends BE_Controller {
 			update_data('tbl_audit_universe', ['initial_audit' => $initial_audit], 'id', $id_audit_universe[$i]);
 			
 			$audit_universe = get_data('tbl_audit_universe u',[
-				'select' => 'u.*, r.*, s4.id as id_department, s4.section_name as department, s.section_name, rc.id_risk',
+				'select' => 'u.*, r.*, s3.id as id_division, s3.section_name as division, s.section_name, rc.id_risk',
 				'join' => [
 					'tbl_rcm r on u.id_rcm = r.id',
 					'tbl_m_audit_section s on r.id_section = s.id',
-					'tbl_m_audit_section s4 on s.parent_id = s4.id',
+					'tbl_m_audit_section s3 on s.level3 = s3.id',
 					'tbl_risk_control rc on r.id_risk_control = rc.id',
 				],
 				'where' => [
@@ -191,13 +191,13 @@ class Audit_universe extends BE_Controller {
 					}
 					$cek = get_data('tbl_annual_audit_plan_group', [
 						'where' => [
-							'id_department' => $audit_universe['id_department'],
+							'id_division' => $audit_universe['id_division'],
 							'year' => date('Y', strtotime($start_date))
 						]
 					])->row_array();
 					$data_audit_plan_group = [
 						'id' =>	$cek['id'] ?? 0,				
-						'id_department' => $audit_universe['id_department'],
+						'id_division' => $audit_universe['id_division'],
 						'year' => date('Y', strtotime($start_date)),
 						'start_date' => $start_date
 					];
