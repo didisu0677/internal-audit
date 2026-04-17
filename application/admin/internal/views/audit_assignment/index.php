@@ -96,6 +96,8 @@
 																					<th class="border-0 text-muted small bg-light">Risk</th>
 																					<th class="border-0 text-muted small bg-light">Internal Control</th>
 																					<th class="border-0 text-muted small bg-light">Kriteria</th>
+																					<th class="border-0 text-muted small bg-light">Pre-liminary Audit</th>
+																					<th class="border-0 text-muted small bg-light">Data Request</th>
 																					<th class="border-0 text-muted small bg-light">Pengujian</th>
 																					<th class="border-0 text-muted small bg-light">Hasil Review</th>
 																					<th class="border-0 text-muted small bg-light">Finding</th>
@@ -1000,6 +1002,8 @@ modal_close();
 									});
 								html += `</td>
 								<td class="align-middle kriteria ${disableClass}" style="width: 300px; min-width: 180px;" data-field="kriteria">${item.kriteria || ''}</td>
+								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="preliminary_audit">${item.preliminary_audit || ''}</td>
+								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="data_request">${item.data_request || ''}</td>
 								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="pengujian">${item.pengujian || ''}</td>
 								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="hasil_review">${item.hasil_review || ''}</td>
 								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="finding">${item.finding || ''}</td>
