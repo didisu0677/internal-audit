@@ -101,6 +101,7 @@ class Annual_audit_plan extends BE_Controller {
 					'closing_date' 	=> $v['closing_date'],
 					'status'       	=> $v['status'],
 					'duration'     	=> 0,
+					'durations'    	=> [],
 					'expense_est_total' => 0,
 					'department' => []
 				];
@@ -138,6 +139,7 @@ class Annual_audit_plan extends BE_Controller {
 			
 			$durasi = get_data('tbl_audit_plan_duration', 'id_audit_plan_group', $v['id_audit_plan_group'])->result_array();
 			$data_clean[$v['year']][$v['label_divisi']]['duration'] = $this->calculate_unique_duration($durasi);
+			$data_clean[$v['year']][$v['label_divisi']]['durations'] = $durasi;
 
 			$data_clean[$v['year']][$v['label_divisi']]['expense_est_total'] = 0;
 			$expense_est= get_data('tbl_audit_plan_expense', [
@@ -168,6 +170,7 @@ class Annual_audit_plan extends BE_Controller {
 		$auditee = get_active_auditee();
 		$auditor = get_active_auditor();
 		$expense_item = $this->getExpenseItem();
+		
 		render([
 			'data' => $data_clean,
 			'expense_item' => $expense_item,

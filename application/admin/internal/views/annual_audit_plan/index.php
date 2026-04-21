@@ -94,15 +94,39 @@
 															'id_plan_group' => $groupData['id_audit_plan_group'] ?? ''
 														];
 													}
-													// Use group-level dates
-													$startDateTs = isset($groupData['start_date']) && $groupData['start_date'] ? strtotime($groupData['start_date']) : null;
-													$endDateTs   = isset($groupData['end_date']) && $groupData['end_date'] ? strtotime($groupData['end_date']) : $startDateTs;
-													if($startDateTs){
-														$startMonth = (int)date('n',$startDateTs);
-														$endMonth   = (int)date('n',$endDateTs);
-														if($endMonth < $startMonth) $endMonth = $startMonth;
-														for($m=$startMonth; $m <= $endMonth; $m++){
-															$groupSummary[$groupName]['months'][$m] = true;
+													$durationItems = isset($groupData['durations']) && is_array($groupData['durations']) ? $groupData['durations'] : [];
+													$startDateTs = null;
+													$endDateTs = null;
+
+													foreach($durationItems as $durationItem){
+														$itemStartTs = !empty($durationItem['start_date']) ? strtotime($durationItem['start_date']) : null;
+														$itemEndTs = !empty($durationItem['end_date']) ? strtotime($durationItem['end_date']) : $itemStartTs;
+
+														if($itemStartTs){
+															if(is_null($startDateTs) || $itemStartTs < $startDateTs){
+																$startDateTs = $itemStartTs;
+															}
+															$startMonth = (int)date('n', $itemStartTs);
+															$endMonth = $itemEndTs ? (int)date('n', $itemEndTs) : $startMonth;
+															if($endMonth < $startMonth) $endMonth = $startMonth;
+															for($m = $startMonth; $m <= $endMonth; $m++){
+																$groupSummary[$groupName]['months'][$m] = true;
+															}
+														}
+
+														if($itemEndTs && (is_null($endDateTs) || $itemEndTs > $endDateTs)){
+															$endDateTs = $itemEndTs;
+														}
+													}
+
+													if(is_null($startDateTs) && isset($groupData['start_date']) && $groupData['start_date']){
+														$startDateTs = strtotime($groupData['start_date']);
+													}
+													if(is_null($endDateTs)){
+														if(isset($groupData['end_date']) && $groupData['end_date']){
+															$endDateTs = strtotime($groupData['end_date']);
+														} else {
+															$endDateTs = $startDateTs;
 														}
 													}
 													if($startDateTs){
@@ -457,7 +481,7 @@
 							<div class='card border-0 shadow-sm'>
 								<div class='card-body p-3'>
 									<select class='form-control form-control-sm mb-2 select2' name='schedule_audit' id='schedule_audit' style='width:100% !important' required>
-										<option value='' selected>-- Select Schedule Audit --</option>";
+										<option value='' selected>-- Select Audit Assignment Letter --</option>";
 										foreach(get_list_schedule_audit() as $schedule){
 											echo "<option value='".$schedule['id']."'>".$schedule['val']."</option>";
 										}
