@@ -48,8 +48,16 @@
 															</div>
 														</div>
 														<div class="text-right">
+															<?php 
+																$deptTotal = 0; 
+																foreach($departments as $groupTmp => $groupDataTmp){ 
+																	if(is_array($groupDataTmp) && isset($groupDataTmp['department']) && is_array($groupDataTmp['department'])) { 
+																		$deptTotal += count($groupDataTmp['department']); 
+																	}
+																}
+															?>
 															<span class="badge badge-light text-primary font-weight-bold px-3 py-2">
-																<?= count($departments) ?> Department<?= count($departments) > 1 ? 's' : '' ?>
+																<?= $deptTotal ?> Department<?= $deptTotal > 1 ? 's' : '' ?>
 															</span>
 														</div>
 													</div>
@@ -65,48 +73,108 @@
 										<div class="collapse" id="year-collapse<?=$year?>" data-year="<?=$year?>">
 											<div class="card-body p-0">
 												<?php
-												// Build summary schedule table (simple calendar-like) for the year
-												$summaryRows = [];
-												$rowNo = 1;
-												foreach($departments as $deptName => $deptData){
-													// $deptData structure appears to be an array with one or more detail arrays containing aktivitas
-													foreach($deptData as $detail){
-														if(!is_array($detail) || !isset($detail['aktivitas'])) continue; // skip non-detail entries
-														$months = array_fill(1,12,false);
-														$startDate = isset($detail['start_date']) && $detail['start_date'] ? strtotime($detail['start_date']) : null;
-														$endDate   = isset($detail['end_date']) && $detail['end_date'] ? strtotime($detail['end_date']) : $startDate;
-														if($startDate){
-															$startMonth = (int)date('n',$startDate);
-															$endMonth   = (int)date('n',$endDate);
-															if($endMonth < $startMonth) $endMonth = $startMonth; // safety
-															for($m=$startMonth; $m <= $endMonth; $m++){
-																$months[$m] = true;
-															}
-														}
-														$summaryRows[] = [
-															'no' => $rowNo++,
-															'id_department' => $detail['id_department'] ?? '',
-															'id_plan_group' => $detail['id_audit_plan_group'] ?? '',
-															'department' => $deptName . (isset($detail['objective']) && $detail['objective'] ? '' : ''),
-															'auditor' => $detail['auditor'] ?? '',
-															'auditee' => $detail['auditee'] ?? '',
-															'expense' => isset($detail['expense_est_total']) ? number_format($detail['expense_est_total'],0,',','.') : '',
-															'months' => $months
+												// Build summary schedule table aggregated by Division (group)
+												$groupSummary = [];
+												// Status precedence: canceled > planned > unplanned > completed
+												$statusPriorityMap = ['canceled' => 4, 'planned' => 3, 'unplanned' => 2, 'completed' => 1];
+												foreach($departments as $groupName => $groupData){
+													if(!is_array($groupData)) continue;
+													// Init group entry
+													if(!isset($groupSummary[$groupName])){
+														$groupSummary[$groupName] = [
+															'months' => array_fill(1,12,false),
+															'duration' => 0,
+															'expense' => 0,
+															'expense_real' => 0,
+															'start_ts' => null,
+															'end_ts' => null,
+															'closing_ts' => null,
+															'status' => null,
+															'departments' => [],
+															'id_plan_group' => $groupData['id_audit_plan_group'] ?? ''
 														];
+													}
+													// Use group-level dates
+													$startDateTs = isset($groupData['start_date']) && $groupData['start_date'] ? strtotime($groupData['start_date']) : null;
+													$endDateTs   = isset($groupData['end_date']) && $groupData['end_date'] ? strtotime($groupData['end_date']) : $startDateTs;
+													if($startDateTs){
+														$startMonth = (int)date('n',$startDateTs);
+														$endMonth   = (int)date('n',$endDateTs);
+														if($endMonth < $startMonth) $endMonth = $startMonth;
+														for($m=$startMonth; $m <= $endMonth; $m++){
+															$groupSummary[$groupName]['months'][$m] = true;
+														}
+													}
+													if($startDateTs){
+														if(is_null($groupSummary[$groupName]['start_ts']) || $startDateTs < $groupSummary[$groupName]['start_ts']){
+															$groupSummary[$groupName]['start_ts'] = $startDateTs;
+														}
+													}
+													if($endDateTs){
+														if(is_null($groupSummary[$groupName]['end_ts']) || $endDateTs > $groupSummary[$groupName]['end_ts']){
+															$groupSummary[$groupName]['end_ts'] = $endDateTs;
+														}
+													}
+													$closingTs = isset($groupData['closing_date']) && $groupData['closing_date'] ? strtotime($groupData['closing_date']) : null;
+													if($closingTs){
+														if(is_null($groupSummary[$groupName]['closing_ts']) || $closingTs > $groupSummary[$groupName]['closing_ts']){
+															$groupSummary[$groupName]['closing_ts'] = $closingTs;
+														}
+													}
+													// Sum group-level estimate and per-department real
+													if(isset($groupData['expense_est_total'])){
+														$groupSummary[$groupName]['expense'] += (int)$groupData['expense_est_total'];
+													}
+														if(isset($groupData['duration'])){
+															$groupSummary[$groupName]['duration'] += (int)$groupData['duration'];
+														}
+													if(isset($groupData['department']) && is_array($groupData['department'])){
+														foreach($groupData['department'] as $deptName => $deptItems){
+															if(isset($deptItems['expense_real_total'])){
+																$groupSummary[$groupName]['expense_real'] += (int)$deptItems['expense_real_total'];
+															}
+															// Collect department meta from first aktivitas
+															$meta = ['id_department' => '', 'id_audit_plan_group' => '', 'auditor' => '', 'auditee' => ''];
+															foreach($deptItems as $k => $entry){
+																if(is_array($entry) && isset($entry['aktivitas']) && is_array($entry['aktivitas'])){
+																	$detail = $entry['aktivitas'];
+																	$meta = [
+																		'id_department' => $detail['id_department'] ?? '',
+																		'id_audit_plan_group' => $detail['id_audit_plan_group'] ?? '',
+																		'auditor' => $detail['auditor'] ?? '',
+																		'auditee' => $detail['auditee'] ?? ''
+																	];
+																	break;
+																}
+															}
+															$groupSummary[$groupName]['departments'][] = array_merge(['name' => $deptName], $meta);
+														}
+													}
+													// Aggregate status with precedence (group-level)
+													$currStatus = isset($groupData['status']) ? $groupData['status'] : null;
+													$currRank = isset($statusPriorityMap[$currStatus]) ? $statusPriorityMap[$currStatus] : 0;
+													$existingRank = isset($statusPriorityMap[$groupSummary[$groupName]['status'] ?? '']) ? $statusPriorityMap[$groupSummary[$groupName]['status'] ?? ''] : 0;
+													if($currRank > $existingRank){
+														$groupSummary[$groupName]['status'] = $currStatus;
 													}
 												}
 												?>
-												<?php if(!empty($summaryRows)): ?>
+												<?php if(!empty($groupSummary)): ?>
 													<div class="table-responsive px-3 pt-3">
 														<table class="table table-sm table-bordered table-striped mb-4 align-middle table-summary-year">
 															<thead class="thead-light">
 																<tr class="text-center align-middle">
 																	<th rowspan="2" class="align-middle" style="vertical-align: middle;" width="40">No</th>
-																	<th rowspan="2" class="text-left align-middle">Department</th>
-																	<th rowspan="2" class="align-middle">Auditor</th>
-																	<th rowspan="2" class="align-middle">Auditee</th>
-																	<th rowspan="2" class="text-right align-middle" width="110">Expense (Rp)</th>
+																	<th rowspan="2" class="text-left align-middle">Division</th>
+																	<th rowspan="2" class="text-center align-middle text-nowrap" width="1px">Start Date Est</th>
+																	<th rowspan="2" class="text-center align-middle text-nowrap" width="1px">End Date Est</th>
+																	<th rowspan="2" class="text-center align-middle text-nowrap" width="90">Duration</th>
+																	<th rowspan="2" class="text-right align-middle" width="120">Expense Est (Rp)</th>
+																	<th rowspan="2" class="text-center align-middle" width="120">Closing Date</th>
+																	<th rowspan="2" class="text-right align-middle" width="120">Expense Real (Rp)</th>
+																	<th rowspan="2" class="text-center align-middle" width="100">Status</th>
 																	<th colspan="12">Months</th>
+																	<th rowspan="2"></th>
 																</tr>
 																<tr class="text-center">
 																	<?php $mn=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; foreach($mn as $m): ?>
@@ -115,32 +183,51 @@
 																</tr>
 															</thead>
 															<tbody>
-																<?php foreach($summaryRows as $r): ?>
+																<?php $rowNo = 1; foreach($groupSummary as $groupName => $g): ?>
 																	<tr>
-																		<td class="text-center" width="1px"><?=$r['no']?></td>
-																		<td class="w-25"><?=$r['department']?></td>
-																		<td width="10%" class="text-nowrap">
-																			<select class="select2 form-control auditor" name="auditor" data-id-plan-group="<?=$r['id_plan_group']?>" data-id-department="<?=$r['id_department']?>">
-																				<option value="">-- Auditor --</option>
-																				<?php foreach($auditor as $a) :?> 
-																					<option value="<?=$a['id']?>" <?= $r['auditor'] == $a['id'] ? 'selected' : '' ?>><?=$a['nama']?></option>
-																				<?php endforeach ?>
-																			</select>
+																		<td class="text-center" width="1px"><?=$rowNo++?></td>
+																		<td class="w-25"><?=$groupName?></td>
+																		<td class="text-center text-nowrap"><?= $g['start_ts'] ? date('d M Y', $g['start_ts']) : '-' ?></td>
+																		<td class="text-center text-nowrap"><?= $g['end_ts'] ? date('d M Y', $g['end_ts']) : '-' ?></td>
+																		<td class="text-center text-nowrap detail-durasi" data-id="<?=$g['id_plan_group']?>"><?= !empty($g['duration']) ? $g['duration'].' days' : '-' ?></td>
+																		<td class="text-right text-nowrap detail-expense" data-id="<?=$g['id_plan_group']?>" data-cat="est"><?= number_format($g['expense'],0,',','.') ?></td>
+																		<td class="text-center text-nowrap"><?= $g['closing_ts'] ? date('d M Y', $g['closing_ts']) : '-' ?></td>
+																		<td class="text-right text-nowrap"><?= number_format($g['expense_real'],0,',','.') ?></td>
+																		<td class="text-center text-nowrap">
+																			<?php if(isset($g['status']) && $g['status'] == 'unplanned'): ?>
+																				<span class="badge badge-secondary">Unplanned</span>
+																			<?php elseif(isset($g['status']) && $g['status'] == 'planned'): ?>
+																				<span class="badge badge-warning">Planned</span>
+																			<?php elseif(isset($g['status']) && $g['status'] == 'canceled'): ?>
+																				<span class="badge badge-danger">Canceled</span>
+																			<?php elseif(isset($g['status']) && $g['status'] == 'completed'): ?>
+																				<span class="badge badge-success">Completed</span>
+																			<?php else: ?>
+																				<span class="badge badge-light">-</span>
+																			<?php endif; ?>
 																		</td>
-																		<td width="10%" class="text-nowrap">
-																			<select class="select2 form-control auditee" name="auditee" data-id-plan-group="<?=$r['id_plan_group']?>" data-id-department="<?=$r['id_department']?>">
-																				<option value="">-- Auditee --</option>
-																				<?php foreach($auditee as $a) : ?>
-																					<option value="<?=$a['id']?>" <?= $r['auditee'] == $a['id'] ? 'selected' : '' ?>><?=$a['nama']?></option>
-																				<?php endforeach ?>
-																			</select>
-																		</td>
-																		<!-- <td class="text-nowrap text-center text-nowrap" style="width: 1px;"><?=$r['auditor']?></td>
-																		<td class="text-nowrap text-center text-nowrap" style="width: 1px;"><?=$r['auditee']?></td> -->
-																		<td class="text-right text-nowrap"><?=$r['expense']?></td>
-																		<?php for($m=1;$m<=12;$m++): $active=$r['months'][$m]; ?>
-																			<td class="text-center p-1 month-cell <?=$active?'active-month':''?>"></td>
+																		<?php for($m=1;$m<=12;$m++): $active=$g['months'][$m]; ?>
+																			<td class="text-center p-1 month-cell detail-durasi <?=$active?'active-month':''?>" data-id="<?=$g['id_plan_group']?>"></td>
 																		<?php endfor; ?>
+																		<td class="text-center text-nowrap">
+																			<?php $selectId = 'dept-select-'.$year.'-'.md5($groupName); ?>
+																			<div class="d-flex align-items-center justify-content-center">
+																				<div class="btn-group btn-group-sm" role="group">
+																					<?php $divStatus = $g['status'] ?? null; ?>
+																					<?php if($divStatus == 'planned' || $divStatus == 'unplanned'): ?>
+																						<button class="btn btn-outline-warning btn-icon-only btn-edit" type="button" data-id="<?=$g['id_plan_group']?>" data-select="<?=$selectId?>" title="Edit">
+																							<i class="fas fa-edit"></i>
+																						</button>
+																						<button class="btn btn-outline-success btn-icon-only btn-completed" type="button" data-id="<?=$g['id_plan_group']?>" data-select="<?=$selectId?>" title="Completed">
+																							<i class="fas fa-check"></i>
+																						</button>
+																						<button class="btn btn-outline-danger btn-icon-only btn-cancel" type="button" data-id="<?=$g['id_plan_group']?>" data-select="<?=$selectId?>" title="Cancel">
+																							<i class='fas fa-times'></i>
+																						</button>
+																					<?php endif; ?>
+																				</div>
+																			</div>
+																		</td>
 																	</tr>
 																<?php endforeach; ?>
 															</tbody>
@@ -154,121 +241,172 @@
 													.table-summary-year .month-cell.active-month { background:#007bff; color:#fff; }
 												</style>
 
-												<?php foreach($departments as $dept => $deptData): ?>
+												<?php foreach($departments as $groupName => $groupData): ?>
 													<div class="border-bottom">
-														<div class="p-3 bg-light font-weight-bold">
-															<button class="btn btn-link text-decoration-none text-dark p-0 font-weight-bold dept-toggle flex-grow-1 text-left" 
+														<div class="p-3 bg-white font-weight-bold" style="!important; border-left: 3px solid #007bff;">
+															<button class="btn btn-link text-decoration-none text-dark p-0 font-weight-bold group-toggle flex-grow-1 text-left" 
 																	type="button" 
 																	data-toggle="collapse" 
-																	data-target="#dept-collapse<?=$year?>-<?=md5($dept)?>" 
+																	data-target="#group-collapse<?=$year?>-<?=md5($groupName)?>" 
 																	aria-expanded="false" 
-																	aria-controls="dept-collapse<?=$year?>-<?=md5($dept)?>">
-																<div class="d-flex justify-content-between align-items-center">
-																	<div>
-																		<i class="fas fa-chevron-down me-2 text-info"></i>
-																		<span><?= $dept ?></span>
+																	aria-controls="group-collapse<?=$year?>-<?=md5($groupName)?>">
+																	<div class="d-flex justify-content-between align-items-center">
+																		<div>
+																			<i class="fas fa-chevron-down me-2 text-primary"></i>
+																			<span><?= $groupName ?></span>
+																		</div>
+																		<span class="badge badge-primary ml-2"><?= (is_array($groupData) && isset($groupData['department']) && is_array($groupData['department'])) ? count($groupData['department']) : 0 ?> Departments</span>
 																	</div>
-																	<span class="badge badge-info ml-2"><?= count($deptData['data']['aktivitas']) ?> items</span>
-																</div>
-															</button>
-														</div>
-														<div class="collapse" id="dept-collapse<?=$year?>-<?=md5($dept)?>">
-															<div class="table-responsive">
-																<table class="table table-hover mb-0">
-																	<thead class="bg-light">
-																		<tr>
-																			<th></th>
-																			<th class="border-0 text-muted small">Aktivitas</th>
-																			<th class="border-0 text-muted small">Audit Area</th>
-																			<th class="border-0 text-muted small">Resiko</th>
-																			<th class="border-0 text-muted small">Objektif</th>
-																			<th class="border-0 text-muted small">Durasi</th>
-																			<th class="border-0 text-muted small">Start Date Est</th>
-																			<th class="border-0 text-muted small">End Date Est</th>
-																			<th class="border-0 text-muted small">Expense Est</th>
-																			<th class="border-0 text-muted small">Closing Date</th>
-																			<th class="border-0 text-muted small">Expense Real</th>
-																			<th class="border-0 text-muted small">Status</th>
-																			<th class="border-0 text-muted small text-center"></th>
-																		</tr>
-																	</thead>
-																	<tbody>
-																		<?php 
-																		foreach($deptData as $key => $detail):
-																			$count = count($detail['aktivitas']);
-																			foreach($detail['aktivitas'] as $i => $activity) : ?>
-																			<tr>
-																				<td class="align-middle text-nowrap" width="1px"><button class="btn btn-sm btn-danger btn-icon-only btn-delete-plan" data-id_plan="<?=$activity['id_audit_plan']?>">X</button></td>
-																				<td class="align-middle text-nowrap" width="1px"><?= $activity['aktivitas'] ?></td>
-																				<td class="align-middle text-nowrap" width="1px"><?= $activity['sub_aktivitas'] ?></td>
-																				<td class="align-middle text-nowrap" width="1px">
-																					<div class="d-flex flex-wrap">
-																						<?php foreach($activity['risk'] as $risk) : ?>
-																							<span class="badge badge-light border mr-1 mb-1 p-2"><?=$risk['risk']?> - <?=$risk['bobot_text']?></span>
-																						<?php endforeach ?>
-																					</div>
-																				</td>
-																				<?php if($i == 0) : ?>
-																					<td rowspan="<?=$count?>" class="align-middle">
-																						<div class="text-sm"><?=$detail['objective']?></div>
-																					</td>
-																					<td rowspan="<?=$count?>" width="1px" class="align-middle text-center detail-durasi text-nowrap" data-id="<?=$detail['id_audit_plan_group']?>">
-																						<?php if(isset($detail['duration'])): ?>
-																							<h6 class="badge badge-info"><?= $detail['duration'] ?> Hari</h6>
-																						<?php else: ?>
-																							<h6 class="text-muted">-</h6>
-																						<?php endif; ?>
-																					</td>
-																					<td rowspan="<?=$count?>" width="1px" class="align-middle text-nowrap text-center">
-																						<h6 class="text-muted"><?= $detail['start_date'] ? date('d M Y', strtotime($detail['start_date'])) : '-' ?></h6>
-																					</td>
-																					<td rowspan="<?=$count?>" width="1px" class="align-middle text-nowrap text-center">
-																						<h6 class="text-muted"><?= $detail['end_date'] ? date('d M Y', strtotime($detail['end_date'])) : '-' ?></h6>
-																					</td>
-																					<td rowspan="<?=$count?>" width="1px" class="align-middle text-nowrap text-right detail-expense" data-id="<?=$detail['id_audit_plan_group']?>" data-cat="est">
-																						<h6 class="font-weight-medium">Rp. <?= isset($detail['expense_est_total']) ? number_format($detail['expense_est_total'],0) : 0 ?></h6>
-																					</td>
-																					<td rowspan="<?=$count?>" width="1px" class="align-middle text-nowrap text-center">
-																						<h6 class="text-muted"><?= $detail['closing_date'] ? date('d M Y', strtotime($detail['closing_date'])) : '-' ?></h6>
-																					</td>
-																					<td rowspan="<?=$count?>" width="1px" class="align-middle text-nowrap text-right detail-expense" data-id="<?=$detail['id_audit_plan_group']?>" data-cat="real">
-																						<h6 class="font-weight-medium">Rp. <?= isset($detail['expense_real_total']) ? number_format($detail['expense_real_total'],0) : 0 ?></h6>
-																					</td>
-																					<td rowspan="<?=$count?>" width="1px" class="align-middle text-center text-nowrap">
-																						<?php if(isset($detail['status']) && $detail['status'] == 'unplanned'): ?>
-																							<h6 class="badge badge-secondary"><?= ucfirst($detail['status']) ?> </h6>
-																						<?php elseif(isset($detail['status']) && $detail['status'] == 'planned'): ?>
-																							<h6 class="badge badge-warning"><?= ucfirst($detail['status']) ?> </h6>
-																						<?php elseif(isset($detail['status']) && $detail['status'] == 'canceled'): ?>
-																							<h6 class="badge badge-danger cancel-detail" data-id="<?=$detail['id_audit_plan_group']?>"><?= ucfirst($detail['status']) ?> </h6>
-																						<?php else : ?>
-																							<h6 class="badge badge-success"><?= ucfirst($detail['status']) ?> </h6>
-																						<?php endif; ?>
-																					</td>
-																					<td rowspan="<?=$count?>" width="1px" class="align-middle text-center text-nowrap">
-																						<?php if($detail['status'] == 'planned' || $detail['status'] == 'unplanned'):?>
-																						<button class="btn btn-sm btn-outline-warning btn-icon-only btn-edit" type="button" data-id="<?=$detail['id_audit_plan_group']?>" title="Edit">
-																							<i class="fas fa-edit"></i>
-																						</button>
-																						<button class="btn btn-sm btn-outline-success btn-icon-only btn-completed" type="button" data-id="<?=$detail['id_audit_plan_group']?>" title="Completed">
-																							<i class="fas fa-check"></i>
-																						</button>
-																						<button class="btn btn-sm btn-outline-danger btn-icon-only btn-cancel" type="button" data-id="<?=$detail['id_audit_plan_group']?>" title="Cancel">
-																							<i class='fas fa-times'></i>
-																						</button>
-																						<?php endif; ?>
-																					</td>
-																				<?php endif ?>
-																			</tr>																	
-																		<?php 
-																	endforeach;
-																	endforeach; ?>
-																	</tbody>
-																</table>
+																</button>
 															</div>
-														</div>
+														<div class="collapse" id="group-collapse<?=$year?>-<?=md5($groupName)?>">
+															<?php if(isset($groupData['department']) && is_array($groupData['department'])): foreach($groupData['department'] as $dept => $deptItems): ?>
+																<div class="p-3 bg-light font-weight-bold" style="margin-left: 20px !important; border-left: 3px solid #17a2b8;">
+																	<button class="btn btn-link text-decoration-none text-dark p-0 font-weight-bold dept-toggle flex-grow-1 text-left" 
+																			type="button" 
+																			data-toggle="collapse" 
+																			data-target="#dept-collapse<?=$year?>-<?=md5($groupName.$dept)?>" 
+																			aria-expanded="false" 
+																			aria-controls="dept-collapse<?=$year?>-<?=md5($groupName.$dept)?>">
+																			<div class="d-flex justify-content-between align-items-center">
+																				<div>
+																					<i class="fas fa-chevron-down me-2 text-info"></i>
+																					<span><?= $dept ?></span>
+																				</div>
+																				<?php 
+																					$itemCount = 0; 
+																					if(is_array($deptItems)){
+																						foreach($deptItems as $k => $entry){
+																							if(is_array($entry) && isset($entry['aktivitas'])) $itemCount++;
+																						}
+																					}
+																				?>
+																				<span class="badge badge-info ml-2"><?= $itemCount ?> items</span>
+																			</div>
+																		</button>
+																</div>
+																<div class="collapse" id="dept-collapse<?=$year?>-<?=md5($groupName.$dept)?>" style="margin-left: 30px;">
+																	<div class="table-responsive" style="border-left: 2px solid #6c757d;">
+																		<table class="table table-hover mb-0">
+																		<thead class="bg-light">
+																			<tr>
+																				<th></th>
+																				<th class="border-0 text-muted small">Aktivitas</th>
+																				<th class="border-0 text-muted small">Audit Area</th>
+																				<th class="border-0 text-muted small">Resiko</th>
+																				<th class="border-0 text-muted small">Auditor</th>
+																				<th class="border-0 text-muted small">Auditee</th>
+																			</tr>
+																		</thead>
+																		<tbody>
+																			<?php 
+																			// Collect aktivitas items within this department
+																			$items = [];
+																			if(is_array($deptItems)){
+																				foreach($deptItems as $k => $entry){
+																					if(is_array($entry) && isset($entry['aktivitas'])){
+																						$items[] = $entry;
+																					}
+																				}
+																			}
+																			$count = count($items);
+																			// Derive department-level meta from first aktivitas
+																			$detailMeta = ['objective' => '', 'id_audit_plan_group' => '', 'id_department' => '', 'auditor' => '', 'auditee' => ''];
+																			if($count > 0){
+																				$first = $items[0]['aktivitas'];
+																				$detailMeta['objective'] = $first['objective'] ?? '';
+																				$detailMeta['id_audit_plan_group'] = $first['id_audit_plan_group'] ?? '';
+																				$detailMeta['id_department'] = $first['id_department'] ?? '';
+																				$detailMeta['auditor'] = $first['auditor'] ?? '';
+																				$detailMeta['auditee'] = $first['auditee'] ?? '';
+																				foreach($items as $i => $item) : $act = $item['aktivitas']; ?>
+																					<tr>
+																					<td class="align-middle text-nowrap" width="1px"><button class="btn btn-sm btn-danger btn-icon-only btn-delete-plan" data-id_plan="<?=$act['id_audit_plan']?>">X</button></td>
+																					<td class="align-middle text-nowrap" width="1px"><?= $act['aktivitas'] ?></td>
+																					<td class="align-middle text-nowrap" width="1px"><?= $act['sub_aktivitas'] ?></td>
+																						<td class="align-middle text-nowrap" width="1px">
+																							<div class="d-flex flex-wrap">
+																							<?php if(isset($item['risk']) && is_array($item['risk'])): foreach($item['risk'] as $risk) : ?>
+																									<span class="badge badge-light border mr-1 mb-1 p-2"><?=$risk['risk']?> - <?=$risk['bobot_text']?></span>
+																							<?php endforeach; endif; ?>
+																							</div>
+																						</td>
+																					<?php if($i == 0) : ?>
+																							
+																							<td rowspan="<?=$count?>" width="1px" class="align-middle text-nowrap">
+																							<select class="select2 form-control auditor" name="auditor" data-id-plan-group="<?=$detailMeta['id_audit_plan_group']?>" data-id-department="<?=$detailMeta['id_department']?>">
+																									<option value="">-- Auditor --</option>
+																									<?php foreach($auditor as $a) :?>
+																									<option value="<?=$a['id']?>" <?= ($detailMeta['auditor'] ?? '') == $a['id'] ? 'selected' : '' ?>><?=$a['nama']?></option>
+																									<?php endforeach ?>
+																								</select>
+																							</td>
+																							<td rowspan="<?=$count?>" width="1px" class="align-middle text-nowrap">
+																							<select class="select2 form-control auditee" name="auditee" data-id-plan-group="<?=$detailMeta['id_audit_plan_group']?>" data-id-department="<?=$detailMeta['id_department']?>">
+																									<option value="">-- Auditee --</option>
+																									<?php foreach($auditee as $a) : ?>
+																									<option value="<?=$a['id']?>" <?= ($detailMeta['auditee'] ?? '') == $a['id'] ? 'selected' : '' ?>><?=$a['nama']?></option>
+																									<?php endforeach ?>
+																								</select>
+																							</td>
+																							<!-- <td rowspan="<?=$count?>" width="1px" class="align-middle text-center detail-durasi text-nowrap" data-id="<?=$detail['id_audit_plan_group']?>">
+																								<?php if(isset($detail['duration'])): ?>
+																									<h6 class="badge badge-info"><?= $detail['duration'] ?> Hari</h6>
+																								<?php else: ?>
+																									<h6 class="text-muted">-</h6>
+																								<?php endif; ?>
+																							</td>
+																							<td rowspan="<?=$count?>" width="1px" class="align-middle text-nowrap text-center">
+																								<h6 class="text-muted"><?= $detail['start_date'] ? date('d M Y', strtotime($detail['start_date'])) : '-' ?></h6>
+																							</td>
+																							<td rowspan="<?=$count?>" width="1px" class="align-middle text-nowrap text-center">
+																								<h6 class="text-muted"><?= $detail['end_date'] ? date('d M Y', strtotime($detail['end_date'])) : '-' ?></h6>
+																							</td>
+																							<td rowspan="<?=$count?>" width="1px" class="align-middle text-nowrap text-right detail-expense" data-id="<?=$detail['id_audit_plan_group']?>" data-cat="est">
+																								<h6 class="font-weight-medium">Rp. <?= isset($detail['expense_est_total']) ? number_format($detail['expense_est_total'],0) : 0 ?></h6>
+																							</td>
+																							<td rowspan="<?=$count?>" width="1px" class="align-middle text-nowrap text-center">
+																								<h6 class="text-muted"><?= $detail['closing_date'] ? date('d M Y', strtotime($detail['closing_date'])) : '-' ?></h6>
+																							</td>
+																							<td rowspan="<?=$count?>" width="1px" class="align-middle text-nowrap text-right detail-expense" data-id="<?=$detail['id_audit_plan_group']?>" data-cat="real">
+																								<h6 class="font-weight-medium">Rp. <?= isset($detail['expense_real_total']) ? number_format($detail['expense_real_total'],0) : 0 ?></h6>
+																							</td>
+																							<td rowspan="<?=$count?>" width="1px" class="align-middle text-center text-nowrap">
+																								<?php if(isset($detail['status']) && $detail['status'] == 'unplanned'): ?>
+																									<h6 class="badge badge-secondary"><?= ucfirst($detail['status']) ?> </h6>
+																								<?php elseif(isset($detail['status']) && $detail['status'] == 'planned'): ?>
+																									<h6 class="badge badge-warning"><?= ucfirst($detail['status']) ?> </h6>
+																								<?php elseif(isset($detail['status']) && $detail['status'] == 'canceled'): ?>
+																									<h6 class="badge badge-danger cancel-detail" data-id="<?=$detail['id_audit_plan_group']?>"><?= ucfirst($detail['status']) ?> </h6>
+																								<?php else : ?>
+																									<h6 class="badge badge-success"><?= ucfirst($detail['status']) ?> </h6>
+																								<?php endif; ?>
+																							</td>
+																							<td rowspan="<?=$count?>" width="1px" class="align-middle text-center text-nowrap">
+																								<?php if($detail['status'] == 'planned' || $detail['status'] == 'unplanned'):?>
+																									<button class="btn btn-sm btn-outline-warning btn-icon-only btn-edit" type="button" data-id="<?=$detail['id_audit_plan_group']?>" title="Edit">
+																										<i class="fas fa-edit"></i>
+																									</button>
+																									<button class="btn btn-sm btn-outline-success btn-icon-only btn-completed" type="button" data-id="<?=$detail['id_audit_plan_group']?>" title="Completed">
+																										<i class="fas fa-check"></i>
+																									</button>
+																									<button class="btn btn-sm btn-outline-danger btn-icon-only btn-cancel" type="button" data-id="<?=$detail['id_audit_plan_group']?>" title="Cancel">
+																										<i class='fas fa-times'></i>
+																									</button>
+																								<?php endif; ?>
+																							</td> -->
+																						<?php endif ?>
+																					</tr>															
+																				<?php endforeach; }
+																			?>
+																		</tbody>
+																	</table>
+																</div>
+															</div>
+														<?php endforeach; endif; ?>
 													</div>
-												<?php endforeach; ?>
+												</div>
+											<?php endforeach; ?>
 											</div>
 										</div>
 									</div>
@@ -562,6 +700,22 @@
 		
 		// Tutup semua department collapse dalam year yang sama
 		$(`[data-year="${currentYear}"] .dept-toggle`).not(this).each(function() {
+			let otherTarget = $(this).data('target');
+			if (otherTarget !== targetCollapse) {
+				$(otherTarget).collapse('hide');
+				$(this).attr('aria-expanded', 'false');
+				$(this).find('.fas').removeClass('fa-chevron-up').addClass('fa-chevron-down');
+			}
+		});
+	});
+
+	// Handle group collapse - hanya satu group yang bisa terbuka dalam satu year
+	$(document).on('click', '.group-toggle', function(e) {
+		let targetCollapse = $(this).data('target');
+		let currentYear = $(this).closest('[data-year]').data('year');
+
+		// Tutup semua group collapse dalam year yang sama
+		$(`[data-year="${currentYear}"] .group-toggle`).not(this).each(function() {
 			let otherTarget = $(this).data('target');
 			if (otherTarget !== targetCollapse) {
 				$(otherTarget).collapse('hide');
@@ -937,7 +1091,7 @@
 					tbody += `
 						<tr>
 							<td colspan='3' class='text-right font-weight-bold'>Total Duration</td>
-							<td class='text-center font-weight-bold'>${res.reduce((sum, item) => sum + (parseInt(item.duration_day) || 0), 0)} days</td>
+							<td class='text-center font-weight-bold'>${getActivityDurationTotal(res)} days</td>
 						</tr>`;
 				} else {
 					tbody = `

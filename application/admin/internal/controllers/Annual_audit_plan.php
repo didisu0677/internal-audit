@@ -6,6 +6,56 @@ class Annual_audit_plan extends BE_Controller {
 		parent::__construct();
 	}
 
+	function get_working_dates($start_date, $days) {
+		$days = (int)$days;
+		if(empty($start_date) || $days <= 0) {
+			return [];
+		}
+
+		try {
+			$date = new DateTime($start_date);
+		} catch (Exception $e) {
+			return [];
+		}
+
+		$dates = [$date->format('Y-m-d')];
+		$remaining = $days;
+
+		while($remaining > 1) {
+			$date->modify('+1 day');
+
+			if($date->format('N') < 6) {
+				$dates[] = $date->format('Y-m-d');
+				$remaining--;
+			}
+		}
+
+		return $dates;
+	}
+
+	function calculate_unique_duration($durations) {
+		$scheduled_dates = [];
+		$unscheduled_total = 0;
+
+		foreach($durations as $duration) {
+			$day_count = isset($duration['duration_day']) ? (int)$duration['duration_day'] : 0;
+			if($day_count <= 0) {
+				continue;
+			}
+
+			if(empty($duration['start_date'])) {
+				$unscheduled_total += $day_count;
+				continue;
+			}
+
+			foreach($this->get_working_dates($duration['start_date'], $day_count) as $date) {
+				$scheduled_dates[$date] = true;
+			}
+		}
+
+		return count($scheduled_dates) + $unscheduled_total;
+	}
+
 	function index() {
 		$activity = get_data('tbl_audit_plan_activity', 'is_active', 1)->result_array();
 
@@ -18,13 +68,14 @@ class Annual_audit_plan extends BE_Controller {
 		$year = date('Y');
 		$data_clean = [];
 		$query = get_data('tbl_annual_audit_plan a', [
-			'select' => 'a.id as id_audit_plan, a.id_audit_plan_group, dep.id as id_department, concat(dep.section_name, " - ",dep.description) as label_department, dep.section_name as department, ak.aktivitas, sa.sub_aktivitas, ag.*, rc.id_risk',
+			'select' => 'a.id as id_audit_plan, a.id_audit_plan_group, dep.id as id_department, div.id as id_division, concat(div.section_name, " - ", div.description) as label_divisi, dep.section_name as label_department, dep.section_name as department, ak.aktivitas, sa.sub_aktivitas, ag.*, rc.id_risk',
 			'join' => [
 				'tbl_audit_universe u on a.id_universe = u.id', 
 				'tbl_rcm rcm on u.id_rcm = rcm.id',
 				'tbl_risk_control rc on rcm.id_risk_control = rc.id',
 				'tbl_m_audit_section s on rcm.id_section = s.id',
 				'tbl_m_audit_section dep on s.level4 = dep.id',
+				'tbl_m_audit_section div on dep.level3 = div.id',
 				'tbl_sub_aktivitas sa on rcm.id_sub_aktivitas = sa.id',
 				'tbl_aktivitas ak on sa.id_aktivitas = ak.id',
 				'tbl_annual_audit_plan_group ag on ag.id = a.id_audit_plan_group'
@@ -32,17 +83,16 @@ class Annual_audit_plan extends BE_Controller {
 			'where' => [
 				'ag.year >= ' => $year
 			],
-			'order_by' => 'ag.year, dep.urutan'
+			'order_by' => 'ag.year, div.urutan'
 		])->result_array();
-			
 		foreach($query as $v){
 			// Apply status filter early to reduce processing
 			$group_status = $v['status'];
 			if($filter == 'plan' && !in_array($group_status, $plan_status)) continue;
 			if($filter == 'history' && !in_array($group_status, $history_status)) continue;
 
-			if(!isset($data_clean[$v['year']][$v['label_department']]['data'])){
-				$data_clean[$v['year']][$v['label_department']]['data'] = [
+			if(!isset($data_clean[$v['year']][$v['label_divisi']])){
+				$data_clean[$v['year']][$v['label_divisi']] = [
 					'id_audit_plan_group' => $v['id_audit_plan_group'],
 					'id_department' => $v['id_department'],
 					'objective'    	=> $v['objective'],
@@ -50,24 +100,21 @@ class Annual_audit_plan extends BE_Controller {
 					'end_date'     	=> $v['end_date'],
 					'closing_date' 	=> $v['closing_date'],
 					'status'       	=> $v['status'],
-					'auditee'     	=> $v['auditee'],
-					'auditor'     	=> $v['auditor'],
 					'duration'     	=> 0,
 					'expense_est_total' => 0,
-					'aktivitas' => []
+					'department' => []
 				];
 			}
 			// tambahkan aktivitas baru
-			$data_clean[$v['year']][$v['label_department']]['data']['aktivitas'][] = [
-				'id_audit_plan' => $v['id_audit_plan'],
-				'aktivitas'     => $v['aktivitas'],
+			$data_clean[$v['year']][$v['label_divisi']]['department'][$v['label_department']][] = [
+				'aktivitas'     => $v,
 				'sub_aktivitas' => $v['sub_aktivitas'],
 				'id_risk'       => $v['id_risk'],
 				'risk'			=> []
 			];
 
 			// ambil index aktivitas terakhir
-			$lastIndex = count($data_clean[$v['year']][$v['label_department']]['data']['aktivitas']) - 1;
+			$lastIndex = count($data_clean[$v['year']][$v['label_divisi']]['department'][$v['label_department']]) - 1;
 
 			// decode risk
 			$id_risk = json_decode($v['id_risk'], true);
@@ -84,20 +131,15 @@ class Annual_audit_plan extends BE_Controller {
 						]
 					])->row_array();
 					if($risk){
-						$data_clean[$v['year']][$v['label_department']]['data']['aktivitas'][$lastIndex]['risk'][] = $risk;
+						$data_clean[$v['year']][$v['label_divisi']]['department'][$v['label_department']][$lastIndex]['risk'][] = $risk;
 					}
 				}
 			}
 			
 			$durasi = get_data('tbl_audit_plan_duration', 'id_audit_plan_group', $v['id_audit_plan_group'])->result_array();
-			$data_clean[$v['year']][$v['label_department']]['data']['duration'] = 0;
-			foreach($durasi as $d){
-				if(isset($d['duration_day'])){
-					$data_clean[$v['year']][$v['label_department']]['data']['duration'] += (int)$d['duration_day'];
-				}
-			}
+			$data_clean[$v['year']][$v['label_divisi']]['duration'] = $this->calculate_unique_duration($durasi);
 
-			$data_clean[$v['year']][$v['label_department']]['data']['expense_est_total'] = 0;
+			$data_clean[$v['year']][$v['label_divisi']]['expense_est_total'] = 0;
 			$expense_est= get_data('tbl_audit_plan_expense', [
 				'where' => [
 					'id_audit_plan_group' => $v['id_audit_plan_group'],
@@ -106,11 +148,11 @@ class Annual_audit_plan extends BE_Controller {
 			])->result_array();
 			foreach($expense_est as $e){
 				if(isset($e['days']) && isset($e['amount'])){
-					$data_clean[$v['year']][$v['label_department']]['data']['expense_est_total'] += ((int)$e['days'] * (int)$e['amount']);
+					$data_clean[$v['year']][$v['label_divisi']]['expense_est_total'] += ((int)$e['days'] * (int)$e['amount']);
 				}
 			}
-
-			$data_clean[$v['year']][$v['label_department']]['data']['expense_real_total'] = 0;
+		
+			$data_clean[$v['year']][$v['label_divisi']]['expense_real_total'] = 0;
 			$expense_real= get_data('tbl_audit_plan_expense', [
 				'where' => [
 					'id_audit_plan_group' => $v['id_audit_plan_group'],
@@ -119,7 +161,7 @@ class Annual_audit_plan extends BE_Controller {
 			])->result_array();
 			foreach($expense_real as $r){
 				if(isset($r['days']) && isset($r['amount'])){
-					$data_clean[$v['year']][$v['label_department']]['data']['expense_real_total'] += ((int)$r['days'] * (int)$r['amount']);
+					$data_clean[$v['year']][$v['label_divisi']]['expense_real_total'] += ((int)$r['days'] * (int)$r['amount']);
 				}
 			}
 		}
@@ -193,7 +235,7 @@ class Annual_audit_plan extends BE_Controller {
 		])->result_array();
 
 		$data['expense_type'] = get_data('tbl_expense_type', 'is_active', 1)->result_array();
-		$schedule_audit = get_data('tbl_schedule_audit', 'id', $data['schedule_audit'])->row_array();
+		$schedule_audit = get_data('tbl_schedule_audit', 'id', $data['schedule_audit'] ?? null)->row_array();
 		$data['schedule_audit'] = $schedule_audit ? $schedule_audit['id']: '';
 		render($data,'json');
 	}
@@ -294,9 +336,22 @@ class Annual_audit_plan extends BE_Controller {
 			save_data('tbl_audit_plan_duration', $insertActivity);
 			$total_durasi += (int)$duration[$i];
 		}
-		$end_date = null;
-		if(!empty($start_date) && !empty($total_durasi)){
-			$end_date = $this->add_working_days($start_date, $total_durasi);
+		// update plan start_date
+		$plan_duration = get_data('tbl_audit_plan_duration', [
+			'select' => 'MIN(start_date) as start_date, MAX(end_date) as end_date',
+			'where' => [
+				'id_audit_plan_group' => $id_audit_plan_group,
+			]
+		])->row_array();
+
+		if($plan_duration && !empty($plan_duration['start_date'])){
+			$start_date = $plan_duration['start_date'];
+		}
+		//============================== end
+
+ 		$end_date = null;
+		if($plan_duration && !empty($plan_duration['end_date'])){
+			$end_date = $plan_duration['end_date'];
 		}
 		
 		$data = [
