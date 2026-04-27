@@ -282,10 +282,10 @@ modal_open('modal-bobot','Edit Bobot Finding','modal-md');
 		col_init(3,9);
 		input('hidden','id','id');
 		input('hidden','field_name','field_name');
-		input('number', 'Kemungkinan', 'bobot_kemungkinan', 'required','','oninput="if(this.value.length > 0) { this.value = this.value.slice(0,1); if(this.value > 6) this.value = 6; if(this.value < 1) this.value = 1; } previewBobot();"');
-		echo '<div class="form-group row"><div class="col-md-9 offset-md-3"><small class="text-muted"><i class="fas fa-info-circle mr-1"></i>Min 1, Maks 6</small></div></div>';
-		input('number', 'Dampak', 'bobot_dampak', 'required','','oninput="if(this.value.length > 0) { this.value = this.value.slice(0,1); if(this.value > 6) this.value = 6; if(this.value < 1) this.value = 1; } previewBobot();"');
-		echo '<div class="form-group row"><div class="col-md-9 offset-md-3"><small class="text-muted"><i class="fas fa-info-circle mr-1"></i>Min 1, Maks 6</small></div></div>';
+			input('number', 'Kemungkinan', 'bobot_kemungkinan', 'required','','min="0" max="6" oninput="sanitizeBobotInput(this);"');
+		echo '<div class="form-group row"><div class="col-md-9 offset-md-3"><small class="text-muted"><i class="fas fa-info-circle mr-1"></i>Min 0, Maks 6</small></div></div>';
+			input('number', 'Dampak', 'bobot_dampak', 'required','','min="0" max="6" oninput="sanitizeBobotInput(this);"');
+		echo '<div class="form-group row"><div class="col-md-9 offset-md-3"><small class="text-muted"><i class="fas fa-info-circle mr-1"></i>Min 0, Maks 6</small></div></div>';
 		echo '<div class="form-group row" id="bobot-preview-row" style="display:none">';
 			echo '<label class="col-md-3 col-form-label">Bobot Finding</label>';
 			echo '<div class="col-md-9 d-flex align-items-center">';
@@ -696,9 +696,9 @@ modal_close();
 			if(field == 'bobot_finding'){
 				const k = $cell.data('kemungkinan');
 				const d = $cell.data('dampak');
-				if(k){ $(modalType).find('[name="bobot_kemungkinan"]').val(k); }
-				if(d){ $(modalType).find('[name="bobot_dampak"]').val(d); }
-				if(k && d){ previewBobot(); }
+				if(k !== '' && k !== null && typeof k !== 'undefined'){ $(modalType).find('[name="bobot_kemungkinan"]').val(k); }
+				if(d !== '' && d !== null && typeof d !== 'undefined'){ $(modalType).find('[name="bobot_dampak"]').val(d); }
+				if(hasBobotValue(k) && hasBobotValue(d)){ previewBobot(); }
 			}
 
 			$(modalType).modal('show');
@@ -733,14 +733,6 @@ modal_close();
 			if(formData.field == 'kriteria'){
 				if(formData.value == null || formData.value.length == 0){
 					cAlert.open('Please select at least one Kriteria!', 'info');
-					return;
-				}
-			}
-
-			if(modal.is('#modal-bobot')){
-				const parsed = JSON.parse(formData.value);
-				if(!parsed.kemungkinan || !parsed.dampak || parsed.score === 'Unknown'){
-					cAlert.open('Isi Kemungkinan dan Dampak dengan nilai 1–6!', 'info');
 					return;
 				}
 			}
@@ -1007,9 +999,13 @@ modal_close();
 								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="pengujian">${item.pengujian || ''}</td>
 								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="hasil_review">${item.hasil_review || ''}</td>
 								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="finding">${item.finding || ''}</td>
-								<td class="align-middle bobot ${disableClass}" style="width: 300px; min-width: 180px;" data-field="bobot_finding" data-kemungkinan="${item.bobot_kemungkinan || ''}" data-dampak="${item.bobot_dampak || ''}">${
-								item.bobot_finding
-									? renderBobotBadge(item.bobot_kemungkinan || '', item.bobot_dampak || '', getScore(item.bobot_kemungkinan, item.bobot_dampak))
+								<td class="align-middle bobot ${disableClass}" style="width: 300px; min-width: 180px;" data-field="bobot_finding" data-kemungkinan="${hasBobotValue(item.bobot_kemungkinan) ? item.bobot_kemungkinan : ''}" data-dampak="${hasBobotValue(item.bobot_dampak) ? item.bobot_dampak : ''}">${
+								hasBobotValue(item.bobot_finding)
+									? renderBobotBadge(
+										hasBobotValue(item.bobot_kemungkinan) ? item.bobot_kemungkinan : '',
+										hasBobotValue(item.bobot_dampak) ? item.bobot_dampak : '',
+										getScore(item.bobot_kemungkinan, item.bobot_dampak)
+									)
 									: ''
 							}</td>
 								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="unconfirmity">${item.unconfirmity || ''}</td>
@@ -1136,6 +1132,14 @@ modal_close();
 				$('button[data-file="'+idx+'"]').text(typeof lang!=='undefined'?lang.unggah:'Upload').removeAttr('disabled');
 			});
 		}
+		
+		const colorMap = {
+			'5': 'secondary',
+			'4': 'danger', 
+			'3': 'warning', 
+			'2': 'info', 
+			'1': 'success' 
+		}
 
 		// Remove a duplicated attachment block
 		$(document).on('click', '.btn-remove-attachment', function(){
@@ -1150,25 +1154,43 @@ modal_close();
 		});
 					
 		function bobotLabel(score){
-			const map = { '4': 'Critical', '3': 'Major', '2': 'Moderate', '1': 'Minor' };
+			const map = { '5': 'Improvement', '4': 'Critical', '3': 'Major', '2': 'Moderate', '1': 'Minor' };
 			return map[String(score)] || score;
 		}
 
 		function renderBobotBadge(kemungkinan, dampak, score, label){
-			const colorMap = { '4': 'danger', '3': 'warning', '2': 'info', '1': 'success' };
+			// const colorMap = { '4': 'danger', '3': 'warning', '2': 'info', '1': 'success' };
 			const color = colorMap[String(score)] || 'secondary';
 			const displayLabel = label || bobotLabel(score);
 			return `<small class="text-muted d-block">Kemungkinan: ${kemungkinan} | Dampak: ${dampak}</small>`
 				 + `<span class="badge badge-${color}">${displayLabel}</span>`;
 		}
 
+		function hasBobotValue(value){
+			return value !== '' && value !== null && typeof value !== 'undefined';
+		}
+
+		function sanitizeBobotInput(element){
+			let value = String(element.value || '').replace(/\D/g, '');
+
+			if (value === '') {
+				element.value = '';
+				previewBobot();
+				return;
+			}
+
+			value = parseInt(value.slice(-1), 10);
+			element.value = Math.min(6, Math.max(0, value));
+			previewBobot();
+		}
+	
 		function previewBobot(){
 			const k = $('#modal-bobot [name="bobot_kemungkinan"]').val();
 			const d = $('#modal-bobot [name="bobot_dampak"]').val();
-			if(!k || !d){ $('#bobot-preview-row').hide(); return; }
+			if(!hasBobotValue(k) || !hasBobotValue(d)){ $('#bobot-preview-row').hide(); return; }
 			const score = getScore(k, d);
 			if(score === 'Unknown'){ $('#bobot-preview-row').hide(); return; }
-			const colorMap = { '4': 'danger', '3': 'warning', '2': 'info', '1': 'success' };
+			// const colorMap = { '4': 'danger', '3': 'warning', '2': 'info', '1': 'success' };
 			const color = colorMap[score] || 'secondary';
 			$('#bobot-preview-badge')
 				.removeClass('badge-danger badge-warning badge-info badge-success badge-secondary')
@@ -1234,6 +1256,9 @@ const scoreMatrix = {
   "1,3": "1",
   "1,2": "1",
   "1,1": "1",
+	"1,0": "5",
+	"0,1": "5",
+	"0,0": "5"
 };
 
 function getScore(kemungkinan, dampak) {
