@@ -113,16 +113,7 @@ class Rcm extends BE_Controller {
 				$keterangan[$val['id_risk_control']][] = $risk_item['keterangan'];
 			}
 
-			$control = get_data('tbl_internal_control a', [
-				'select' => 'a.id_internal_control as id,b.internal_control',
-				'join' => 'tbl_m_internal_control b on a.id_internal_control = b.id',
-				'where' => [
-					'a.is_active' => 1,
-					'a.id_aktivitas' => $val['id_aktivitas'],
-					'a.id_sub_aktivitas' => $val['id_sub_aktivitas'],
-				]
-			])->result_array();
-
+			$control = get_data('tbl_internal_control', 'id_sub_aktivitas', $val['id_sub_aktivitas'])->result_array();
 			foreach($control as $control_item) {
 				$control_list[$val['id']][] = $control_item['internal_control'];
 			}
@@ -149,7 +140,7 @@ class Rcm extends BE_Controller {
 
 			$rows[] = $row;
 		}
-
+	
 		return $rows;
 	}
 
