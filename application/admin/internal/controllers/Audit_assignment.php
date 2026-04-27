@@ -281,8 +281,9 @@ class Audit_assignment extends BE_Controller {
 			$auditor = get_detail_auditor($plan['auditor']);
 			$divisi = get_detail_department($plan['id_department']);
 			$bobot = get_detail_bobot($row['bobot_finding']);
+			$has_finding = $this->has_meaningful_finding($row['finding'] ?? '');
 			
-			if(!empty($row['finding']) && empty($row['status_finding'])){
+			if($has_finding && empty($row['status_finding'])){
 				render([
 					'status' => 'info',
 					'message' => 'Pastikan status finding diisi jika ada finding!'
@@ -290,7 +291,7 @@ class Audit_assignment extends BE_Controller {
 				return;
 			}
 
-			if(!empty($row['finding']) && empty($row['bobot_finding'])){
+			if($has_finding && empty($row['bobot_finding'])){
 				render([
 					'status' => 'info',
 					'message' => 'Pastikan bobot finding diisi jika ada finding!'
@@ -322,7 +323,7 @@ class Audit_assignment extends BE_Controller {
 				'id_section_department' => $plan['id_section'],
 				'audit_area' => $plan['audit_area'],
 				'id_sub_aktivitas' => $plan['id_audit_area'],
-				'finding' => $row['finding'],
+				'finding' => $has_finding ? $row['finding'] : '',
 				'bobot_finding' => $bobot ? $bobot['bobot'] : '',
 				'status_finding_control' => $row['status_finding'],
 				'status_finding' => '0' 
@@ -800,6 +801,12 @@ class Audit_assignment extends BE_Controller {
 		$html = preg_replace("/\n{3,}/", "\n\n", $html);
 
 		return trim($html);
+	}
+
+	private function has_meaningful_finding($finding) {
+		$normalized_finding = trim($this->html_to_excel_text($finding));
+
+		return $normalized_finding !== '' && strcasecmp($normalized_finding, 'No Issue') !== 0;
 	}
 
 	function get_kriteria_string() {
