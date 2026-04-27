@@ -90,6 +90,7 @@
 															'end_ts' => null,
 															'closing_ts' => null,
 															'status' => null,
+															'plan_groups' => [],
 															'departments' => [],
 															'id_plan_group' => $groupData['id_audit_plan_group'] ?? ''
 														];
@@ -149,19 +150,23 @@
 													if(isset($groupData['expense_est_total'])){
 														$groupSummary[$groupName]['expense'] += (int)$groupData['expense_est_total'];
 													}
+													if(isset($groupData['expense_real_total'])){
+														$groupSummary[$groupName]['expense_real'] += (int)$groupData['expense_real_total'];
+													}
 														if(isset($groupData['duration'])){
 															$groupSummary[$groupName]['duration'] += (int)$groupData['duration'];
 														}
 													if(isset($groupData['department']) && is_array($groupData['department'])){
 														foreach($groupData['department'] as $deptName => $deptItems){
-															if(isset($deptItems['expense_real_total'])){
-																$groupSummary[$groupName]['expense_real'] += (int)$deptItems['expense_real_total'];
-															}
 															// Collect department meta from first aktivitas
 															$meta = ['id_department' => '', 'id_audit_plan_group' => '', 'auditor' => '', 'auditee' => ''];
 															foreach($deptItems as $k => $entry){
 																if(is_array($entry) && isset($entry['aktivitas']) && is_array($entry['aktivitas'])){
 																	$detail = $entry['aktivitas'];
+																	$planGroupId = $detail['id_audit_plan_group'] ?? '';
+																	if($planGroupId !== '' && !in_array($planGroupId, $groupSummary[$groupName]['plan_groups'])){
+																		$groupSummary[$groupName]['plan_groups'][] = $planGroupId;
+																	}
 																	$meta = [
 																		'id_department' => $detail['id_department'] ?? '',
 																		'id_audit_plan_group' => $detail['id_audit_plan_group'] ?? '',
@@ -207,14 +212,22 @@
 																</tr>
 															</thead>
 															<tbody>
-																<?php $rowNo = 1; foreach($groupSummary as $groupName => $g): ?>
+																<?php 
+																$rowNo = 1; 
+																foreach($groupSummary as $groupName => $g):
+																	$planGroups = array_values(array_unique(array_filter($g['plan_groups'] ?? [])));
+																	if(empty($planGroups) && !empty($g['id_plan_group'])){
+																		$planGroups[] = $g['id_plan_group'];
+																	}
+																	$planGroupsAttr = htmlspecialchars(json_encode($planGroups), ENT_QUOTES, 'UTF-8');
+																?>
 																	<tr>
 																		<td class="text-center" width="1px"><?=$rowNo++?></td>
 																		<td class="w-25"><?=$groupName?></td>
 																		<td class="text-center text-nowrap"><?= $g['start_ts'] ? date('d M Y', $g['start_ts']) : '-' ?></td>
 																		<td class="text-center text-nowrap"><?= $g['end_ts'] ? date('d M Y', $g['end_ts']) : '-' ?></td>
-																		<td class="text-center text-nowrap detail-durasi" data-id="<?=$g['id_plan_group']?>"><?= !empty($g['duration']) ? $g['duration'].' days' : '-' ?></td>
-																		<td class="text-right text-nowrap detail-expense" data-id="<?=$g['id_plan_group']?>" data-cat="est"><?= number_format($g['expense'],0,',','.') ?></td>
+																		<td class="text-center text-nowrap detail-durasi" data-id="<?=$planGroupsAttr?>"><?= !empty($g['duration']) ? $g['duration'].' days' : '-' ?></td>
+																		<td class="text-right text-nowrap detail-expense" data-id="<?=$planGroupsAttr?>" data-cat="est"><?= number_format($g['expense'],0,',','.') ?></td>
 																		<td class="text-center text-nowrap"><?= $g['closing_ts'] ? date('d M Y', $g['closing_ts']) : '-' ?></td>
 																		<td class="text-right text-nowrap"><?= number_format($g['expense_real'],0,',','.') ?></td>
 																		<td class="text-center text-nowrap">
@@ -231,7 +244,7 @@
 																			<?php endif; ?>
 																		</td>
 																		<?php for($m=1;$m<=12;$m++): $active=$g['months'][$m]; ?>
-																			<td class="text-center p-1 month-cell detail-durasi <?=$active?'active-month':''?>" data-id="<?=$g['id_plan_group']?>"></td>
+																			<td class="text-center p-1 month-cell detail-durasi <?=$active?'active-month':''?>" data-id="<?=$planGroupsAttr?>"></td>
 																		<?php endfor; ?>
 																		<td class="text-center text-nowrap">
 																			<?php $selectId = 'dept-select-'.$year.'-'.md5($groupName); ?>
@@ -239,13 +252,13 @@
 																				<div class="btn-group btn-group-sm" role="group">
 																					<?php $divStatus = $g['status'] ?? null; ?>
 																					<?php if($divStatus == 'planned' || $divStatus == 'unplanned'): ?>
-																						<button class="btn btn-outline-warning btn-icon-only btn-edit" type="button" data-id="<?=$g['id_plan_group']?>" data-select="<?=$selectId?>" title="Edit">
+																						<button class="btn btn-outline-warning btn-icon-only btn-edit" type="button" data-id="<?=$planGroupsAttr?>" data-select="<?=$selectId?>" title="Edit">
 																							<i class="fas fa-edit"></i>
 																						</button>
-																						<button class="btn btn-outline-success btn-icon-only btn-completed" type="button" data-id="<?=$g['id_plan_group']?>" data-select="<?=$selectId?>" title="Completed">
+																						<button class="btn btn-outline-success btn-icon-only btn-completed" type="button" data-id="<?=$planGroupsAttr?>" data-select="<?=$selectId?>" title="Completed">
 																							<i class="fas fa-check"></i>
 																						</button>
-																						<button class="btn btn-outline-danger btn-icon-only btn-cancel" type="button" data-id="<?=$g['id_plan_group']?>" data-select="<?=$selectId?>" title="Cancel">
+																						<button class="btn btn-outline-danger btn-icon-only btn-cancel" type="button" data-id="<?=$planGroupsAttr?>" data-select="<?=$selectId?>" title="Cancel">
 																							<i class='fas fa-times'></i>
 																						</button>
 																					<?php endif; ?>
@@ -357,16 +370,16 @@
 																						</td>
 																					<?php if($i == 0) : ?>
 																							
-																							<td rowspan="<?=$count?>" width="1px" class="align-middle text-nowrap">
-																							<select class="select2 form-control auditor" name="auditor" data-id-plan-group="<?=$detailMeta['id_audit_plan_group']?>" data-id-department="<?=$detailMeta['id_department']?>">
+																							<td rowspan="<?=$count?>" class="align-middle text-nowrap" style="min-width: 220px;">
+																							<select class="select2 form-control auditor" name="auditor" style="width:100% !important;" data-id-plan-group="<?=$detailMeta['id_audit_plan_group']?>" data-id-department="<?=$detailMeta['id_department']?>">
 																									<option value="">-- Auditor --</option>
 																									<?php foreach($auditor as $a) :?>
 																									<option value="<?=$a['id']?>" <?= ($detailMeta['auditor'] ?? '') == $a['id'] ? 'selected' : '' ?>><?=$a['nama']?></option>
 																									<?php endforeach ?>
 																								</select>
 																							</td>
-																							<td rowspan="<?=$count?>" width="1px" class="align-middle text-nowrap">
-																							<select class="select2 form-control auditee" name="auditee" data-id-plan-group="<?=$detailMeta['id_audit_plan_group']?>" data-id-department="<?=$detailMeta['id_department']?>">
+																							<td rowspan="<?=$count?>" class="align-middle text-nowrap" style="min-width: 220px;">
+																							<select class="select2 form-control auditee" name="auditee" style="width:100% !important;" data-id-plan-group="<?=$detailMeta['id_audit_plan_group']?>" data-id-department="<?=$detailMeta['id_department']?>">
 																									<option value="">-- Auditee --</option>
 																									<?php foreach($auditee as $a) : ?>
 																									<option value="<?=$a['id']?>" <?= ($detailMeta['auditee'] ?? '') == $a['id'] ? 'selected' : '' ?>><?=$a['nama']?></option>
@@ -764,7 +777,7 @@
 	});
 
 	$(document).on('click', '.btn-edit', async function(){
-		let id = $(this).data('id');
+		let id = normalizePlanGroupIds($(this).data('id'));
 		let res = await $.ajax({
 			url: base_url + 'internal/annual_audit_plan/getData',
 			type: 'post',
@@ -773,7 +786,7 @@
 		})
 
 		$('#id_plan').val(res.id);
-		$('#id_plan_group').val(res.id_audit_plan_group);
+		$('#id_plan_group').val(JSON.stringify(normalizePlanGroupIds(res.id_audit_plan_group)));
 		$('#start_date').val(res.start_date);
 		$('#schedule_audit').val(res.schedule_audit).trigger('change');
 		$('#objektif').val(res.objective);
@@ -826,10 +839,42 @@
 		$('#mEdit').modal('show');
 	})
 	$(document).on('click', '.btn-completed', function(){
-		let id = $(this).data('id');
-		$('#id_plan_completed').val(id);
+		let id = normalizePlanGroupIds($(this).data('id'));
+		$('#id_plan_completed').val(JSON.stringify(id));
 		$('#mCompleted').modal('show');
 	})
+
+	function normalizePlanGroupIds(value) {
+		if (Array.isArray(value)) {
+			return [...new Set(value.map(String).map(item => item.trim()).filter(Boolean))];
+		}
+
+		if (typeof value === 'string') {
+			const trimmedValue = value.trim();
+			if (!trimmedValue) {
+				return [];
+			}
+
+			try {
+				const parsedValue = JSON.parse(trimmedValue);
+				if (Array.isArray(parsedValue)) {
+					return normalizePlanGroupIds(parsedValue);
+				}
+			} catch (error) {
+				if (trimmedValue.includes(',')) {
+					return normalizePlanGroupIds(trimmedValue.split(','));
+				}
+			}
+
+			return [trimmedValue];
+		}
+
+		if (value === null || value === undefined || value === '') {
+			return [];
+		}
+
+		return [String(value).trim()].filter(Boolean);
+	}
 
 	function parseInputDate(value) {
 		if (!value || typeof value !== 'string') {
@@ -1071,7 +1116,7 @@
 	});
 
 	$(document).on('click', '.cancel-detail', function(){
-		let id = $(this).data('id');
+		let id = normalizePlanGroupIds($(this).data('id'));
 		$.ajax({
 			url: base_url + 'internal/annual_audit_plan/getCancelDetail',
 			type: 'post',
@@ -1091,7 +1136,7 @@
 	});
 
 	$(document).on('click', '.detail-durasi', function(){
-		let id = $(this).data('id');
+		let id = normalizePlanGroupIds($(this).data('id'));
 		$.ajax({
 			url: base_url + 'internal/annual_audit_plan/getDetailDuration',
 			type: 'post',
@@ -1131,7 +1176,7 @@
 	});
 	$(document).on('click', '.detail-expense', function(){
 		let cat = $(this).data('cat');
-		let id = $(this).data('id');
+		let id = normalizePlanGroupIds($(this).data('id'));
 		
 		$.ajax({
 			url: base_url + 'internal/annual_audit_plan/getDetailExpense',
@@ -1175,8 +1220,8 @@
 	let id_selected;
 
 	$(document).on('click', '.btn-cancel', function(){
-		id_selected = $(this).data('id');
-		$('#id_plan_cancel').val(id_selected);
+		id_selected = normalizePlanGroupIds($(this).data('id'));
+		$('#id_plan_cancel').val(JSON.stringify(id_selected));
 		$('#mConfirmCancel').modal('show');
 		// cConfirm.open('Are you sure you want to cancel this audit plan?', 'confirmCancel');
 	});
@@ -1244,7 +1289,7 @@
 
 
 	function confirmCancel(){
-		let id = $('#id_plan_cancel').val();
+		let id = normalizePlanGroupIds($('#id_plan_cancel').val());
 		let reason = $('#reason_cancel').val();
 		
 		$.ajax({
