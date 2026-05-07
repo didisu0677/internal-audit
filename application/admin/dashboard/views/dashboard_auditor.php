@@ -274,7 +274,7 @@
     '#6EF3F2', // Implementasi tidak sesuai 
     '#40BCD8', // Design kurang efektif 
     '#2A80B9', // Design tidak ditemukan 
-    '#6B5C99', // Improvement
+    '#77b86c', // Improvement
     '#7B6EA8', // Critical 
     '#5B8CCB', // Major
     '#6ECFF6', // Moderate
