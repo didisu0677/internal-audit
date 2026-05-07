@@ -132,7 +132,7 @@ class Kuisioner extends BE_Controller {
 			$status = send_mail([
 				'subject'		=> 'Permintaan Pengisian Kuisioner Setelah Audit',
 				'to'			=> $data['email'],
-				'cc'			=> $audit_cc,
+				// 'cc'			=> $audit_cc,
 				'nama_user'		=> $data['nama'],
 				'url'			=> base_url('internal/kuisioner/entry/'.$id),
 				'view'			=> 'internal/kuisioner/mailer_send_kuisioner'
