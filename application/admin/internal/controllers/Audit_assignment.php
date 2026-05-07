@@ -754,13 +754,27 @@ class Audit_assignment extends BE_Controller {
 		}
 
 		$filename = 'Detil_Temuan_Audit.docx';
+
+		// Write to temp file first to get accurate Content-Length and avoid buffer corruption
+		$tmpFile = tempnam(sys_get_temp_dir(), 'phpword_');
+		$writer = IOFactory::createWriter($phpWord, 'Word2007');
+		$writer->save($tmpFile);
+
+		// Clean any buffered output that would corrupt the binary stream
+		while (ob_get_level()) {
+			ob_end_clean();
+		}
+
 		header('Content-Description: File Transfer');
 		header('Content-Type: application/vnd.openxmlformats-officedocument.wordprocessingml.document');
-		header('Content-Disposition: attachment; filename="'.$filename.'"');
+		header('Content-Disposition: attachment; filename="' . $filename . '"');
+		header('Content-Transfer-Encoding: binary');
+		header('Content-Length: ' . filesize($tmpFile));
 		header('Cache-Control: max-age=0');
+		header('Pragma: public');
 
-		$writer = IOFactory::createWriter($phpWord, 'Word2007');
-		$writer->save('php://output');
+		readfile($tmpFile);
+		@unlink($tmpFile);
 		exit;
 	}
 

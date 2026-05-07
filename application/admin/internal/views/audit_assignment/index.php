@@ -998,7 +998,7 @@ modal_close();
 								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="data_request">${item.data_request || ''}</td>
 								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="pengujian">${item.pengujian || ''}</td>
 								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="hasil_review">${item.hasil_review || ''}</td>
-								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="finding">${item.finding || ''}</td>
+								<td class="align-middle editable ${disableClass}" style="width: 600px; min-width: 350px;" data-field="finding">${item.finding || 'No Issue'}</td>
 								<td class="align-middle bobot ${disableClass}" style="width: 300px; min-width: 180px;" data-field="bobot_finding" data-kemungkinan="${hasBobotValue(item.bobot_kemungkinan) ? item.bobot_kemungkinan : ''}" data-dampak="${hasBobotValue(item.bobot_dampak) ? item.bobot_dampak : ''}">${
 								hasBobotValue(item.bobot_finding)
 									? renderBobotBadge(
