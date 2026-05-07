@@ -157,9 +157,31 @@ class Kuisioner extends BE_Controller {
 			],
 			'where' => [
 				'r.periode_audit' => $periode
-			]
+			],
+			'order_by' => 'r.status, u.nama'
 		])->result_array();	
-	
+		render($data, 'json');
+	}
+
+	function get_detail(){
+		$id = post('id');
+		$respon = get_data('tbl_kuisioner_respon r', [
+			'select' => 'u.kode, u.nama, r.*',
+			'join' => [
+				'tbl_auditee a on r.id_auditee = a.id',
+				'tbl_user u on a.id_user = u.id'
+			],
+			'where' => [
+				'r.id' => $id
+			]
+		])->row_array();
+
+		$questions = get_data('tbl_m_kuisioner', 'is_active', '1')->result_array();
+
+		$data = [
+			'respon'    => $respon,
+			'questions' => $questions,
+		];
 		render($data, 'json');
 	}
 

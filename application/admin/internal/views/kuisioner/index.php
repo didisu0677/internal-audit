@@ -89,12 +89,22 @@
 						</div>
 					</div>';
 	modal_close();
-	modal_open('mDetail', 'Detail');
+	modal_open('mDetail', 'Detail Kuisioner');
 		modal_body();
 				echo '
-					<table class="table table-sm" id="tbl-detail">
+					<div id="detail-info" class="mb-3"></div>
+					<table class="table table-sm table-bordered" id="tbl-detail">
+						<thead class="thead-light">
+							<tr>
+								<th width="40">#</th>
+								<th>Pertanyaan</th>
+								<th width="80" class="text-center">Nilai</th>
+							</tr>
+						</thead>
 						<tbody></tbody>
+						<tfoot></tfoot>
 					</table>
+					<div id="detail-komentar" class="mt-2"></div>
 				';
 	modal_close();
 ?>
@@ -158,6 +168,72 @@
 		
 	// })
 
+	$(document).on('click', '#list-periode .list-group-item[data-id]', function(){
+		let id = $(this).data('id');
+		$('#tbl-detail tbody').html('<tr><td colspan="3" class="text-center"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>');
+		$('#tbl-detail tfoot').html('');
+		$('#detail-info').html('');
+		$('#detail-komentar').html('');
+		$('#mDetail').modal('show');
+		$.ajax({
+			url: base_url + 'internal/kuisioner/get_detail',
+			type: 'post',
+			data: {id: id},
+			success: function(res){
+				let r = res.respon;
+				let questions = res.questions;
+				let answers = r.respon ? JSON.parse(r.respon) : [];
+				let komentar = r.komentar ? r.komentar.replace(/\n/g, '<br>') : '<span class="text-muted">Tidak ada komentar</span>';
+
+				let statusClass = r.status == '1' ? 'badge-success' : 'badge-warning';
+				let statusText  = r.status == '1' ? 'Sudah Mengisi' : 'Belum Mengisi';
+				$('#detail-info').html(`
+					<div class="d-flex align-items-center mb-2">
+						<div>
+							<strong>${r.nama}</strong> <span class="text-muted small">(${r.kode})</span>
+							<span class="badge ${statusClass} ml-2">${statusText}</span>
+						</div>
+					</div>
+					${r.submitted_at ? '<p class="text-muted small mb-0"><i class="fas fa-clock mr-1"></i>Submitted: ' + r.submitted_at + '</p>' : ''}
+				`);
+
+				if(answers.length === 0){
+					$('#tbl-detail tbody').html('<tr><td colspan="3" class="text-center text-muted">Belum ada jawaban</td></tr>');
+					return;
+				}
+
+				let tbody = '';
+				$.each(questions, function(i, q){
+					let val = answers[i] !== undefined ? answers[i] : '-';
+					let badgeClass = val >= 4 ? 'badge-success' : (val >= 3 ? 'badge-primary' : (val >= 2 ? 'badge-warning' : 'badge-danger'));
+					tbody += `
+						<tr>
+							<td class="text-center">${i+1}</td>
+							<td>${q.question}</td>
+							<td class="text-center"><span class="badge ${badgeClass}">${val}</span></td>
+						</tr>`;
+				});
+				$('#tbl-detail tbody').html(tbody);
+
+				$('#tbl-detail tfoot').html(`
+					<tr class="font-weight-bold">
+						<td colspan="2" class="text-right">Nilai Akhir</td>
+						<td class="text-center">${parseFloat(r.nilai_akhir).toFixed(2)}</td>
+					</tr>
+				`);
+
+				$('#detail-komentar').html(`
+					<div class="card bg-light border-0">
+						<div class="card-body py-2 px-3">
+							<strong><i class="fas fa-comment-alt mr-1"></i>Komentar:</strong>
+							<p class="mb-0 mt-1">${komentar}</p>
+						</div>
+					</div>
+				`);
+			}
+		});
+	});
+
 	$(document).on('change', '#tahun', function(){
 		get_list_periode();
 	})
@@ -184,6 +260,7 @@
 	});
 	
 	$(document).on('click', '#btn-submit', function(){
+		let $button = $(this);
 		let periode = $('#periode').val();
 		let auditee = $('#auditee').val();
 
@@ -191,6 +268,12 @@
 			cAlert.open('Periode dan Auditee wajib diisi!', 'info');
 			return;
 		}
+
+		if($button.prop('disabled')){
+			return;
+		}
+
+		$button.prop('disabled', true).text('Mengirim...');
 		$.ajax({
 			url: base_url + 'internal/kuisioner/send_kuisioner',
 			type: 'post',
@@ -207,6 +290,9 @@
 				}else{
 					cAlert.open('Gagal mengirim email ke (' + user_fail + ')', 'error', 'reload_page');
 				}
+			},
+			complete: function(){
+				$button.prop('disabled', false).text('Submit');
 			}
 		})
 	})
@@ -232,6 +318,7 @@
 						let statusClass = '';
 						let statusText = '';
 						let statusIcon = '';
+						let komentarHtml = v.komentar ? `<p class="mb-0 mt-1 text-muted small"><i class="fas fa-comment-alt mr-1"></i>${v.komentar.length > 120 ? v.komentar.substring(0, 120) + '...' : v.komentar}</p>` : '<p class="mb-0 mt-1 text-muted small"><i class="fas fa-comment-slash mr-1"></i>Tidak ada komentar</p>';
 						
 						if(v.status == '0'){
 							statusClass = 'badge-warning';
@@ -244,13 +331,14 @@
 						}
 
 						html += `
-							<div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" data-id="${v.id}">
+							<div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center" style="cursor:pointer" data-id="${v.id}">
 								<div class="d-flex align-items-center">
 									<i class="${statusIcon} mr-3 text-muted"></i>
 									<div>
 										<h6 class="mb-1">${v.nama}</h6>
 										<p class="mb-0 text-muted small">${v.kode}</p>
 										<span class="badge ${statusClass}">${statusText}</span>
+										${komentarHtml}
 									</div>
 								</div>
 							</div>`;
