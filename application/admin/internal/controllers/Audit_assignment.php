@@ -25,34 +25,36 @@ class Audit_assignment extends BE_Controller {
 			$where = ['aa.status' => 'history'];
 		}
 		$query = get_data('tbl_annual_audit_plan a', [
-			'select' => 'aa.id as id_audit_assignment, concat(dep.section_name, " - ",dep.description) as label_department, a.id as id_audit_plan, a.id_audit_plan_group, dep.section_name as department, ak.aktivitas, sa.sub_aktivitas, rc.id_risk, s.section_name as section, ag.year, aa.status',
+			'select' => 'aa.id as id_audit_assignment, concat(dep.section_name, " - ",dep.description) as label_department, a.id as id_audit_plan, a.id_audit_plan_group, dep.section_name as department, ak.aktivitas, sa.sub_aktivitas, rc.id_risk, s.section_name as section, ag.year, aa.status, concat(div.section_name, " - ", div.description) as label_divisi, div.urutan as div_urutan',
 			'join' => [
 				'tbl_audit_universe u on a.id_universe = u.id', 
 				'tbl_rcm rcm on u.id_rcm = rcm.id',
 				'tbl_risk_control rc on rcm.id_risk_control = rc.id',
 				'tbl_m_audit_section s on rcm.id_section = s.id',
 				'tbl_m_audit_section dep on s.level4 = dep.id',
+				'tbl_m_audit_section div on dep.level3 = div.id',
 				'tbl_sub_aktivitas sa on rcm.id_sub_aktivitas = sa.id',
 				'tbl_aktivitas ak on sa.id_aktivitas = ak.id',
 				'tbl_annual_audit_plan_group ag on ag.id = a.id_audit_plan_group',
 				'tbl_individual_audit_assignment aa on aa.id_audit_plan = a.id'
 			],		
 			'where' => $where,
-			'order_by' => 'ag.year, dep.urutan'
+			'order_by' => 'ag.year, div.urutan, dep.urutan'
 		])->result_array();
 
 		foreach($query as $row) {
 			$y = $row['year'];
+			$div_key = $row['label_divisi'] ?: 'Lainnya';
 			$dept_key = $row['label_department'];
-			if(!isset($data_grouped[$y][$dept_key])) {
-				$data_grouped[$y][$dept_key] = [
+			if(!isset($data_grouped[$y][$div_key][$dept_key])) {
+				$data_grouped[$y][$div_key][$dept_key] = [
 					'id_audit_plan_group' => $row['id_audit_plan_group'],
 					'section' => $row['section'],
 					'status' => $row['status'],
 					'count' => 0
 				];
 			}
-			$data_grouped[$y][$dept_key]['count']++;
+			$data_grouped[$y][$div_key][$dept_key]['count']++;
 		}
 		
 		render([

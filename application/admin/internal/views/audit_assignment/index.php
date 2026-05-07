@@ -26,7 +26,7 @@
 				<div class="card shadow-sm border-0">
 					<div class="card-body p-4">
 						<div id="result">
-							<?php foreach($data as $year => $departments): ?>
+							<?php foreach($data as $year => $divisions): ?>
 								<div class="mb-4">
 									<div class="card border-0 shadow-sm">
 										<div class="card-header text-white border-0 py-4" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);border-radius: 15px;">
@@ -50,82 +50,104 @@
 										</div>
 											<div class="collapse" id="year-collapse<?=$year?>" data-year="<?=$year?>">
 												<div class="card-body p-0">
-													<?php foreach($departments as $dept => $deptData): ?>
-														<div class="border-bottom department-panel">
-															<div class="p-3 bg-light font-weight-bold">
-																<button class="btn btn-link text-decoration-none text-dark p-0 font-weight-bold dept-toggle flex-grow-1 text-left" 
-																			type="button" 
-																			data-toggle="collapse" 
-																			data-target="#dept-collapse<?=$year?>-<?=md5($dept)?>" 
-																			aria-expanded="false" 
-																			aria-controls="dept-collapse<?=$year?>-<?=md5($dept)?>">
-																		<div class="d-flex justify-content-between align-items-center">
-																			<div>
-																				<i class="fas fa-chevron-down me-2 text-info"></i>
-																				<span><?= $dept ?></span>
-																			</div>
-																			<!-- <span class="badge badge-info ml-2 assignment-count">Loading...</span> -->
+													<?php foreach($divisions as $divName => $departments): ?>
+														<div class="border-bottom">
+															<div class="p-3 bg-white font-weight-bold" style="border-left: 3px solid #667eea;">
+																<button class="btn btn-link text-decoration-none text-dark p-0 font-weight-bold div-toggle flex-grow-1 text-left"
+																		type="button"
+																		data-toggle="collapse"
+																		data-target="#div-collapse<?=$year?>-<?=md5($divName)?>"
+																		aria-expanded="false"
+																		aria-controls="div-collapse<?=$year?>-<?=md5($divName)?>">
+																	<div class="d-flex justify-content-between align-items-center">
+																		<div>
+																			<i class="fas fa-chevron-down me-2 text-primary"></i>
+																			<span><?= $divName ?></span>
 																		</div>
+																		<span class="badge badge-primary ml-2"><?= count($departments) ?> Department<?= count($departments) > 1 ? 's' : '' ?></span>
+																	</div>
 																</button>
-																<?php if($deptData['status'] == 'active'): ?> 
-																	<button class="btn btn-success btn-sm float-right mark-completed" type="button" data-id-plangroup="<?=$deptData['id_audit_plan_group']?>">
-																		<i class="fas fa-check me-1"></i>
-																		Mark Complete
-																	</button>
-																<?php else :  ?>
-																	<div class="btn-group float-right" role="group">
-																		<button class="btn btn-danger btn-sm download-report" type="button" data-id-plangroup="<?=$deptData['id_audit_plan_group']?>">
-																			<i class="fas fa-file-excel me-1"></i>
-																			Excel
-																		</button>
-																		<button class="btn btn-primary btn-sm download-report-docx" type="button" data-id-plangroup="<?=$deptData['id_audit_plan_group']?>" style="margin-left:6px;">
-																			<i class="fas fa-file-word me-1"></i>
-																			DOCX
-																		</button>
-																	</div>
-																<?php endif?>
 															</div>
-																<div class="collapse" id="dept-collapse<?=$year?>-<?=md5($dept)?>">
-																	<div class="table-responsive department-focus-target" style="overflow-y: auto;">
-																		<table class="table table-hover table-bordered mb-0">
-																			<thead class="bg-light text-center sticky-top">
-																				<tr>
-																					<th class="border-0 text-muted small bg-light">Section</th>
-																					<th class="border-0 text-muted small bg-light">Aktivitas</th>
-																					<th class="border-0 text-muted small bg-light">Audit Area</th>
-																					<th class="border-0 text-muted small bg-light">Risk</th>
-																					<th class="border-0 text-muted small bg-light">Internal Control</th>
-																					<th class="border-0 text-muted small bg-light">Kriteria</th>
-																					<th class="border-0 text-muted small bg-light">Pre-liminary Audit</th>
-																					<th class="border-0 text-muted small bg-light">Data Request</th>
-																					<th class="border-0 text-muted small bg-light">Pengujian</th>
-																					<th class="border-0 text-muted small bg-light">Hasil Review</th>
-																					<th class="border-0 text-muted small bg-light">Finding</th>
-																					<th class="border-0 text-muted small bg-light">Bobot Finding</th>
-																					<th class="border-0 text-muted small bg-light">Unconfirmity</th>
-																					<th class="border-0 text-muted small bg-light">Dampak</th>
-																					<th class="border-0 text-muted small bg-light">Root Cause</th>
-																					<th class="border-0 text-muted small bg-light">Recommendation</th>
-																					<th class="border-0 text-muted small bg-light">Finding Control Status</th>
-																					<th class="border-0 text-muted small bg-light">Attachment</th>
-																				</tr>
-																			</thead>
-																			<tbody class="department-data" data-group-id="<?=$deptData['id_audit_plan_group']?>">
-																				<tr>
-																					<td colspan="20" class="text-center py-4">
-																						<div class="spinner-border spinner-border-sm text-primary mr-2" role="status">
-																							<span class="sr-only">Loading...</span>
-																						</div>
-																						Loading audit assignments...
-																					</td>
-																				</tr>
-																			</tbody>
-																		</table>
-																	</div>
-																</div>
+															<div class="collapse" id="div-collapse<?=$year?>-<?=md5($divName)?>">
+																<?php foreach($departments as $dept => $deptData): ?>
+																	<div class="border-bottom department-panel" style="margin-left: 20px; border-left: 3px solid #17a2b8;">
+																		<div class="p-3 bg-light font-weight-bold">
+																			<button class="btn btn-link text-decoration-none text-dark p-0 font-weight-bold dept-toggle flex-grow-1 text-left" 
+																						type="button" 
+																						data-toggle="collapse" 
+																						data-target="#dept-collapse<?=$year?>-<?=md5($dept)?>" 
+																						aria-expanded="false" 
+																						aria-controls="dept-collapse<?=$year?>-<?=md5($dept)?>">
+																				<div class="d-flex justify-content-between align-items-center">
+																					<div>
+																						<i class="fas fa-chevron-down me-2 text-info"></i>
+																						<span><?= $dept ?></span>
+																					</div>
+																					<!-- <span class="badge badge-info ml-2 assignment-count">Loading...</span> -->
+																				</div>
+																		</button>
+																		<?php if($deptData['status'] == 'active'): ?> 
+																			<button class="btn btn-success btn-sm float-right mark-completed" type="button" data-id-plangroup="<?=$deptData['id_audit_plan_group']?>">
+																				<i class="fas fa-check me-1"></i>
+																				Mark Complete
+																			</button>
+																		<?php else :  ?>
+																			<div class="btn-group float-right" role="group">
+																				<button class="btn btn-danger btn-sm download-report" type="button" data-id-plangroup="<?=$deptData['id_audit_plan_group']?>">
+																					<i class="fas fa-file-excel me-1"></i>
+																					Excel
+																				</button>
+																				<button class="btn btn-primary btn-sm download-report-docx" type="button" data-id-plangroup="<?=$deptData['id_audit_plan_group']?>" style="margin-left:6px;">
+																					<i class="fas fa-file-word me-1"></i>
+																					DOCX
+																				</button>
+																			</div>
+																		<?php endif?>
+																		</div>
+																			<div class="collapse" id="dept-collapse<?=$year?>-<?=md5($dept)?>">
+																				<div class="table-responsive department-focus-target" style="overflow-y: auto;">
+																					<table class="table table-hover table-bordered mb-0">
+																						<thead class="bg-light text-center sticky-top">
+																							<tr>
+																								<th class="border-0 text-muted small bg-light">Section</th>
+																								<th class="border-0 text-muted small bg-light">Aktivitas</th>
+																								<th class="border-0 text-muted small bg-light">Audit Area</th>
+																								<th class="border-0 text-muted small bg-light">Risk</th>
+																								<th class="border-0 text-muted small bg-light">Internal Control</th>
+																								<th class="border-0 text-muted small bg-light">Kriteria</th>
+																								<th class="border-0 text-muted small bg-light">Pre-liminary Audit</th>
+																								<th class="border-0 text-muted small bg-light">Data Request</th>
+																								<th class="border-0 text-muted small bg-light">Pengujian</th>
+																								<th class="border-0 text-muted small bg-light">Hasil Review</th>
+																								<th class="border-0 text-muted small bg-light">Finding</th>
+																								<th class="border-0 text-muted small bg-light">Bobot Finding</th>
+																								<th class="border-0 text-muted small bg-light">Unconfirmity</th>
+																								<th class="border-0 text-muted small bg-light">Dampak</th>
+																								<th class="border-0 text-muted small bg-light">Root Cause</th>
+																								<th class="border-0 text-muted small bg-light">Recommendation</th>
+																								<th class="border-0 text-muted small bg-light">Finding Control Status</th>
+																								<th class="border-0 text-muted small bg-light">Attachment</th>
+																							</tr>
+																						</thead>
+																						<tbody class="department-data" data-group-id="<?=$deptData['id_audit_plan_group']?>">
+																							<tr>
+																								<td colspan="20" class="text-center py-4">
+																									<div class="spinner-border spinner-border-sm text-primary mr-2" role="status">
+																										<span class="sr-only">Loading...</span>
+																									</div>
+																									Loading audit assignments...
+																								</td>
+																							</tr>
+																						</tbody>
+																					</table>
+																				</div>
+																			</div>
+																		</div>
+																<?php endforeach; ?>
 															</div>
-														<?php endforeach; ?>
-													</div>
+														</div>
+													<?php endforeach; ?>
+												</div>
 											</div>
 										</div>
 									</div>
@@ -571,7 +593,14 @@ modal_close();
 			});
 		});
 
-		// Only one department open within same year
+		// Allow only one division open at a time within same year
+		$(document).on('click', '.div-toggle', function(){
+			const $yearCollapse = $(this).closest('[id^="year-collapse"]');
+			const targetCollapse = $(this).attr('aria-controls');
+			$yearCollapse.find('.collapse[id^="div-collapse"]').not('#' + targetCollapse).collapse('hide');
+		});
+
+		// Only one department open within same division
 		$(document).on('click', '.dept-toggle', function () {
 			if (isEditing) return false;
 
@@ -580,12 +609,12 @@ modal_close();
 			const $collapse = $('#' + targetCollapse);
 			const $tbody = $collapse.find('.department-data');
 			const groupId = $tbody.data('group-id');
-			const $yearCollapse = $button.closest('[id^="year-collapse"]');
+			const $divCollapse = $button.closest('[id^="div-collapse"]');
 
 			// Pastikan element ditemukan
 			if (!groupId) return;
 
-			$yearCollapse.find('.collapse[id^="dept-collapse"]').not($collapse).collapse('hide');
+			$divCollapse.find('.collapse[id^="dept-collapse"]').not($collapse).collapse('hide');
 
 			// Load data hanya kalau belum pernah dimuat atau kosong
 			if (!$tbody.data('loaded') && !$tbody.data('loading')) {
@@ -596,12 +625,11 @@ modal_close();
 
 		// Icon update on collapse show/hide
 		$(document).on('shown.bs.collapse', '.collapse', function(){
-			let toggle = $(`[data-target="#${this.id}"]`);
+			let toggle = $(`[data-target="#${this.id}"], [aria-controls="${this.id}"]`);
 			toggle.find('.fas').removeClass('fa-chevron-down').addClass('fa-chevron-up');
 			toggle.attr('aria-expanded','true');
 
-			// Only activate theater focus for dept collapses, never for year collapses
-			// (year collapse contains hidden dept-data in DOM which would falsely trigger theater mode)
+			// Only activate theater focus for dept collapses, never for year/div collapses
 			if (!this.id || !this.id.startsWith('dept-collapse')) return;
 
 			const groupId = $(this).find('.department-data').data('group-id');
@@ -610,11 +638,11 @@ modal_close();
 			}
 		});
 		$(document).on('hidden.bs.collapse', '.collapse', function(){
-			let toggle = $(`[data-target="#${this.id}"]`);
+			let toggle = $(`[data-target="#${this.id}"], [aria-controls="${this.id}"]`);
 			toggle.find('.fas').removeClass('fa-chevron-up').addClass('fa-chevron-down');
 			toggle.attr('aria-expanded','false');
 
-			if ($(this).is('[id^="year-collapse"]')) {
+			if ($(this).is('[id^="year-collapse"]') || $(this).is('[id^="div-collapse"]')) {
 				clearDepartmentFocus();
 				return;
 			}
