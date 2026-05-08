@@ -165,7 +165,7 @@ class Audit_universe extends BE_Controller {
 					'tbl_rcm r on u.id_rcm = r.id',
 					'tbl_m_audit_section s on r.id_section = s.id',
 					'tbl_m_audit_section s3 on s.level3 = s3.id',
-					'tbl_m_audit_section s4 on s.parent_id = s4.id',
+					'tbl_m_audit_section s4 on s.level4 = s4.id',
 					'tbl_risk_control rc on r.id_risk_control = rc.id',
 				],
 				'where' => [
