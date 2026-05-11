@@ -95,22 +95,26 @@ class Rcm extends BE_Controller {
 			'order_by' => 'b4.urutan, department, e.aktivitas, c.sequence, c.sub_aktivitas',
 		])->result_array();
 
+		$fetched_risk_control = [];
 		foreach($grup as $val) {
-			$risk_control = get_data('tbl_risk_control a', [
-				'select' => 'b.*, concat(c.risk," - ", d.bobot) as risk, c.keterangan',
-				'join' => [
-					'tbl_risk_control_detail b on a.id = b.id_risk_control',
-					'tbl_risk_register c on b.id_risk = c.id',
-					'tbl_bobot_status_audit d on b.bobot = d.id',
-				],
-				'where' => [
-					'a.id' => $val['id_risk_control']
-				]
-			])->result_array();
+			if(!isset($fetched_risk_control[$val['id_risk_control']])) {
+				$risk_control = get_data('tbl_risk_control a', [
+					'select' => 'b.*, concat(c.risk," - ", d.bobot) as risk, c.keterangan',
+					'join' => [
+						'tbl_risk_control_detail b on a.id = b.id_risk_control',
+						'tbl_risk_register c on b.id_risk = c.id',
+						'tbl_bobot_status_audit d on b.bobot = d.id',
+					],
+					'where' => [
+						'a.id' => $val['id_risk_control']
+					]
+				])->result_array();
 
-			foreach($risk_control as $risk_item) {
-				$risk_list[$val['id_risk_control']][] = $risk_item['risk'];
-				$keterangan[$val['id_risk_control']][] = $risk_item['keterangan'];
+				foreach($risk_control as $risk_item) {
+					$risk_list[$val['id_risk_control']][] = $risk_item['risk'];
+					$keterangan[$val['id_risk_control']][] = $risk_item['keterangan'];
+				}
+				$fetched_risk_control[$val['id_risk_control']] = true;
 			}
 
 			$control = get_data('tbl_internal_control', 'id_sub_aktivitas', $val['id_sub_aktivitas'])->result_array();
