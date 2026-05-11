@@ -72,8 +72,8 @@ class Control_register extends BE_Controller {
 		if(!empty($ctrl_existing)) {
 			$response = save_data('tbl_aktivitas',$data_a,post(':validation'));
 			if($response['status'] == 'success') {
-				if(empty($data['id_sub_aktivitas'])){
-					$sub = insert_data('tbl_sub_aktivitas',[
+				if(empty($data['id_sub_aktivitas']) || empty($data['id_aktivitas'])){
+					$sub = save_data('tbl_sub_aktivitas',[
 						'id_aktivitas' => $response['id'],
 						'sub_aktivitas' => $data['audit_area'],
 						'is_active' => 1
@@ -104,7 +104,7 @@ class Control_register extends BE_Controller {
 					$data_c = [
 						'id'	=> $id_control[$c],
 						'id_aktivitas'=>$response['id'],
-						'id_sub_aktivitas'=>$sub,
+						'id_sub_aktivitas'=>$sub['id'],
 						'id_internal_control' => $int['id'],
 						'internal_control'=>$ctrl_existing[$c],
 						'location_control' => $ctrl_location[$c],
