@@ -104,7 +104,7 @@ class Control_register extends BE_Controller {
 					$data_c = [
 						'id'	=> $id_control[$c],
 						'id_aktivitas'=>$response['id'],
-						'id_sub_aktivitas'=>$sub['id'],
+						'id_sub_aktivitas'=>$sub,
 						'id_internal_control' => $int['id'],
 						'internal_control'=>$ctrl_existing[$c],
 						'location_control' => $ctrl_location[$c],
