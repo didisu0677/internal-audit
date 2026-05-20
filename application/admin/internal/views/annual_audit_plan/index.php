@@ -955,6 +955,15 @@
 		return scheduledDates.size + unscheduledTotal;
 	}
 
+	function updateRemoveButtons(rowClass, removeClass) {
+		const rows = $(rowClass);
+		if (rows.length > 1) {
+			$(removeClass).removeClass('d-none').show();
+		} else {
+			$(removeClass).addClass('d-none').hide();
+		}
+	}
+
 	$(document).ready(function() {
 		// Auto expand nearest year collapse on load
 		(function autoOpenNearestYear(){
@@ -1068,15 +1077,6 @@
 		$(document).on('change input', '.start-date, .duration-input', calculateTotalDuration);
 		$(document).on('input', '.expense-est-input', calculateTotalExpenseEst);
 		$(document).on('input', '.expense-real-input', calculateTotalExpenseReal);
-		
-		function updateRemoveButtons(rowClass, removeClass) {
-			const rows = $(rowClass);
-			if (rows.length > 1) {
-				$(removeClass).show();
-			} else {
-				$(removeClass).hide();
-			}
-		}
 		
 		function calculateTotalDuration() {
 			const activities = [];
@@ -1431,7 +1431,14 @@
 					</div>
 					<div class='col-4'>
 						<input type='text' class='form-control form-control-sm note-input' name='expense_note[]' placeholder='Note'>
-					</div>`;
+					</div>
+					<div class='col-1'>
+						<button type='button' class='btn btn-sm btn-outline-danger btn-icon-only remove-expense-est d-none' >
+							<i class='fas fa-trash'></i>
+						</button>
+					</div>
+				</div>
+			</div>`;
 		}else{
 			$.each(data, function(i, item){
 				html += `
@@ -1457,18 +1464,19 @@
 						</div>
 						<div class='col-4'>
 							<input type='text' class='form-control form-control-sm note-input' name='expense_note[]' placeholder='Note' value='${item.note}'>
-						</div>`	
+						</div>
+						<div class='col-1'>
+							<button type='button' class='btn btn-sm btn-outline-danger btn-icon-only remove-expense-est d-none' >
+								<i class='fas fa-trash'></i>
+							</button>
+						</div>
+					</div>
+				</div>`;	
 			});
 		}
-		html += `<div class='col-1'>
-						<button type='button' class='btn btn-sm btn-outline-danger btn-icon-only remove-expense-est d-none' >
-							<i class='fas fa-trash'></i>
-						</button>
-					</div>
-				</div>
-			</div>`;	
 		$('#expense-est-container').html(html);
 		$('#expense-est-footer').remove();
+		updateRemoveButtons('.expense-est-row', '.remove-expense-est');
 		
 		let footer = `
 			<div id='expense-est-footer'>
